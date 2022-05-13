@@ -41,9 +41,9 @@ if not os.path.exists("config.json"):
                 "table":"TwiFix",
                 "method":"youtube-dl", 
                 "color":"#43B581", 
-                "appname": "TwitFix", 
-                "repo": "https://github.com/robinuniverse/twitfix", 
-                "url": "https://fxtwitter.com"
+                "appname": "vxTwitter", 
+                "repo": "https://github.com/dylanpdx/BetterTwitFix", 
+                "url": "https://vxtwitter.com"
                 },
             "api":{"api_key":"[api_key goes here]",
             "api_secret":"[api_secret goes here]",
@@ -81,14 +81,6 @@ elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
     db = client[table]
-
-@app.route('/bidoof/')
-def bidoof():
-    return redirect("https://cdn.discordapp.com/attachments/291764448757284885/937343686927319111/IMG_20211226_202956_163.webp", 301)
-
-@app.route('/discord/')
-def discord():
-    return redirect("https://discord.gg/ztz2hHwZXv", 301)
 
 @app.route('/stats/')
 def statsPage():
