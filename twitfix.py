@@ -277,6 +277,7 @@ def link_to_vnf_from_api(video_link):
             for video in tweet['extended_entities']['media'][0]['video_info']['variants']:
                 if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
                     url = video['url']
+                    best_bitrate = video['bitrate']
     elif tweetType(tweet) == "Text":
         url   = ""
         thumb = ""
