@@ -428,10 +428,12 @@ def embed(video_link, vnf, image):
     except:
         vnf['likes'] = 0; vnf['rts'] = 0; vnf['time'] = 0
         print(' ➤ [ X ] Failed QRT check - old VNF object')
-        
+    appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
         template = 'text.html'
     if vnf['type'] == "Image":
+        if vnf['images'][4]!="1":
+            appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
         image = vnf['images'][image]
         template = 'image.html'
     if vnf['type'] == "Video":
@@ -460,7 +462,7 @@ def embed(video_link, vnf, image):
         user       = vnf['uploader'], 
         video_link = video_link, 
         color      = color, 
-        appname    = config['config']['appname'], 
+        appname    = config['config']['appname']+appNamePost, 
         repo       = config['config']['repo'], 
         url        = config['config']['url'], 
         urlDesc    = urlDesc, 
