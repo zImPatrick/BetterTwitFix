@@ -2,6 +2,11 @@
 (A fork of TwitFix)
 Basic flask server that serves fixed twitter video embeds to desktop discord by using either the Twitter API or Youtube-DL to grab tweet video information. This also automatically embeds the first link in the text of non video tweets (API Only)
 
+## Differences from fxtwitter
+fxtwitter exposed all recently processed tweets publicly via a "latest" and "top" page.
+
+Even though Tweets are public, it was a personal concern for me that a tweet with potentially sensitive information in it could suddenly be shown to however many people were browsing the latest tweets page, and could be used as a tool for harassment. This was removed in [The following commit](https://github.com/dylanpdx/BetterTwitFix/commit/87ba86ba502e73ddb370bd4e5b964548d3272400#diff-a11c36d9b2d53672d6b3d781dca5bef9129159947de66bc3ffaec5fab389d80cL115)
+
 ## How to use (discord side)
 
 just put the url to the server, and directly after, the full URL to the tweet you want to embed
@@ -15,6 +20,8 @@ https://vxtwitter.com/[twitter video url] or [last half of twitter url] (everyth
 You can also simply type out 'vx' directly before 'twitter.com' in any valid twitter video url, and that will convert it into a working vxTwitter url, for example:
 
 **Note**: If you enjoy this service, please considering donating via [Ko-Fi](https://ko-fi.com/dylanpdx) to help cover server costs
+
+I do not monitor any tweets processed by this server. Additionally, if you plan on hosting the code yourself and are concerned about this, be sure to check how to disable logging on the web server you are using (i.e Nginx)
 
 ## How to run (server side)
 
