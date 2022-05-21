@@ -17,10 +17,6 @@ def getTotalImgSize(imageArray): # take the image with the most pixels, multiply
         return (maxImage.size[0], maxImage.size[1])
     elif (len(imageArray) == 2):
         return (maxImage.size[0] * 2, maxImage.size[1])
-    elif (len(imageArray) == 3):
-        return (maxImage.size[0] * 2, maxImage.size[1]*2)
-    elif (len(imageArray) == 4):
-        return (maxImage.size[0] * 2, maxImage.size[1]*2)
     else:
         return (maxImage.size[0] * 2, maxImage.size[1]*2)
 
