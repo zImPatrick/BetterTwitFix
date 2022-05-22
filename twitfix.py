@@ -10,7 +10,7 @@ import re
 import os
 import urllib.parse
 import urllib.request
-from datetime import date
+from datetime import date,datetime, timedelta
 
 app = Flask(__name__)
 CORS(app)
@@ -196,6 +196,9 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
+def getDefaultTTL():
+    return datetime.today().replace(microsecond=0) + timedelta(days=1)
+
 def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
     cached_vnf = getVnfFromLinkCache(video_link)
     if cached_vnf == None:
@@ -241,7 +244,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
     else:
         return embed(video_link, cached_vnf, image)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=getDefaultTTL()): # Return a dict of video info with default values
     vnf = {
         "tweet"         : tweet,
         "url"           : url,
@@ -257,7 +260,8 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "rts"           : rts,
         "time"          : time,
         "qrt"           : qrt,
-        "nsfw"          : nsfw
+        "nsfw"          : nsfw,
+        "ttl"           : ttl
     }
     return vnf
 
@@ -383,20 +387,25 @@ def getVnfFromLinkCache(video_link):
             print(" ➤ [ X ] Link not in json cache")
             return None
 
+def serializeUnknown(obj):
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError ("Type %s not serializable" % type(obj))
+
 def addVnfToLinkCache(video_link, vnf):
-    if link_cache_system == "db":
-        try:
-            out = db.linkCache.insert_one(vnf)
-            print(" ➤ [ + ] Link added to DB cache ")
-            return True
-        except Exception:
-            print(" ➤ [ X ] Failed to add link to DB cache")
-            return None
-    elif link_cache_system == "json":
-        link_cache[video_link] = vnf
-        with open("links.json", "w") as outfile: 
-            json.dump(link_cache, outfile, indent=4, sort_keys=True)
-            return None
+    try:
+        if link_cache_system == "db":
+                out = db.linkCache.insert_one(vnf)
+                print(" ➤ [ + ] Link added to DB cache ")
+                return True
+        elif link_cache_system == "json":
+            link_cache[video_link] = vnf
+            with open("links.json", "w") as outfile: 
+                json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
+                return None
+    except Exception:
+        print(" ➤ [ X ] Failed to add link to DB cache")
+        return None
 
 def message(text):
     return render_template(
