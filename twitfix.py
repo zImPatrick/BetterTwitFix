@@ -74,9 +74,18 @@ if link_cache_system == "json":
             default_link_cache = {"test":"test"}
             json.dump(default_link_cache, outfile, indent=4, sort_keys=True)
 
-    f = open('links.json',)
-    link_cache = json.load(f)
-    f.close()
+    try:
+        f = open('links.json',)
+        link_cache = json.load(f)
+    except json.decoder.JSONDecodeError:
+        print(" ➤ [ X ] Failed to load cache JSON file. Creating new file.")
+        link_cache = {}
+    except FileNotFoundError:
+        print(" ➤ [ X ] Failed to load cache JSON file. Creating new file.")
+        link_cache = {}
+    finally:
+        f.close()
+        
 elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
