@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, Response, send_from_directory, url_for, send_file, make_response, jsonify
+from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
 import youtube_dl
 import textwrap
@@ -10,7 +10,9 @@ import re
 import os
 import urllib.parse
 import urllib.request
+import combineImg
 from datetime import date,datetime, timedelta
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)
@@ -123,7 +125,14 @@ def twitfix(sub_path):
         else:
             print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
             return dir(sub_path)
+    elif request.url.startswith("https://c.vx"):
+        twitter_url = sub_path
 
+        if match.start() == 0:
+            twitter_url = "https://twitter.com/" + sub_path
+        
+        if user_agent in generate_embed_user_agents:
+            return embedCombined(twitter_url)
     elif request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -204,6 +213,23 @@ def dir(sub_path):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
+
+@app.route("/rendercombined.png")
+def rendercombined():
+    # get "imgs" from request arguments
+    imgs = request.args.get("imgs", "")
+    imgs = imgs.split(",")
+    if (len(imgs) == 0 or len(imgs)>4):
+        abort(400)
+    #check that each image starts with "https://pbs.twimg.com"
+    for img in imgs:
+        if not img.startswith("https://pbs.twimg.com"):
+            abort(400)
+    finalImg= combineImg.genImageFromURL(imgs)
+    imgIo = BytesIO()
+    finalImg.save(imgIo, 'PNG')
+    imgIo.seek(0)
+    return send_file(imgIo, mimetype='image/png')
 
 def getDefaultTTL():
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
@@ -488,6 +514,68 @@ def embed(video_link, vnf, image):
         urlUser    = urlUser, 
         urlLink    = urlLink,
         tweetLink  = vnf['tweet'] )
+
+
+def embedCombined(video_link):
+    cached_vnf = getVnfFromLinkCache(video_link)
+
+    if cached_vnf == None:
+        try:
+            vnf = link_to_vnf(video_link)
+            addVnfToLinkCache(video_link, vnf)
+            return embedCombinedVnf(video_link, vnf)
+
+        except Exception as e:
+            print(e)
+            return message("Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)")
+    else:
+        return embedCombinedVnf(video_link, cached_vnf)
+
+def embedCombinedVnf(video_link,vnf):
+    if vnf['type'] != "Image":
+        return embed(video_link, vnf, 0)
+    desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
+    urlUser = urllib.parse.quote(vnf['uploader'])
+    urlDesc = urllib.parse.quote(desc)
+    urlLink = urllib.parse.quote(video_link)
+    likeDisplay = ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']) + "\n")
+
+    if vnf['qrt'] == {}: # Check if this is a QRT and modify the description
+            desc = (desc + likeDisplay)
+    else:
+        qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + "):\n─────────────\n'" + vnf['qrt']['desc'] + "'")
+        desc = (desc + qrtDisplay +  likeDisplay)
+
+    color = "#7FFFD4" # Green
+
+    if vnf['nsfw'] == True:
+        color = "#800020" # Red
+    image = "https://vxtwitter.com/rendercombined.png?imgs="
+    for i in range(0,int(vnf['images'][4])):
+        image = image + vnf['images'][i] + ","
+    image = image[:-1] # Remove last comma
+    return render_template(
+        'image.html', 
+        likes      = vnf['likes'], 
+        rts        = vnf['rts'], 
+        time       = vnf['time'], 
+        screenName = vnf['screen_name'], 
+        vidlink    = vnf['url'], 
+        pfp        = vnf['pfp'],  
+        vidurl     = vnf['url'], 
+        desc       = desc,
+        pic        = image,
+        user       = vnf['uploader'], 
+        video_link = video_link, 
+        color      = color, 
+        appname    = config['config']['appname'], 
+        repo       = config['config']['repo'], 
+        url        = config['config']['url'], 
+        urlDesc    = urlDesc, 
+        urlUser    = urlUser, 
+        urlLink    = urlLink,
+        tweetLink  = vnf['tweet'] )
+
 
 def tweetType(tweet): # Are we dealing with a Video, Image, or Text tweet?
     if 'extended_entities' in tweet:

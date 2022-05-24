@@ -1,4 +1,6 @@
 from PIL import Image, ImageOps, ImageFilter
+import requests
+from io import BytesIO
 
 # find the highest res image in an array of images
 def findImageWithMostPixels(imageArray):
@@ -80,3 +82,12 @@ def genImage(imageArray):
     combinedBG = combineImages(imageArray, *getTotalImgSize(imageArray),False)
     combinedBG = blurImage(combinedBG,50)
     return Image.alpha_composite(combinedBG,combined)
+
+def genImageFromURL(urlArray):
+    # this method avoids storing the images in disk, instead they're stored in memory
+    # no cache means that they'll have to be downloaded again if the image is requested again
+    # TODO: cache?
+    imageArray = []
+    for url in urlArray:
+        imageArray.append(Image.open(BytesIO(requests.get(url).content)))
+    return genImage(imageArray)
