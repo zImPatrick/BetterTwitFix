@@ -1,6 +1,10 @@
+import json
+from weakref import finalize
 from PIL import Image, ImageOps, ImageFilter
 import requests
 from io import BytesIO
+import io
+import base64
 
 # find the highest res image in an array of images
 def findImageWithMostPixels(imageArray):
@@ -83,6 +87,7 @@ def genImage(imageArray):
     combinedBG = blurImage(combinedBG,50)
     finalImg = Image.alpha_composite(combinedBG,combined)
     finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
+    finalImg = finalImg.convert('RGB')
     return finalImg
 
 def genImageFromURL(urlArray):
@@ -93,3 +98,20 @@ def genImageFromURL(urlArray):
     for url in urlArray:
         imageArray.append(Image.open(BytesIO(requests.get(url).content)))
     return genImage(imageArray)
+    
+def lambda_handler(event, context):
+    # TODO implement
+    images = event["queryStringParameters"].get("imgs","").split(",")
+    combined = genImageFromURL(images)
+    buffered = BytesIO()
+    combined.save(buffered,format="JPEG")
+    combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
+    return {
+        'statusCode': 200,
+        "headers": 
+        {
+            "Content-Type": "image/jpg"
+        },
+        'body': combined_str,
+        'isBase64Encoded': True
+    }

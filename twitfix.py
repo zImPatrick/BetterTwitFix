@@ -46,7 +46,8 @@ if not os.path.exists("config.json"):
                 "color":"#43B581", 
                 "appname": "vxTwitter", 
                 "repo": "https://github.com/dylanpdx/BetterTwitFix", 
-                "url": "https://vxtwitter.com"
+                "url": "https://vxtwitter.com",
+                "combination_method": "local" # can either be 'local' or a URL to a server handling requests in the same format
                 },
             "api":{"api_key":"[api_key goes here]",
             "api_secret":"[api_secret goes here]",
@@ -222,6 +223,11 @@ def favicon():
 def rendercombined():
     # get "imgs" from request arguments
     imgs = request.args.get("imgs", "")
+
+    if 'combination_method' in config['config'] and config['config']['combination_method'] != "local":
+        return redirect(config['config']['combination_method']+"?imgs="+imgs, 301)
+    # Redirecting here instead of setting the embed URL directly to this because if the config combination_method changes in the future, old URLs will still work
+
     imgs = imgs.split(",")
     if (len(imgs) == 0 or len(imgs)>4):
         abort(400)
