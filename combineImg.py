@@ -82,7 +82,7 @@ def genImage(imageArray):
     combinedBG = combineImages(imageArray, *getTotalImgSize(imageArray),False)
     combinedBG = blurImage(combinedBG,50)
     finalImg = Image.alpha_composite(combinedBG,combined)
-    finalImg = ImageOps.pad(finalImg, imageArray[0].size,color=(0, 0, 0, 0))
+    finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
     return finalImg
 
 def genImageFromURL(urlArray):
