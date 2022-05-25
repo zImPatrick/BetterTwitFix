@@ -81,7 +81,9 @@ def genImage(imageArray):
     combined = combineImages(imageArray, *getTotalImgSize(imageArray))
     combinedBG = combineImages(imageArray, *getTotalImgSize(imageArray),False)
     combinedBG = blurImage(combinedBG,50)
-    return Image.alpha_composite(combinedBG,combined)
+    finalImg = Image.alpha_composite(combinedBG,combined)
+    finalImg = ImageOps.pad(finalImg, imageArray[0].size,color=(0, 0, 0, 0))
+    return finalImg
 
 def genImageFromURL(urlArray):
     # this method avoids storing the images in disk, instead they're stored in memory
