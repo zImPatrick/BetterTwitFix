@@ -1,3 +1,4 @@
+from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
 import youtube_dl
@@ -133,6 +134,9 @@ def twitfix(sub_path):
         
         if user_agent in generate_embed_user_agents:
             return embedCombined(twitter_url)
+        else:
+            print(" ➤ [ R ] Redirect to " + twitter_url)
+            return redirect(twitter_url, 301)
     elif request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -227,9 +231,10 @@ def rendercombined():
             abort(400)
     finalImg= combineImg.genImageFromURL(imgs)
     imgIo = BytesIO()
-    finalImg.save(imgIo, 'PNG')
+    finalImg = finalImg.convert("RGB")
+    finalImg.save(imgIo, 'JPEG',quality=70)
     imgIo.seek(0)
-    return send_file(imgIo, mimetype='image/png')
+    return send_file(imgIo, mimetype='image/jpeg')
 
 def getDefaultTTL():
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
@@ -568,7 +573,7 @@ def embedCombinedVnf(video_link,vnf):
         user       = vnf['uploader'], 
         video_link = video_link, 
         color      = color, 
-        appname    = config['config']['appname'], 
+        appname    = config['config']['appname'] + " - View original tweet for full quality", 
         repo       = config['config']['repo'], 
         url        = config['config']['url'], 
         urlDesc    = urlDesc, 
