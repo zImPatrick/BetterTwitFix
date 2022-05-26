@@ -1,4 +1,5 @@
 import json
+from pickletools import optimize
 from weakref import finalize
 from PIL import Image, ImageOps, ImageFilter
 import requests
@@ -104,7 +105,7 @@ def lambda_handler(event, context):
     images = event["queryStringParameters"].get("imgs","").split(",")
     combined = genImageFromURL(images)
     buffered = BytesIO()
-    combined.save(buffered,format="JPEG")
+    combined.save(buffered,format="JPEG",quality=60)
     combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
     return {
         'statusCode': 200,
