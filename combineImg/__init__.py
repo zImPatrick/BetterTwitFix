@@ -1,11 +1,12 @@
-import json
 from pickletools import optimize
+from turtle import down
 from weakref import finalize
 from PIL import Image, ImageOps, ImageFilter
-import requests
+from requests import get
 from io import BytesIO
-import io
 import base64
+from multiprocessing.pool import ThreadPool
+from time import time as timer
 
 # find the highest res image in an array of images
 def findImageWithMostPixels(imageArray):
@@ -27,15 +28,21 @@ def getTotalImgSize(imageArray): # take the image with the most pixels, multiply
     else:
         return (maxImage.size[0] * 2, maxImage.size[1]*2)
 
+def scaleImageIterable(args):
+    image = args[0]
+    targetWidth = args[1]
+    targetHeight = args[2]
+    pad=args[3]
+    if pad:
+        image = image.convert('RGBA')
+        newImg = ImageOps.pad(image, (targetWidth, targetHeight),color=(0, 0, 0, 0))
+    else:
+        newImg = ImageOps.fit(image, (targetWidth, targetHeight)) # scale + crop
+    return newImg
+
 def scaleAllImagesToSameSize(imageArray,targetWidth,targetHeight,pad=True): # scale all images in the array to the same size, preserving aspect ratio
     newImageArray = []
-    for image in imageArray:
-        if pad:
-            image = image.convert('RGBA')
-            newImg = ImageOps.pad(image, (targetWidth, targetHeight),color=(0, 0, 0, 0))
-        else:
-            newImg = ImageOps.fit(image, (targetWidth, targetHeight)) # scale + crop
-        newImageArray.append(newImg)
+    newImageArray=[scaleImageIterable([image,targetWidth,targetHeight,pad]) for image in imageArray]
     return newImageArray
 
 def blurImage(image, radius):
@@ -83,22 +90,29 @@ def saveImage(image, name):
 
 # combine up to four images into a single image
 def genImage(imageArray):
-    combined = combineImages(imageArray, *getTotalImgSize(imageArray))
-    combinedBG = combineImages(imageArray, *getTotalImgSize(imageArray),False)
+    totalSize=getTotalImgSize(imageArray)
+    combined = combineImages(imageArray, *totalSize)
+    combinedBG = combineImages(imageArray, *totalSize,False)
     combinedBG = blurImage(combinedBG,50)
     finalImg = Image.alpha_composite(combinedBG,combined)
     finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
     finalImg = finalImg.convert('RGB')
     return finalImg
 
+def downloadImage(url):
+    return Image.open(BytesIO(get(url).content))
+
 def genImageFromURL(urlArray):
     # this method avoids storing the images in disk, instead they're stored in memory
     # no cache means that they'll have to be downloaded again if the image is requested again
     # TODO: cache?
-    imageArray = []
-    for url in urlArray:
-        imageArray.append(Image.open(BytesIO(requests.get(url).content)))
-    return genImage(imageArray)
+    start = timer()
+    imageArray = ThreadPool(8).map(downloadImage,urlArray)
+    print(f"Images downloaded in: {timer() - start}s")
+    start = timer()
+    finalImg = genImage(imageArray)
+    print(f"Image generated in: {timer() - start}s")
+    return finalImg
     
 def lambda_handler(event, context):
     # TODO implement
