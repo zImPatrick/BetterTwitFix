@@ -117,6 +117,9 @@ def genImageFromURL(urlArray):
     
 def lambda_handler(event, context):
     images = event["queryStringParameters"].get("imgs","").split(",")
+    for img in images:
+        if not img.startswith("https://pbs.twimg.com"):
+            return {'statusCode':400,'body':'Invalid image URL'}
     combined = genImageFromURL(images)
     buffered = BytesIO()
     combined.save(buffered,format="JPEG",quality=60)
