@@ -219,13 +219,14 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
-@app.route("/rendercombined.png")
+@app.route("/rendercombined.jpg")
 def rendercombined():
     # get "imgs" from request arguments
     imgs = request.args.get("imgs", "")
 
     if 'combination_method' in config['config'] and config['config']['combination_method'] != "local":
-        return redirect(config['config']['combination_method']+"?imgs="+imgs, 301)
+        url = config['config']['combination_method'] + "/rendercombined.jpg?imgs=" + imgs
+        return redirect(url, 302)
     # Redirecting here instead of setting the embed URL directly to this because if the config combination_method changes in the future, old URLs will still work
 
     imgs = imgs.split(",")
@@ -561,7 +562,7 @@ def embedCombinedVnf(video_link,vnf):
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    image = "https://vxtwitter.com/rendercombined.png?imgs="
+    image = "https://vxtwitter.com/rendercombined.jpg?imgs="
     for i in range(0,int(vnf['images'][4])):
         image = image + vnf['images'][i] + ","
     image = image[:-1] # Remove last comma
