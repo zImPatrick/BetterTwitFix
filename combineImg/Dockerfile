@@ -1,4 +1,5 @@
 FROM public.ecr.aws/lambda/python:3.8
+RUN yum -y update
 RUN yum -y install git && yum clean all
 RUN yum -y install tar gzip zlib freetype-devel \
     gcc \

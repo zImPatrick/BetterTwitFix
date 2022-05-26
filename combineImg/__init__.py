@@ -1,11 +1,8 @@
-from pickletools import optimize
-from turtle import down
-from weakref import finalize
 from PIL import Image, ImageOps, ImageFilter
 from requests import get
 from io import BytesIO
 import base64
-from multiprocessing.pool import ThreadPool
+import concurrent.futures
 from time import time as timer
 
 # find the highest res image in an array of images
@@ -42,7 +39,9 @@ def scaleImageIterable(args):
 
 def scaleAllImagesToSameSize(imageArray,targetWidth,targetHeight,pad=True): # scale all images in the array to the same size, preserving aspect ratio
     newImageArray = []
-    newImageArray=[scaleImageIterable([image,targetWidth,targetHeight,pad]) for image in imageArray]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        newImageArray = [executor.submit(scaleImageIterable, (image, targetWidth, targetHeight,pad)) for image in imageArray]
+        newImageArray = [future.result() for future in newImageArray]
     return newImageArray
 
 def blurImage(image, radius):
@@ -107,7 +106,9 @@ def genImageFromURL(urlArray):
     # no cache means that they'll have to be downloaded again if the image is requested again
     # TODO: cache?
     start = timer()
-    imageArray = ThreadPool(8).map(downloadImage,urlArray)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        imageArray = [executor.submit(downloadImage, url) for url in urlArray]
+        imageArray = [future.result() for future in imageArray]
     print(f"Images downloaded in: {timer() - start}s")
     start = timer()
     finalImg = genImage(imageArray)
@@ -115,7 +116,6 @@ def genImageFromURL(urlArray):
     return finalImg
     
 def lambda_handler(event, context):
-    # TODO implement
     images = event["queryStringParameters"].get("imgs","").split(",")
     combined = genImageFromURL(images)
     buffered = BytesIO()
