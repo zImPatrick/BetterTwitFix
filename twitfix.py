@@ -546,7 +546,7 @@ def embedCombined(video_link):
         return embedCombinedVnf(video_link, cached_vnf)
 
 def embedCombinedVnf(video_link,vnf):
-    if vnf['type'] != "Image":
+    if vnf['type'] != "Image" or vnf['images'][4] == "1":
         return embed(video_link, vnf, 0)
     desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
     urlUser = urllib.parse.quote(vnf['uploader'])
