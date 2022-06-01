@@ -1,7 +1,7 @@
 from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
-import youtube_dl
+import yt_dlp
 import textwrap
 import twitter
 import pymongo
@@ -383,7 +383,7 @@ def link_to_vnf_from_api(video_link):
 
 def link_to_vnf_from_youtubedl(video_link):
     print(" ➤ [ X ] Attempting to download tweet info via YoutubeDL: " + video_link)
-    with youtube_dl.YoutubeDL({'outtmpl': '%(id)s.%(ext)s'}) as ydl:
+    with yt_dlp.YoutubeDL({'outtmpl': '%(id)s.%(ext)s'}) as ydl:
         result = ydl.extract_info(video_link, download=False)
         vnf    = tweetInfo(result['url'], video_link, result['description'].rsplit(' ',1)[0], result['thumbnail'], result['uploader'])
         return vnf
