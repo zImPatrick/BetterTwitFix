@@ -116,6 +116,11 @@ def genImageFromURL(urlArray):
     return finalImg
     
 def lambda_handler(event, context):
+    if ("queryStringParameters" not in event):
+        return {
+            "statusCode": 400,
+            "body": "Invalid request."
+        }
     images = event["queryStringParameters"].get("imgs","").split(",")
     for img in images:
         if not img.startswith("https://pbs.twimg.com"):
