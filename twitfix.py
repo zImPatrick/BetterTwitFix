@@ -15,6 +15,7 @@ import combineImg
 from datetime import date,datetime, timedelta
 from io import BytesIO
 import msgs
+import twExtract
 
 app = Flask(__name__)
 CORS(app)
@@ -317,12 +318,14 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
     }
     return vnf
 
-def link_to_vnf_from_api(video_link):
+def get_tweet_data_from_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from Twitter API")
     twid = int(re.sub(r'\?.*$','',video_link.rsplit("/", 1)[-1])) # gets the tweet ID as a int from the passed url
     tweet = twitter_api.statuses.show(_id=twid, tweet_mode="extended")
-    # For when I need to poke around and see what a tweet looks like
-    #print(tweet)
+    #print(tweet) # For when I need to poke around and see what a tweet looks like
+    return tweet
+
+def link_to_vnf_from_tweet_data(tweet,video_link):
     imgs = ["","","","", ""]
     print(" ➤ [ + ] Tweet Type: " + tweetType(tweet))
     # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
@@ -382,6 +385,17 @@ def link_to_vnf_from_api(video_link):
         
     return vnf
 
+
+def link_to_vnf_from_unofficial_api(video_link):
+    print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
+    tweet = twExtract.extractStatus(video_link)
+    return link_to_vnf_from_tweet_data(tweet,video_link)
+
+
+def link_to_vnf_from_api(video_link):
+    tweet = get_tweet_data_from_api(video_link)
+    return link_to_vnf_from_tweet_data(tweet,video_link)
+
 def link_to_vnf_from_youtubedl(video_link):
     print(" ➤ [ X ] Attempting to download tweet info via YoutubeDL: " + video_link)
     with yt_dlp.YoutubeDL({'outtmpl': '%(id)s.%(ext)s'}) as ydl:
@@ -396,7 +410,13 @@ def link_to_vnf(video_link): # Return a VideoInfo object or die trying
         except Exception as e:
             print(" ➤ [ !!! ] API Failed")
             print(e)
-            return link_to_vnf_from_youtubedl(video_link)
+            try:
+                return link_to_vnf_from_unofficial_api(video_link)
+            except Exception as e:
+                print(" ➤ [ !!! ] UNOFFICIAL API Failed")
+                print(e)
+                return link_to_vnf_from_youtubedl(video_link) # This is the last resort, will only work for videos
+                
     elif config['config']['method'] == 'api':
         try:
             return link_to_vnf_from_api(video_link)
