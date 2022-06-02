@@ -14,6 +14,7 @@ import urllib.request
 import combineImg
 from datetime import date,datetime, timedelta
 from io import BytesIO
+import msgs
 
 app = Flask(__name__)
 CORS(app)
@@ -258,7 +259,7 @@ def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet
             print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
         except Exception as e:
             print(e)
-            return message("Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)")
+            return message(msgs.failedToScan)
     else:
         return redirect(cached_vnf['url'], 301)
         print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
@@ -273,7 +274,7 @@ def direct_video_link(video_link): # Just get a redirect to a MP4 link from any 
             print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
         except Exception as e:
             print(e)
-            return message("Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)")
+            return message(msgs.failedToScan)
     else:
         return cached_vnf['url']
         print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
@@ -289,7 +290,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
 
         except Exception as e:
             print(e)
-            return message("Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)")
+            return redirect(video_link) #message(msgs)
     else:
         return embed(video_link, cached_vnf, image)
 
@@ -543,7 +544,7 @@ def embedCombined(video_link):
 
         except Exception as e:
             print(e)
-            return message("Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)")
+            return message(msgs.failedToScan)
     else:
         return embedCombinedVnf(video_link, cached_vnf)
 
