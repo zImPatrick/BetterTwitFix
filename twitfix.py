@@ -389,6 +389,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 def link_to_vnf_from_unofficial_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
     tweet = twExtract.extractStatus(video_link)
+    print (" ➤ [ ✔ ] Unofficial API Success")
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 
