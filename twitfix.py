@@ -291,7 +291,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
 
         except Exception as e:
             print(e)
-            return redirect(video_link) #message(msgs)
+            return message(msgs.failedToScan)
     else:
         return embed(video_link, cached_vnf, image)
 
