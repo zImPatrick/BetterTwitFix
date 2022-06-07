@@ -81,17 +81,14 @@ if link_cache_system == "json":
             json.dump(default_link_cache, outfile, indent=4, sort_keys=True)
 
     try:
-        f = open('links.json',)
-        link_cache = json.load(f)
-    except json.decoder.JSONDecodeError:
+        with open('links.json', "r") as f:
+            link_cache = json.load(f)
+    except (json.decoder.JSONDecodeError, FileNotFoundError):
         print(" ➤ [ X ] Failed to load cache JSON file. Creating new file.")
-        link_cache = {}
-    except FileNotFoundError:
-        print(" ➤ [ X ] Failed to load cache JSON file. Creating new file.")
-        link_cache = {}
-    finally:
-        f.close()
-        
+        with open('links.json', "w") as f:
+            link_cache = {}
+            json.dump(link_cache, f)
+
 elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
