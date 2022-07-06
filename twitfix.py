@@ -4,9 +4,7 @@ from flask_cors import CORS
 import yt_dlp
 import textwrap
 import twitter
-import pymongo
 import requests
-import json
 import re
 import os
 import urllib.parse
@@ -16,6 +14,8 @@ from datetime import date,datetime, timedelta
 from io import BytesIO
 import msgs
 import twExtract
+from configHandler import config
+from cache import addVnfToLinkCache,getVnfFromLinkCache
 
 app = Flask(__name__)
 CORS(app)
@@ -36,63 +36,12 @@ generate_embed_user_agents = [
     "Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)", 
     "test"]
 
-# Read config from config.json. If it does not exist, create new.
-if not os.path.exists("config.json"):
-    with open("config.json", "w") as outfile:
-        default_config = {
-            "config":{
-                "link_cache":"json",
-                "database":"[url to mongo database goes here]",
-                "table":"TwiFix",
-                "method":"youtube-dl", 
-                "color":"#43B581", 
-                "appname": "vxTwitter", 
-                "repo": "https://github.com/dylanpdx/BetterTwitFix", 
-                "url": "https://vxtwitter.com",
-                "combination_method": "local" # can either be 'local' or a URL to a server handling requests in the same format
-                },
-            "api":{"api_key":"[api_key goes here]",
-            "api_secret":"[api_secret goes here]",
-            "access_token":"[access_token goes here]",
-            "access_secret":"[access_secret goes here]"
-            }
-        }
 
-        json.dump(default_config, outfile, indent=4, sort_keys=True)
-
-    config = default_config
-else:
-    f = open("config.json")
-    config = json.load(f)
-    f.close()
 
 # If method is set to API or Hybrid, attempt to auth with the Twitter API
 if config['config']['method'] in ('api', 'hybrid'):
     auth = twitter.oauth.OAuth(config['api']['access_token'], config['api']['access_secret'], config['api']['api_key'], config['api']['api_secret'])
     twitter_api = twitter.Twitter(auth=auth)
-
-link_cache_system = config['config']['link_cache']
-
-if link_cache_system == "json":
-    link_cache = {}
-    if not os.path.exists("config.json"):
-        with open("config.json", "w") as outfile:
-            default_link_cache = {"test":"test"}
-            json.dump(default_link_cache, outfile, indent=4, sort_keys=True)
-
-    try:
-        with open('links.json', "r") as f:
-            link_cache = json.load(f)
-    except (json.decoder.JSONDecodeError, FileNotFoundError):
-        print(" ➤ [ X ] Failed to load cache JSON file. Creating new file.")
-        with open('links.json', "w") as f:
-            link_cache = {}
-            json.dump(link_cache, f)
-
-elif link_cache_system == "db":
-    client = pymongo.MongoClient(config['config']['database'], connect=False)
-    table = config['config']['table']
-    db = client[table]
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
@@ -431,50 +380,6 @@ def link_to_vnf(video_link): # Return a VideoInfo object or die trying
             return None
     else:
         print("Please set the method key in your config file to 'api' 'youtube-dl' or 'hybrid'")
-        return None
-
-def getVnfFromLinkCache(video_link):
-    if link_cache_system == "db":
-        collection = db.linkCache
-        vnf        = collection.find_one({'tweet': video_link})
-        # print(vnf)
-        if vnf != None: 
-            hits   = ( vnf['hits'] + 1 ) 
-            print(" ➤ [ ✔ ] Link located in DB cache. " + "hits on this link so far: [" + str(hits) + "]")
-            query  = { 'tweet': video_link }
-            change = { "$set" : { "hits" : hits } }
-            out    = db.linkCache.update_one(query, change)
-            return vnf
-        else:
-            print(" ➤ [ X ] Link not in DB cache")
-            return None
-    elif link_cache_system == "json":
-        if video_link in link_cache:
-            print("Link located in json cache")
-            vnf = link_cache[video_link]
-            return vnf
-        else:
-            print(" ➤ [ X ] Link not in json cache")
-            return None
-
-def serializeUnknown(obj):
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat()
-    raise TypeError ("Type %s not serializable" % type(obj))
-
-def addVnfToLinkCache(video_link, vnf):
-    try:
-        if link_cache_system == "db":
-                out = db.linkCache.insert_one(vnf)
-                print(" ➤ [ + ] Link added to DB cache ")
-                return True
-        elif link_cache_system == "json":
-            link_cache[video_link] = vnf
-            with open("links.json", "w") as outfile: 
-                json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
-                return None
-    except Exception:
-        print(" ➤ [ X ] Failed to add link to DB cache")
         return None
 
 def message(text):
