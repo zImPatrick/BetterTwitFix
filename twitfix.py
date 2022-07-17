@@ -97,8 +97,9 @@ def twitfix(sub_path):
             clean = twitter_url[:-4]
         else:
             clean = twitter_url
-
-        return redirect(direct_video_link(clean),302)
+        # TODO: Cache this, but not for too long as disk space can fill up
+        vid = requests.get(direct_video_link(twitter_url))
+        return Response(vid.content,mimetype="video/mp4")
 
     # elif request.url.endswith(".json") or request.url.endswith("%2Ejson"):
     #     twitter_url = "https://twitter.com/" + sub_path
