@@ -71,7 +71,9 @@ def twitfix(sub_path):
         if user_agent in generate_embed_user_agents:
             print( " ➤ [ D ] d.vx link shown to discord user-agent!")
             if request.url.endswith(".mp4") and "?" not in request.url:
-                return redirect(direct_video_link(twitter_url),302)
+                # TODO: Cache this, but not for too long as disk space can fill up
+                vid = requests.get(direct_video_link(twitter_url))
+                return Response(vid.content,mimetype="video/mp4")
             else:
                 return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
         else:
