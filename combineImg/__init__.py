@@ -94,7 +94,7 @@ def genImage(imageArray):
     combinedBG = combineImages(imageArray, *totalSize,False)
     combinedBG = blurImage(combinedBG,50)
     finalImg = Image.alpha_composite(combinedBG,combined)
-    finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
+    #finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
     finalImg = finalImg.convert('RGB')
     return finalImg
 
