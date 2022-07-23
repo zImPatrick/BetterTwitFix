@@ -72,3 +72,5 @@ def getVnfFromLinkCache(video_link):
         else:
             print(" ➤ [ X ] Link not in json cache")
             return None
+    elif link_cache_system == "none":
+        return None

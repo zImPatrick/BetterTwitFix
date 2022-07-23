@@ -41,6 +41,7 @@ vxTwitter generates a config.json in its root directory the first time you run i
 
 - **db**: Caches all links to a mongoDB database. This should be used it you are using uWSGI and are not just running the script on its own as one worker
 - **json**: This saves cached links to a local **links.json** file
+- **none**: Does not cache requests. Not reccomended as you can easily use up your Twitter API credits with this. Intended for use with another cache system (i.e NGINX uwsgi_cache)
 
 **method** - ( Options: **youtube-dl**, **api**, **hybrid** ) 
 
