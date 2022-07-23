@@ -72,7 +72,11 @@ def twitfix(sub_path):
             print( " ➤ [ D ] d.vx link shown to discord user-agent!")
             if request.url.endswith(".mp4") and "?" not in request.url:
                 # TODO: Cache this, but not for too long as disk space can fill up
-                vid = requests.get(direct_video_link(twitter_url))
+                if "?" not in request.url:
+                    clean = twitter_url[:-4]
+                else:
+                    clean = twitter_url
+                vid = requests.get(direct_video_link(clean))
                 return Response(vid.content,mimetype="video/mp4")
             else:
                 return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
@@ -98,7 +102,7 @@ def twitfix(sub_path):
         else:
             clean = twitter_url
         # TODO: Cache this, but not for too long as disk space can fill up
-        vid = requests.get(direct_video_link(twitter_url))
+        vid = requests.get(direct_video_link(clean))
         return Response(vid.content,mimetype="video/mp4")
 
     # elif request.url.endswith(".json") or request.url.endswith("%2Ejson"):
