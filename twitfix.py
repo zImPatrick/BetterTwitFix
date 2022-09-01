@@ -349,7 +349,7 @@ def link_to_vnf_from_unofficial_api(video_link):
     try:
         tweet = twExtract.extractStatus(video_link)
     except Exception as e:
-        print('print(" ➤ [ !!! ] Local UNOFFICIAL API Failed")')
+        print(' ➤ [ !!! ] Local UNOFFICIAL API Failed')
         if ('apiMirrors' in config['config'] and len(config['config']['apiMirrors']) > 0):
             mirror = random.choice(config['config']['apiMirrors'])
             print(" ➤ [ + ] Using API Mirror: "+mirror)
