@@ -321,6 +321,10 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
     else:
         nsfw = False
 
+    if 'entities' in tweet and 'urls' in tweet['entities']:
+        for eurl in tweet['entities']['urls']:
+            text = text.replace(eurl["url"],eurl["expanded_url"])
+
     vnf = tweetInfo(
         url, 
         video_link, 
