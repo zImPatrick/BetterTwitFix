@@ -19,7 +19,8 @@ if not os.path.exists("config.json"):
             "api":{"api_key":"[api_key goes here]",
             "api_secret":"[api_secret goes here]",
             "access_token":"[access_token goes here]",
-            "access_secret":"[access_secret goes here]"
+            "access_secret":"[access_secret goes here]",
+            "apiMirrors":[]
             }
         }
 
