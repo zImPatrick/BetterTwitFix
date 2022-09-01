@@ -1,3 +1,4 @@
+from random import Random, random
 from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
@@ -13,10 +14,10 @@ import combineImg
 from datetime import date,datetime, timedelta
 from io import BytesIO
 import msgs
-import twExtract
+import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
-
+import random
 app = Flask(__name__)
 CORS(app)
 
@@ -341,7 +342,14 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 
 def link_to_vnf_from_unofficial_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
-    tweet = twExtract.extractStatus(video_link)
+    try:
+        tweet = twExtract.extractStatus(video_link)
+    except Exception as e:
+        print('print(" ➤ [ !!! ] Local UNOFFICIAL API Failed")')
+        if ('apiMirrors' in config['config'] and len(config['config']['apiMirrors']) > 0):
+            mirror = random.choice(config['config']['apiMirrors'])
+            print(" ➤ [ + ] Using API Mirror: "+mirror)
+            tweet = requests.get(mirror+"?url="+video_link).json()
     print (" ➤ [ ✔ ] Unofficial API Success")
     return link_to_vnf_from_tweet_data(tweet,video_link)
 

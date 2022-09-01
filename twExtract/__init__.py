@@ -1,4 +1,3 @@
-import imp
 import yt_dlp
 from yt_dlp.extractor import twitter
 import json
@@ -16,3 +15,15 @@ def extractStatus(url):
         'tweet_mode': 'extended',
     })
     return status
+
+def lambda_handler(event, context):
+    if ("queryStringParameters" not in event):
+        return {
+            "statusCode": 400,
+            "body": "Invalid request."
+        }
+    url = event["queryStringParameters"].get("url","")
+    return {
+        'statusCode': 200,
+        'body': extractStatus(url)
+    }
