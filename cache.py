@@ -3,8 +3,13 @@ import pymongo
 from datetime import date,datetime
 import json
 import os
+import boto3
 
 link_cache_system = config['config']['link_cache']
+
+DYNAMO_CACHE_TBL=None
+if link_cache_system=="dynamodb":
+    DYNAMO_CACHE_TBL=os.environ['CACHE_TABLE']
 
 if link_cache_system == "json":
     link_cache = {}
@@ -28,6 +33,8 @@ elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
     db = client[table]
+elif link_cache_system == "dynamodb":
+    client = boto3.resource('dynamodb')
 
 def serializeUnknown(obj):
     if isinstance(obj, (datetime, date)):
@@ -45,8 +52,21 @@ def addVnfToLinkCache(video_link, vnf):
             with open("links.json", "w") as outfile: 
                 json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
                 return None
-    except Exception:
+        elif link_cache_system == "dynamodb":
+            vnf["ttl"] = int(vnf["ttl"].strftime('%s'))
+            table = client.Table(DYNAMO_CACHE_TBL)
+            table.put_item(
+                Item={
+                    'tweet': video_link,
+                    'vnf': vnf,
+                    'ttl':vnf["ttl"]
+                }
+            )
+            print(" ➤ [ + ] Link added to dynamodb cache ")
+            return True
+    except Exception as e:
         print(" ➤ [ X ] Failed to add link to DB cache")
+        print(e)
         return None
 
 def getVnfFromLinkCache(video_link):
@@ -71,6 +91,20 @@ def getVnfFromLinkCache(video_link):
             return vnf
         else:
             print(" ➤ [ X ] Link not in json cache")
+            return None
+    elif link_cache_system == "dynamodb":
+        table = client.Table(DYNAMO_CACHE_TBL)
+        response = table.get_item(
+            Key={
+                'tweet': video_link
+            }
+        )
+        if 'Item' in response:
+            print("Link located in dynamodb cache")
+            vnf = response['Item']['vnf']
+            return vnf
+        else:
+            print(" ➤ [ X ] Link not in dynamodb cache")
             return None
     elif link_cache_system == "none":
         return None
