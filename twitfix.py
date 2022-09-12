@@ -364,13 +364,6 @@ def link_to_vnf_from_api(video_link):
     tweet = get_tweet_data_from_api(video_link)
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
-def link_to_vnf_from_youtubedl(video_link):
-    print(" ➤ [ X ] Attempting to download tweet info via YoutubeDL: " + video_link)
-    with yt_dlp.YoutubeDL({'outtmpl': '%(id)s.%(ext)s'}) as ydl:
-        result = ydl.extract_info(video_link, download=False)
-        vnf    = tweetInfo(result['url'], video_link, result['description'].rsplit(' ',1)[0], result['thumbnail'], result['uploader'])
-        return vnf
-
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
     if config['config']['method'] == 'hybrid':
         #try:
@@ -391,15 +384,8 @@ def link_to_vnf(video_link): # Return a VideoInfo object or die trying
             print(" ➤ [ X ] API Failed")
             print(e)
             return None
-    elif config['config']['method'] == 'youtube-dl':
-        try:
-            return link_to_vnf_from_youtubedl(video_link)
-        except Exception as e:
-            print(" ➤ [ X ] Youtube-DL Failed")
-            print(e)
-            return None
     else:
-        print("Please set the method key in your config file to 'api' 'youtube-dl' or 'hybrid'")
+        print("Please set the method key in your config file to 'api' or 'hybrid'")
         return None
 
 def message(text):
