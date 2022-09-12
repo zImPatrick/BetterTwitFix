@@ -248,7 +248,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
     else:
         return embed(video_link, cached_vnf, image)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
     vnf = {
@@ -267,7 +267,8 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "time"          : time,
         "qrt"           : qrt,
         "nsfw"          : nsfw,
-        "ttl"           : ttl
+        "ttl"           : ttl,
+        "verified"      : verified
     }
     return vnf
 
@@ -312,6 +313,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         qrt['desc']       = tweet['quoted_status']['full_text']
         qrt['handle']     = tweet['quoted_status']['user']['name']
         qrt['screen_name'] = tweet['quoted_status']['user']['screen_name']
+        qrt['verified'] = tweet['quoted_status']['user']['verified']
 
     text = tweet['full_text']
 
@@ -337,7 +339,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         time=tweet['created_at'], 
         qrt=qrt, 
         images=imgs,
-        nsfw=nsfw
+        nsfw=nsfw,
+        verified=tweet['user']['verified']
         )
         
     return vnf
@@ -380,7 +383,6 @@ def link_to_vnf(video_link): # Return a VideoInfo object or die trying
         except Exception as e:
             print(" ➤ [ !!! ] UNOFFICIAL API Failed")
             print(e)
-            return link_to_vnf_from_youtubedl(video_link) # This is the last resort, will only work for videos
                 
     elif config['config']['method'] == 'api':
         try:
@@ -426,7 +428,8 @@ def embed(video_link, vnf, image):
         elif vnf['qrt'] == {}: # Check if this is a QRT and modify the description
             desc = (desc + likeDisplay)
         else:
-            qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + "):\n─────────────\n'" + vnf['qrt']['desc'] + "'")
+            verifiedCheck = "☑️" if ('verified' in vnf['qrt'] and vnf['qrt']['verified']) else ""
+            qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + vnf['qrt']['desc'] + "'")
             desc = (desc + qrtDisplay +  likeDisplay)
     except:
         vnf['likes'] = 0; vnf['rts'] = 0; vnf['time'] = 0
@@ -471,7 +474,9 @@ def embed(video_link, vnf, image):
         urlDesc    = urlDesc, 
         urlUser    = urlUser, 
         urlLink    = urlLink,
-        tweetLink  = vnf['tweet'] )
+        tweetLink  = vnf['tweet'],
+        verified   = vnf['verified']
+        )
 
 
 def embedCombined(video_link):
@@ -501,7 +506,8 @@ def embedCombinedVnf(video_link,vnf):
     if vnf['qrt'] == {}: # Check if this is a QRT and modify the description
             desc = (desc + likeDisplay)
     else:
-        qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + "):\n─────────────\n'" + vnf['qrt']['desc'] + "'")
+        verifiedCheck = "☑️" if ('verified' in vnf['qrt'] and vnf['qrt']['verified']) else ""
+        qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + vnf['qrt']['desc'] + "'")
         desc = (desc + qrtDisplay +  likeDisplay)
 
     color = "#7FFFD4" # Green

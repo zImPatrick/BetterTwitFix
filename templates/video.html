@@ -4,7 +4,7 @@
 <meta property="og:site_name" content="{{ appname }}">
 
 <meta name="twitter:card" content="player" />
-<meta name="twitter:title" content="{{ user }} (@{{ screenName }})" />
+<meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
 <meta name="twitter:image" content="{{ pic }}" />
 <meta name="twitter:player:width" content="720" />
 <meta name="twitter:player:height" content="480" />
@@ -17,7 +17,7 @@
 <meta property="og:video:type" content="video/mp4" />
 <meta property="og:video:width" content="720" />
 <meta property="og:video:height" content="480" />
-<meta name="twitter:title" content="{{ user }} (@{{ screenName }})" />
+<meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
 <meta property="og:image" content="{{ pic }}" />
 <meta property="og:description" content="{{ desc }}" />
 
