@@ -9,7 +9,7 @@ link_cache_system = config['config']['link_cache']
 
 DYNAMO_CACHE_TBL=None
 if link_cache_system=="dynamodb":
-    DYNAMO_CACHE_TBL=os.environ['CACHE_TABLE']
+    DYNAMO_CACHE_TBL=config['config']['table']
 
 if link_cache_system == "json":
     link_cache = {}

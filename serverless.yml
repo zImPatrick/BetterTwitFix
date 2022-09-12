@@ -16,11 +16,10 @@ provider:
       Resource:
         - { "Fn::GetAtt": ["vxTwitterDynamoTable", "Arn" ] }
   environment:
-    CACHE_TABLE: ${self:custom.tableName}
+    VXTWITTER_CACHE_TABLE: ${self:custom.tableName}
     RUNNING_SERVERLESS: 1
     VXTWITTER_LINK_CACHE: dynamodb
     VXTWITTER_DATABASE: none
-    VXTWITTER_DATABASE_TABLE: none
     VXTWITTER_METHOD: hybrid
     VXTWITTER_COLOR: #43B581
     VXTWITTER_APP_NAME: vxTwitter

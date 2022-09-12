@@ -6,7 +6,7 @@ if ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '
             "config":{
                 "link_cache":os.environ["VXTWITTER_LINK_CACHE"],
                 "database":os.environ["VXTWITTER_DATABASE"],
-                "table":os.environ["VXTWITTER_DATABASE_TABLE"],
+                "table":os.environ["VXTWITTER_CACHE_TABLE"],
                 "method":os.environ["VXTWITTER_METHOD"], 
                 "color":os.environ["VXTWITTER_COLOR"], 
                 "appname": os.environ["VXTWITTER_APP_NAME"], 
