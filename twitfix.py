@@ -439,7 +439,8 @@ def embed(video_link, vnf, image):
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-
+    if 'verified' not in vnf:
+        vnf['verified']=False
     return render_template(
         template, 
         likes      = vnf['likes'], 
