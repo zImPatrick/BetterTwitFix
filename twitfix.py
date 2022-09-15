@@ -171,10 +171,9 @@ def dir(sub_path):
     else:
         return redirect(url, 301)
 
-@app.route('/favicon.ico') # This shit don't work
+@app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                          'favicon.ico',mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @app.route("/rendercombined.jpg")
 def rendercombined():
@@ -200,7 +199,13 @@ def rendercombined():
     imgIo.seek(0)
     return send_file(imgIo, mimetype='image/jpeg')
 
-def getDefaultTTL():
+def upgradeVNF(vnf):
+    # Makes sure any VNF object passed through this has proper fields if they're added in later versions
+    if 'verified' not in vnf:
+        vnf['verified']=False
+    return vnf
+
+def getDefaultTTL(): # TTL for deleting items from the database
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
 
 def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
@@ -246,6 +251,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             print(e)
             return message(msgs.failedToScan)
     else:
+        vnf = upgradeVNF(vnf)
         return embed(video_link, cached_vnf, image)
 
 def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False): # Return a dict of video info with default values
@@ -366,11 +372,6 @@ def link_to_vnf_from_api(video_link):
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
     if config['config']['method'] == 'hybrid':
-        #try:
-        #    return link_to_vnf_from_api(video_link)
-        #except Exception as e:
-        #    print(" ➤ [ !!! ] API Failed")
-        #print(e)
         try:
             return link_to_vnf_from_unofficial_api(video_link)
         except Exception as e:
@@ -397,6 +398,29 @@ def message(text):
         repo    = config['config']['repo'], 
         url     = config['config']['url'] )
 
+def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=""):
+    return render_template(
+        template, 
+        likes      = vnf['likes'], 
+        rts        = vnf['rts'], 
+        time       = vnf['time'], 
+        screenName = vnf['screen_name'], 
+        vidlink    = vnf['url'], 
+        pfp        = vnf['pfp'],  
+        vidurl     = vnf['url'], 
+        desc       = desc,
+        pic        = image,
+        user       = vnf['uploader'], 
+        video_link = video_link, 
+        color      = color, 
+        appname    = config['config']['appname'] + appNameSuffix, 
+        repo       = config['config']['repo'], 
+        url        = config['config']['url'], 
+        urlDesc    = urlDesc, 
+        urlUser    = urlUser, 
+        urlLink    = urlLink,
+        tweetLink  = vnf['tweet'] )
+
 def embed(video_link, vnf, image):
     print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + vnf['url'])
     
@@ -404,7 +428,7 @@ def embed(video_link, vnf, image):
     urlUser = urllib.parse.quote(vnf['uploader'])
     urlDesc = urllib.parse.quote(desc)
     urlLink = urllib.parse.quote(video_link)
-    likeDisplay = ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']) + "\n")
+    likeDisplay = msgs.genLikesDisplay(vnf)
     
     try:
         if vnf['type'] == "":
@@ -414,8 +438,7 @@ def embed(video_link, vnf, image):
         elif vnf['qrt'] == {}: # Check if this is a QRT and modify the description
             desc = (desc + likeDisplay)
         else:
-            verifiedCheck = "☑️" if ('verified' in vnf['qrt'] and vnf['qrt']['verified']) else ""
-            qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + vnf['qrt']['desc'] + "'")
+            qrtDisplay = msgs.genQrtDisplay(vnf["qrt"])
             desc = (desc + qrtDisplay +  likeDisplay)
     except:
         vnf['likes'] = 0; vnf['rts'] = 0; vnf['time'] = 0
@@ -439,31 +462,8 @@ def embed(video_link, vnf, image):
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    if 'verified' not in vnf:
-        vnf['verified']=False
-    return render_template(
-        template, 
-        likes      = vnf['likes'], 
-        rts        = vnf['rts'], 
-        time       = vnf['time'], 
-        screenName = vnf['screen_name'], 
-        vidlink    = vnf['url'], 
-        pfp        = vnf['pfp'],  
-        vidurl     = vnf['url'], 
-        desc       = desc,
-        pic        = image,
-        user       = vnf['uploader'], 
-        video_link = video_link, 
-        color      = color, 
-        appname    = config['config']['appname']+appNamePost, 
-        repo       = config['config']['repo'], 
-        url        = config['config']['url'], 
-        urlDesc    = urlDesc, 
-        urlUser    = urlUser, 
-        urlLink    = urlLink,
-        tweetLink  = vnf['tweet'],
-        verified   = vnf['verified']
-        )
+    
+    return getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink)
 
 
 def embedCombined(video_link):
@@ -488,44 +488,24 @@ def embedCombinedVnf(video_link,vnf):
     urlUser = urllib.parse.quote(vnf['uploader'])
     urlDesc = urllib.parse.quote(desc)
     urlLink = urllib.parse.quote(video_link)
-    likeDisplay = ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']) + "\n")
+    likeDisplay = msgs.genLikesDisplay(vnf)
 
     if vnf['qrt'] == {}: # Check if this is a QRT and modify the description
             desc = (desc + likeDisplay)
     else:
-        verifiedCheck = "☑️" if ('verified' in vnf['qrt'] and vnf['qrt']['verified']) else ""
-        qrtDisplay = ("\n─────────────\n ➤ QRT of " + vnf['qrt']['handle'] + " (@" + vnf['qrt']['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + vnf['qrt']['desc'] + "'")
+        qrtDisplay=msgs.genQrtDisplay(vnf["qrt"])
         desc = (desc + qrtDisplay +  likeDisplay)
+
+    image = "https://vxtwitter.com/rendercombined.jpg?imgs="
+    for i in range(0,int(vnf['images'][4])):
+        image = image + vnf['images'][i] + ","
+    image = image[:-1] # Remove last comma
 
     color = "#7FFFD4" # Green
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    image = "https://vxtwitter.com/rendercombined.jpg?imgs="
-    for i in range(0,int(vnf['images'][4])):
-        image = image + vnf['images'][i] + ","
-    image = image[:-1] # Remove last comma
-    return render_template(
-        'image.html', 
-        likes      = vnf['likes'], 
-        rts        = vnf['rts'], 
-        time       = vnf['time'], 
-        screenName = vnf['screen_name'], 
-        vidlink    = vnf['url'], 
-        pfp        = vnf['pfp'],  
-        vidurl     = vnf['url'], 
-        desc       = desc,
-        pic        = image,
-        user       = vnf['uploader'], 
-        video_link = video_link, 
-        color      = color, 
-        appname    = config['config']['appname'] + " - View original tweet for full quality", 
-        repo       = config['config']['repo'], 
-        url        = config['config']['url'], 
-        urlDesc    = urlDesc, 
-        urlUser    = urlUser, 
-        urlLink    = urlLink,
-        tweetLink  = vnf['tweet'] )
+    return getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality")
 
 
 def tweetType(tweet): # Are we dealing with a Video, Image, or Text tweet?
