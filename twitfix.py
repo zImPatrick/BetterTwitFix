@@ -105,23 +105,6 @@ def twitfix(sub_path):
         vid = requests.get(direct_video_link(clean))
         return Response(vid.content,mimetype="video/mp4")
 
-    # elif request.url.endswith(".json") or request.url.endswith("%2Ejson"):
-    #     twitter_url = "https://twitter.com/" + sub_path
-        
-    #     if "?" not in request.url:
-    #         clean = twitter_url[:-5]
-    #     else:
-    #         clean = twitter_url
-
-    #     print( " ➤ [ API ] VNF Json api hit!")
-
-    #     vnf = link_to_vnf_from_api(clean.replace(".json",""))
-
-    #     if user_agent in generate_embed_user_agents:
-    #         return message("VNF Data: ( discord useragent preview )\n\n"+ json.dumps(vnf, default=str))
-    #     else:
-    #         return Response(response=json.dumps(vnf, default=str), status=200, mimetype="application/json")
-
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
         twitter_url = "https://twitter.com/" + sub_path
         
