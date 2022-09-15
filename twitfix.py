@@ -2,9 +2,7 @@ from random import Random, random
 from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
-import yt_dlp
 import textwrap
-import twitter
 import requests
 import re
 import os
@@ -36,12 +34,6 @@ generate_embed_user_agents = [
     "TelegramBot (like TwitterBot)", 
     "Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)", 
     "test"]
-
-
-# If method is set to API or Hybrid, attempt to auth with the Twitter API
-if config['config']['method'] in ('api', 'hybrid'):
-    auth = twitter.oauth.OAuth(config['api']['access_token'], config['api']['access_secret'], config['api']['api_key'], config['api']['api_secret'])
-    twitter_api = twitter.Twitter(auth=auth)
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
@@ -354,23 +346,11 @@ def link_to_vnf_from_api(video_link):
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
-    if config['config']['method'] == 'hybrid':
-        try:
-            return link_to_vnf_from_unofficial_api(video_link)
-        except Exception as e:
-            print(" ➤ [ !!! ] UNOFFICIAL API Failed")
-            print(e)
-                
-    elif config['config']['method'] == 'api':
-        try:
-            return link_to_vnf_from_api(video_link)
-        except Exception as e:
-            print(" ➤ [ X ] API Failed")
-            print(e)
-            return None
-    else:
-        print("Please set the method key in your config file to 'api' or 'hybrid'")
-        return None
+    try:
+        return link_to_vnf_from_unofficial_api(video_link)
+    except Exception as e:
+        print(" ➤ [ !!! ] Unofficial Twitter API Failed")
+        print(e)
 
 def message(text):
     return render_template(
