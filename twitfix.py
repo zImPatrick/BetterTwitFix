@@ -227,7 +227,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             print(e)
             return message(msgs.failedToScan)
     else:
-        vnf = upgradeVNF(vnf)
+        cached_vnf = upgradeVNF(cached_vnf)
         return embed(video_link, cached_vnf, image)
 
 def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False): # Return a dict of video info with default values
