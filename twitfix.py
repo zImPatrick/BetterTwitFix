@@ -55,7 +55,6 @@ def oembedend():
 def twitfix(sub_path):
     user_agent = request.headers.get('user-agent')
     match = pathregex.search(sub_path)
-    print(request.url)
 
     if request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
         if match.start() == 0:
@@ -63,7 +62,7 @@ def twitfix(sub_path):
         if user_agent in generate_embed_user_agents:
             print( " ➤ [ D ] d.vx link shown to discord user-agent!")
             if request.url.endswith(".mp4") and "?" not in request.url:
-                # TODO: Cache this, but not for too long as disk space can fill up
+                
                 if "?" not in request.url:
                     clean = twitter_url[:-4]
                 else:
