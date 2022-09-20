@@ -271,6 +271,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
     elif tweetType(tweet) == "Text":
         url   = ""
         thumb = ""
+        size  = {}
     else:
         imgs = ["","","","", ""]
         i = 0
@@ -283,6 +284,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         url   = ""
         images= imgs
         thumb = tweet['extended_entities']['media'][0]['media_url_https']
+        size  = {}
 
     qrt = {}
 
@@ -359,6 +361,9 @@ def message(text):
         url     = config['config']['url'] )
 
 def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=""):
+    if ('width' in vnf['size'] and 'height' in vnf['size']):
+        vnf['size']['width'] = min(vnf['size']['width'],2000)
+        vnf['size']['height'] = min(vnf['size']['height'],2000)
     return render_template(
         template, 
         likes      = vnf['likes'], 
