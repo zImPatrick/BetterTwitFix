@@ -178,6 +178,11 @@ def upgradeVNF(vnf):
     # Makes sure any VNF object passed through this has proper fields if they're added in later versions
     if 'verified' not in vnf:
         vnf['verified']=False
+    if 'size' not in vnf:
+        if vnf['type'] == 'Video':
+            vnf['size']={'width':720,'height':480}
+        else:
+            vnf['size']={}
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
@@ -229,7 +234,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
         cached_vnf = upgradeVNF(cached_vnf)
         return embed(video_link, cached_vnf, image)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={}): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
     vnf = {
@@ -249,7 +254,8 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "qrt"           : qrt,
         "nsfw"          : nsfw,
         "ttl"           : ttl,
-        "verified"      : verified
+        "verified"      : verified,
+        "size"          : size
     }
     return vnf
 
@@ -268,6 +274,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         if tweet['extended_entities']['media'][0]['video_info']['variants']:
             best_bitrate = -1
             thumb = tweet['extended_entities']['media'][0]['media_url']
+            size=tweet['extended_entities']['media'][0]["original_info"]
             for video in tweet['extended_entities']['media'][0]['video_info']['variants']:
                 if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
                     url = video['url']
@@ -321,7 +328,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         qrt=qrt, 
         images=imgs,
         nsfw=nsfw,
-        verified=tweet['user']['verified']
+        verified=tweet['user']['verified'],
+        size=size
         )
         
     return vnf
@@ -382,7 +390,8 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         urlDesc    = urlDesc, 
         urlUser    = urlUser, 
         urlLink    = urlLink,
-        tweetLink  = vnf['tweet'] )
+        tweetLink  = vnf['tweet'],
+        videoSize  = vnf['size'] )
 
 def embed(video_link, vnf, image):
     print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + vnf['url'])
