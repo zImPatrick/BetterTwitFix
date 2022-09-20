@@ -188,51 +188,40 @@ def upgradeVNF(vnf):
 def getDefaultTTL(): # TTL for deleting items from the database
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
 
-def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
+def vnfFromCacheOrDL(video_link):
     cached_vnf = getVnfFromLinkCache(video_link)
     if cached_vnf == None:
         try:
             vnf = link_to_vnf(video_link)
             addVnfToLinkCache(video_link, vnf)
-            return redirect(vnf['url'], 301)
-            print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
+            return vnf
         except Exception as e:
             print(e)
-            return message(msgs.failedToScan)
+            return None
     else:
-        return redirect(cached_vnf['url'], 301)
-        print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
+        return upgradeVNF(cached_vnf)
+
+def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
+    vnf = vnfFromCacheOrDL(video_link)
+    if vnf != None:
+        return redirect(vnf['url'], 301)
+    else:
+        return message(msgs.failedToScan)
 
 def direct_video_link(video_link): # Just get a redirect to a MP4 link from any tweet link
-    cached_vnf = getVnfFromLinkCache(video_link)
-    if cached_vnf == None:
-        try:
-            vnf = link_to_vnf(video_link)
-            addVnfToLinkCache(video_link, vnf)
-            return vnf['url']
-            print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
-        except Exception as e:
-            print(e)
-            return message(msgs.failedToScan)
+    vnf = vnfFromCacheOrDL(video_link)
+    if vnf != None:
+        return vnf['url']
     else:
-        return cached_vnf['url']
-        print(" ➤ [ D ] Redirecting to direct URL: " + vnf['url'])
+        return message(msgs.failedToScan)
 
 def embed_video(video_link, image=0): # Return Embed from any tweet link
-    cached_vnf = getVnfFromLinkCache(video_link)
+    vnf = vnfFromCacheOrDL(video_link)
 
-    if cached_vnf == None:
-        try:
-            vnf = link_to_vnf(video_link)
-            addVnfToLinkCache(video_link, vnf)
-            return embed(video_link, vnf, image)
-
-        except Exception as e:
-            print(e)
-            return message(msgs.failedToScan)
+    if vnf != None:
+        return embed(video_link, vnf, image)
     else:
-        cached_vnf = upgradeVNF(cached_vnf)
-        return embed(video_link, cached_vnf, image)
+        return message(msgs.failedToScan)
 
 def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={}): # Return a dict of video info with default values
     if (ttl==None):
@@ -439,19 +428,12 @@ def embed(video_link, vnf, image):
 
 
 def embedCombined(video_link):
-    cached_vnf = getVnfFromLinkCache(video_link)
+    vnf = vnfFromCacheOrDL(video_link)
 
-    if cached_vnf == None:
-        try:
-            vnf = link_to_vnf(video_link)
-            addVnfToLinkCache(video_link, vnf)
-            return embedCombinedVnf(video_link, vnf)
-
-        except Exception as e:
-            print(e)
-            return message(msgs.failedToScan)
+    if vnf != None:
+        return embedCombinedVnf(video_link, vnf)
     else:
-        return embedCombinedVnf(video_link, cached_vnf)
+        return message(msgs.failedToScan)
 
 def embedCombinedVnf(video_link,vnf):
     if vnf['type'] != "Image" or vnf['images'][4] == "1":
