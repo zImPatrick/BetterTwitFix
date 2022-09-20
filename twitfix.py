@@ -67,9 +67,9 @@ def twitfix(sub_path):
                     clean = twitter_url[:-4]
                 else:
                     clean = twitter_url
-                #vid = requests.get(direct_video_link(clean))
-                #return Response(vid.content,mimetype="video/mp4") keeping this here in case Discord changes their mind & blocks 307's
-                return redirect(direct_video_link(clean),code=307) # Discord, why do you fail to play 301/302 redirected URLS with .mp4 at the end???
+
+                vnf = vnfFromCacheOrDL(clean)
+                return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
             else:
                 return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
         else:
@@ -93,9 +93,9 @@ def twitfix(sub_path):
             clean = twitter_url[:-4]
         else:
             clean = twitter_url
-        # TODO: Cache this, but not for too long as disk space can fill up
-        vid = requests.get(direct_video_link(clean))
-        return Response(vid.content,mimetype="video/mp4")
+            
+        vnf = vnfFromCacheOrDL(clean)
+        return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
 
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
         twitter_url = "https://twitter.com/" + sub_path
