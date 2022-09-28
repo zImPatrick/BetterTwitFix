@@ -54,9 +54,6 @@ vxTwitter generates a config.json in its root directory the first time you run i
 
 **combination_method** - using c.vxtwitter as the url causes vxTwitter to combine all images in the post into one. This is CPU intensive, so you might not want it running on the same machine that's serving requests. When `combination_method` is set to `local`, it will use the local machine to combine the images. This requires pillow to be installed. If you want to use another server, replace `local` with the URL to the endpoint which combines images. Both methods use the code in the `combineImg` module. Inside, there's also a `Dockerfile` intended to be deployed as a combination endpoint on an [AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html).
 
-**apiMirrors** - During an influx of traffic (i.e when Twitter embeds break!) it's very likely that Twitter will begin to block you for sending too many requests.
-This is an array of replacement Twitter API URLs which can be called upon when requesting tweet info locally fails. An example of an implementation of an API Mirror is in the twExtract directory, and is intended to be hosted on AWS Lambda. If multiple mirror URLs are specified, one will be selected at random.
-
 ## Other stuff
 
 We check for t.co links in non video tweets, and if one is found, we direct the discord useragent to embed that link directly, this means that twitter links containing youtube / vimeo links will automatically embed those as if you had just directly linked to that content

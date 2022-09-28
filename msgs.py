@@ -1,5 +1,5 @@
-failedToScan="Failed to scan your link! This may be due to an incorrect link, private account, or the twitter API itself might be having issues (Check here: https://api.twitterstat.us/)\nIt's also possible that Twitter is API limiting me, in which case I can't do anything about it."
-
+failedToScan="Failed to scan your link! This may be due to an incorrect link, private/suspended account, deleted tweet, or Twitter itself might be having issues (Check here: https://api.twitterstat.us/)"
+failedToScanExtra = "\n\nTwitter gave me this error: "
 
 def genLikesDisplay(vnf):
     return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']) + "\n")

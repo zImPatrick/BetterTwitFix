@@ -1,8 +1,10 @@
+from email import utils
 from random import Random, random
 from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
 import textwrap
+from pkg_resources import ExtractionError
 import requests
 import re
 import os
@@ -16,6 +18,7 @@ import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
 import random
+from yt_dlp.utils import ExtractorError
 app = Flask(__name__)
 CORS(app)
 
@@ -68,7 +71,11 @@ def twitfix(sub_path):
                 else:
                     clean = twitter_url
 
-                vnf = vnfFromCacheOrDL(clean)
+                vnf,e = vnfFromCacheOrDL(clean)
+                if vnf == None:
+                    if e is not None:
+                        return message(msgs.failedToScan+msgs.failedToScanExtra+e)
+                    return message(msgs.failedToScan)
                 return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
             else:
                 return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
@@ -94,7 +101,11 @@ def twitfix(sub_path):
         else:
             clean = twitter_url
             
-        vnf = vnfFromCacheOrDL(clean)
+        vnf,e = vnfFromCacheOrDL(clean)
+        if vnf is None:
+            if e is not None:
+                return message(msgs.failedToScan+msgs.failedToScanExtra+e)
+            return message(msgs.failedToScan)
         return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
 
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
@@ -194,33 +205,47 @@ def vnfFromCacheOrDL(video_link):
         try:
             vnf = link_to_vnf(video_link)
             addVnfToLinkCache(video_link, vnf)
-            return vnf
+            return vnf,None
+        except ExtractorError as exErr:
+            if 'HTTP Error 404' in exErr.msg:
+                exErr.msg="Tweet not found."
+            elif 'suspended' in exErr.msg:
+                exErr.msg="This Tweet is from a suspended account."
+            else:
+                exErr.msg=None
+            return None,exErr.msg
         except Exception as e:
             print(e)
-            return None
+            return None,None
     else:
-        return upgradeVNF(cached_vnf)
+        return upgradeVNF(cached_vnf),None
 
 def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
-    vnf = vnfFromCacheOrDL(video_link)
+    vnf,e = vnfFromCacheOrDL(video_link)
     if vnf != None:
         return redirect(vnf['url'], 301)
     else:
+        if e is not None:
+            return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
 def direct_video_link(video_link): # Just get a redirect to a MP4 link from any tweet link
-    vnf = vnfFromCacheOrDL(video_link)
+    vnf,e = vnfFromCacheOrDL(video_link)
     if vnf != None:
         return vnf['url']
     else:
+        if e is not None:
+            return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
 def embed_video(video_link, image=0): # Return Embed from any tweet link
-    vnf = vnfFromCacheOrDL(video_link)
+    vnf,e = vnfFromCacheOrDL(video_link)
 
     if vnf != None:
         return embed(video_link, vnf, image)
     else:
+        if e is not None:
+            return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
 def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={}): # Return a dict of video info with default values
@@ -327,15 +352,9 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 
 
 def link_to_vnf_from_unofficial_api(video_link):
+    tweet=None
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
-    try:
-        tweet = twExtract.extractStatus(video_link)
-    except Exception as e:
-        print(' ➤ [ !!! ] Local UNOFFICIAL API Failed')
-        if ('apiMirrors' in config['config'] and len(config['config']['apiMirrors']) > 0):
-            mirror = random.choice(config['config']['apiMirrors'])
-            print(" ➤ [ + ] Using API Mirror: "+mirror)
-            tweet = requests.get(mirror+"?url="+video_link).json()
+    tweet = twExtract.extractStatus(video_link)
     print (" ➤ [ ✔ ] Unofficial API Success")
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
@@ -345,11 +364,7 @@ def link_to_vnf_from_api(video_link):
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
-    try:
-        return link_to_vnf_from_unofficial_api(video_link)
-    except Exception as e:
-        print(" ➤ [ !!! ] Unofficial Twitter API Failed")
-        print(e)
+    return link_to_vnf_from_unofficial_api(video_link)
 
 def message(text):
     return render_template(
@@ -433,11 +448,13 @@ def embed(video_link, vnf, image):
 
 
 def embedCombined(video_link):
-    vnf = vnfFromCacheOrDL(video_link)
+    vnf,e = vnfFromCacheOrDL(video_link)
 
     if vnf != None:
         return embedCombinedVnf(video_link, vnf)
     else:
+        if e is not None:
+            return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
 def embedCombinedVnf(video_link,vnf):
