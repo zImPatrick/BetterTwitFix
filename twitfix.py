@@ -158,7 +158,7 @@ def dir(sub_path):
         return redirect(url, 301)
 
 @app.route('/favicon.ico')
-def favicon():
+def favicon(): # pragma: no cover
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @app.route("/rendercombined.jpg")
@@ -272,13 +272,6 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "size"          : size
     }
     return vnf
-
-def get_tweet_data_from_api(video_link):
-    print(" ➤ [ + ] Attempting to download tweet info from Twitter API")
-    twid = int(re.sub(r'\?.*$','',video_link.rsplit("/", 1)[-1])) # gets the tweet ID as a int from the passed url
-    tweet = twitter_api.statuses.show(_id=twid, tweet_mode="extended")
-    #print(tweet) # For when I need to poke around and see what a tweet looks like
-    return tweet
 
 def link_to_vnf_from_tweet_data(tweet,video_link):
     imgs = ["","","","", ""]

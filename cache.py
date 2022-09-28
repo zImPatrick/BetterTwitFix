@@ -8,7 +8,7 @@ import boto3
 link_cache_system = config['config']['link_cache']
 
 DYNAMO_CACHE_TBL=None
-if link_cache_system=="dynamodb":
+if link_cache_system=="dynamodb": # pragma: no cover
     DYNAMO_CACHE_TBL=config['config']['table']
 
 if link_cache_system == "json":
@@ -35,7 +35,7 @@ elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
     db = client[table]
-elif link_cache_system == "dynamodb":
+elif link_cache_system == "dynamodb": # pragma: no cover
     client = boto3.resource('dynamodb')
 
 def serializeUnknown(obj):
@@ -57,7 +57,7 @@ def addVnfToLinkCache(video_link, vnf):
                 return None
         elif link_cache_system == "ram": # FOR TESTS ONLY
             link_cache[video_link] = vnf
-        elif link_cache_system == "dynamodb":
+        elif link_cache_system == "dynamodb": # pragma: no cover
             vnf["ttl"] = int(vnf["ttl"].strftime('%s'))
             table = client.Table(DYNAMO_CACHE_TBL)
             table.put_item(
@@ -98,7 +98,7 @@ def getVnfFromLinkCache(video_link):
         else:
             print(" ➤ [ X ] Link not in json cache")
             return None
-    elif link_cache_system == "dynamodb":
+    elif link_cache_system == "dynamodb": # pragma: no cover
         table = client.Table(DYNAMO_CACHE_TBL)
         response = table.get_item(
             Key={

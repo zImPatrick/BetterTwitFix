@@ -9,3 +9,5 @@ admin.env
 _meta
 .serverless
 db/
+.coverage
+htmlcov/
