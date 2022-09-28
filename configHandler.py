@@ -1,7 +1,9 @@
 import json
 import os
 
-if ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '1'):
+if ('RUNNING_TESTS' in os.environ):
+    config= {"config":{"link_cache":"ram","database":"","table":"","color":"","appname": "vxTwitter","repo": "https://github.com/dylanpdx/BetterTwitFix","url": "https://vxtwitter.com","combination_method": "local"}}
+elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '1'):
     config = {
             "config":{
                 "link_cache":os.environ["VXTWITTER_LINK_CACHE"],

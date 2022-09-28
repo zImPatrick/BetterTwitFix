@@ -28,7 +28,9 @@ if link_cache_system == "json":
         link_cache = {}
     finally:
         f.close()
-        
+elif link_cache_system == "ram":
+    link_cache = {}
+    print("Your link_cache_system is set to 'ram' which is not recommended; this is only intended to be used for tests")
 elif link_cache_system == "db":
     client = pymongo.MongoClient(config['config']['database'], connect=False)
     table = config['config']['table']
@@ -42,6 +44,7 @@ def serializeUnknown(obj):
     raise TypeError ("Type %s not serializable" % type(obj))
 
 def addVnfToLinkCache(video_link, vnf):
+    global link_cache
     try:
         if link_cache_system == "db":
                 out = db.linkCache.insert_one(vnf)
@@ -52,6 +55,8 @@ def addVnfToLinkCache(video_link, vnf):
             with open("links.json", "w") as outfile: 
                 json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
                 return None
+        elif link_cache_system == "ram": # FOR TESTS ONLY
+            link_cache[video_link] = vnf
         elif link_cache_system == "dynamodb":
             vnf["ttl"] = int(vnf["ttl"].strftime('%s'))
             table = client.Table(DYNAMO_CACHE_TBL)
@@ -70,6 +75,7 @@ def addVnfToLinkCache(video_link, vnf):
         return None
 
 def getVnfFromLinkCache(video_link):
+    global link_cache
     if link_cache_system == "db":
         collection = db.linkCache
         vnf        = collection.find_one({'tweet': video_link})
@@ -106,5 +112,25 @@ def getVnfFromLinkCache(video_link):
         else:
             print(" ➤ [ X ] Link not in dynamodb cache")
             return None
+    elif link_cache_system == "ram": # FOR TESTS ONLY
+        if video_link in link_cache:
+            print("Link located in json cache")
+            vnf = link_cache[video_link]
+            return vnf
+        else:
+            print(" ➤ [ X ] Link not in cache")
+            return None
     elif link_cache_system == "none":
         return None
+
+def clearCache():
+    global link_cache
+    # only intended for use in tests
+    if link_cache_system == "ram":
+        link_cache={}
+
+def setCache(value):
+    global link_cache
+    # only intended for use in tests
+    if link_cache_system == "ram":
+        link_cache=value

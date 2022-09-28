@@ -1,1 +1,0 @@
-testTextTweet="https://twitter.com/jack/status/20"
