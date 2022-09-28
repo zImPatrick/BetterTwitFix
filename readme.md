@@ -41,14 +41,8 @@ vxTwitter generates a config.json in its root directory the first time you run i
 
 - **db**: Caches all links to a mongoDB database. This should be used it you are using uWSGI and are not just running the script on its own as one worker
 - **json**: This saves cached links to a local **links.json** file
+- **dynamodb**: Saves cached links to a DynamoDB database - set `table` to the table name to cache links to.
 - **none**: Does not cache requests. Not reccomended as you can easily use up your Twitter API credits with this. Intended for use with another cache system (i.e NGINX uwsgi_cache)
-
-**method** - ( Options: **youtube-dl**, **api**, **hybrid** ) 
-
-- **youtube-dl**: the original method for grabbing twitter video links, this uses a guest token provided via youtube-dl and should work well for individual instances, but may not scale up to a very large amount of usage
-
-- **api**: this directly uses the twitter API to grab tweet info, limited to 900 calls per 15m
-- **hybrid**: This will start off by using the twitter API to grab tweet info, but if the rate limit is reached or the api fails for any other reason it will switch over to youtube-dl to avoid downtime
 
 **color** - Accepts a hex formatted color code, can change the embed color
 
@@ -60,13 +54,8 @@ vxTwitter generates a config.json in its root directory the first time you run i
 
 **combination_method** - using c.vxtwitter as the url causes vxTwitter to combine all images in the post into one. This is CPU intensive, so you might not want it running on the same machine that's serving requests. When `combination_method` is set to `local`, it will use the local machine to combine the images. This requires pillow to be installed. If you want to use another server, replace `local` with the URL to the endpoint which combines images. Both methods use the code in the `combineImg` module. Inside, there's also a `Dockerfile` intended to be deployed as a combination endpoint on an [AWS Lambda function](https://docs.aws.amazon.com/lambda/latest/dg/images-create.html).
 
-**apiMirrors** - During an influx of traffic (i.e when Twitter embeds break!) it's very likely that Twitter will begin to block you for sending too many requests.
-This is an array of replacement Twitter API URLs which can be called upon when requesting tweet info locally fails. An example of an implementation of an API Mirror is in the twExtract directory, and is intended to be hosted on AWS Lambda. If multiple mirror URLs are specified, one will be selected at random.
-
-This project is licensed under the **Do What The Fuck You Want Public License**
-
-
-
 ## Other stuff
 
 We check for t.co links in non video tweets, and if one is found, we direct the discord useragent to embed that link directly, this means that twitter links containing youtube / vimeo links will automatically embed those as if you had just directly linked to that content
+
+This project is licensed under the **Do What The Fuck You Want Public License**

@@ -11,8 +11,7 @@ if ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '
                 "appname": os.environ["VXTWITTER_APP_NAME"], 
                 "repo": os.environ["VXTWITTER_REPO"], 
                 "url": os.environ["VXTWITTER_URL"],
-                "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"], # can either be 'local' or a URL to a server handling requests in the same format
-                "apiMirrors":[]
+                "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"] # can either be 'local' or a URL to a server handling requests in the same format
             }
         }
 else:
@@ -28,8 +27,7 @@ else:
                     "appname": "vxTwitter", 
                     "repo": "https://github.com/dylanpdx/BetterTwitFix", 
                     "url": "https://vxtwitter.com",
-                    "combination_method": "local", # can either be 'local' or a URL to a server handling requests in the same format
-                    "apiMirrors":[]
+                    "combination_method": "local" # can either be 'local' or a URL to a server handling requests in the same format
                 }
             }
 
