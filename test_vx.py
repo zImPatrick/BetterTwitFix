@@ -3,9 +3,8 @@ from wsgiref import headers
 os.environ["RUNNING_TESTS"]="1"
 
 import twitfix,twExtract
-import pytest
-import json
 import cache
+import msgs
 from flask.testing import FlaskClient
 client = FlaskClient(twitfix.app)
 
@@ -134,3 +133,13 @@ def test_embedFromOutdatedCache(): # presets a cache that has VNF's with missing
     assert resp.status_code==200
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
+
+def test_directEmbed():
+    resp = client.get(testVideoTweet.replace("https://twitter.com","")+".mp4",headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert videoVNF_compare["url"] in str(resp.data)
+
+def test_message404():
+    resp = client.get("https://twitter.com/jack/status/12345",headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert msgs.tweetNotFound in str(resp.data)

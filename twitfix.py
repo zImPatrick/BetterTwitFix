@@ -208,9 +208,9 @@ def vnfFromCacheOrDL(video_link):
             return vnf,None
         except ExtractorError as exErr:
             if 'HTTP Error 404' in exErr.msg:
-                exErr.msg="Tweet not found."
+                exErr.msg=msgs.tweetNotFound
             elif 'suspended' in exErr.msg:
-                exErr.msg="This Tweet is from a suspended account."
+                exErr.msg=msgs.tweetSuspended
             else:
                 exErr.msg=None
             return None,exErr.msg
