@@ -248,7 +248,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={}): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
     vnf = {
@@ -269,8 +269,11 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "nsfw"          : nsfw,
         "ttl"           : ttl,
         "verified"      : verified,
-        "size"          : size
+        "size"          : size,
+        "poll"          : poll
     }
+    if (poll is None):
+        del vnf['poll']
     return vnf
 
 def link_to_vnf_from_tweet_data(tweet,video_link):
@@ -323,6 +326,11 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         for eurl in tweet['entities']['urls']:
             text = text.replace(eurl["url"],eurl["expanded_url"])
 
+    if 'card' in tweet and tweet['card']['name'].startswith('poll'):
+        poll=getPollObject(tweet['card'])
+    else:
+        poll=None
+
     vnf = tweetInfo(
         url, 
         video_link, 
@@ -338,7 +346,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         images=imgs,
         nsfw=nsfw,
         verified=tweet['user']['verified'],
-        size=size
+        size=size,
+        poll=poll
         )
         
     return vnf
@@ -404,19 +413,14 @@ def embed(video_link, vnf, image):
     urlLink = urllib.parse.quote(video_link)
     likeDisplay = msgs.genLikesDisplay(vnf)
     
-    try:
-        if vnf['type'] == "":
-            desc = desc
-        elif vnf['type'] == "Video":
-            desc = desc
-        elif vnf['qrt'] == {}: # Check if this is a QRT and modify the description
-            desc = (desc + likeDisplay)
-        else:
-            qrtDisplay = msgs.genQrtDisplay(vnf["qrt"])
-            desc = (desc + qrtDisplay +  likeDisplay)
-    except:
-        vnf['likes'] = 0; vnf['rts'] = 0; vnf['time'] = 0
-        print(' ➤ [ X ] Failed QRT check - old VNF object')
+    if 'poll' in vnf:
+        pollDisplay= msgs.genPollDisplay(vnf['poll'])
+    else:
+        pollDisplay=""
+
+    desc=msgs.formatEmbedDesc(vnf['type'],desc,vnf['qrt'],pollDisplay,likeDisplay)
+
+    print(len(desc))
     appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
         template = 'text.html'
@@ -426,10 +430,10 @@ def embed(video_link, vnf, image):
         image = vnf['images'][image]
         template = 'image.html'
     if vnf['type'] == "Video":
-        urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        #urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
     if vnf['type'] == "":
-        urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        #urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
         
     color = "#7FFFD4" # Green
@@ -475,6 +479,27 @@ def embedCombinedVnf(video_link,vnf):
     if vnf['nsfw'] == True:
         color = "#800020" # Red
     return getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality")
+
+
+def getPollObject(card):
+    poll={"total_votes":0,"choices":[]}
+    choiceCount=0
+    if (card["name"]=="poll2choice_text_only"):
+        choiceCount=2
+    elif (card["name"]=="poll3choice_text_only"):
+        choiceCount=3
+    elif (card["name"]=="poll4choice_text_only"):
+        choiceCount=4
+    
+    for i in range(0,choiceCount):
+        choice = {"text":card["binding_values"][f"choice{i+1}_label"]["string_value"],"votes":int(card["binding_values"][f"choice{i+1}_count"]["string_value"])}
+        poll["total_votes"]+=choice["votes"]
+        poll["choices"].append(choice)
+    # update each choice with a percentage
+    for choice in poll["choices"]:
+        choice["percent"] = round((choice["votes"]/poll["total_votes"])*100,1)
+
+    return poll
 
 
 def tweetType(tweet): # Are we dealing with a Video, Image, or Text tweet?
