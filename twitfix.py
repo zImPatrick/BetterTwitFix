@@ -314,6 +314,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         qrt['handle']     = tweet['quoted_status']['user']['name']
         qrt['screen_name'] = tweet['quoted_status']['user']['screen_name']
         qrt['verified'] = tweet['quoted_status']['user']['verified']
+        qrt['id'] = tweet['quoted_status']['id_str']
 
     text = tweet['full_text']
 
@@ -420,7 +421,6 @@ def embed(video_link, vnf, image):
 
     desc=msgs.formatEmbedDesc(vnf['type'],desc,vnf['qrt'],pollDisplay,likeDisplay)
 
-    print(len(desc))
     appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
         template = 'text.html'
@@ -463,12 +463,14 @@ def embedCombinedVnf(video_link,vnf):
     urlLink = urllib.parse.quote(video_link)
     likeDisplay = msgs.genLikesDisplay(vnf)
 
-    if vnf['qrt'] == {}: # Check if this is a QRT and modify the description
-            desc = (desc + likeDisplay)
+    if 'poll' in vnf:
+        pollDisplay= msgs.genPollDisplay(vnf['poll'])
     else:
-        qrtDisplay=msgs.genQrtDisplay(vnf["qrt"])
-        desc = (desc + qrtDisplay +  likeDisplay)
+        pollDisplay=""
 
+    desc=msgs.formatEmbedDesc(vnf['type'],desc,vnf['qrt'],pollDisplay,likeDisplay)
+
+    
     image = "https://vxtwitter.com/rendercombined.jpg?imgs="
     for i in range(0,int(vnf['images'][4])):
         image = image + vnf['images'][i] + ","

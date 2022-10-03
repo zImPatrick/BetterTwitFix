@@ -26,17 +26,24 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     if pollDisplay==None:
         pollDisplay=""
 
+    if qrt!={} and not (type=="" or type=="Video"):
+
+        qrtDisplay=genQrtDisplay(qrt)
+        if 'id' in qrt and ('https://twitter.com/'+qrt['screen_name']+'/status/'+qrt['id']) in body:
+            body = body.replace(('https://twitter.com/'+qrt['screen_name']+'/status/'+qrt['id']),"")
+            body = body.strip()
+        body+=qrtDisplay
+        qrt={}
+
     if type=="" or type=="Video":
         output = body+pollDisplay
     elif qrt=={}:
         output= body+pollDisplay+likesDisplay
     else:
-        qrtDisplay = genQrtDisplay(qrt)
-        output= body + qrtDisplay +  likesDisplay
+        output= body + likesDisplay
     if len(output)>248:
         # find out how many characters we need to remove
         diff = len(output)-248
-        print("diff: "+str(diff))
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
         return formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay)
