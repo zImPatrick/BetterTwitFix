@@ -4,7 +4,6 @@ from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
 import textwrap
-from pkg_resources import ExtractionError
 import requests
 import re
 import os
@@ -206,8 +205,8 @@ def vnfFromCacheOrDL(video_link):
             vnf = link_to_vnf(video_link)
             addVnfToLinkCache(video_link, vnf)
             return vnf,None
-        except ExtractorError as exErr:
-            if 'HTTP Error 404' in exErr.msg:
+        except (ExtractorError, twExtract.twExtractError.TwExtractError) as exErr:
+            if 'HTTP Error 404' in exErr.msg or 'No status found with that ID' in exErr.msg:
                 exErr.msg=msgs.tweetNotFound
             elif 'suspended' in exErr.msg:
                 exErr.msg=msgs.tweetSuspended
