@@ -13,6 +13,7 @@ testVideoTweet="https://twitter.com/Twitter/status/1263145271946551300"
 testMediaTweet="https://twitter.com/Twitter/status/1118295916874739714"
 testMultiMediaTweet="https://twitter.com/Twitter/status/1293239745695211520"
 testPollTweet="https://twitter.com/norm/status/651169346518056960"
+testQRTTweet="https://twitter.com/Twitter/status/1232823570046255104"
 
 textVNF_compare = {'tweet': 'https://twitter.com/jack/status/20', 'url': '', 'description': 'just setting up my twttr', 'screen_name': 'jack', 'type': 'Text', 'images': ['', '', '', '', ''], 'time': 'Tue Mar 21 20:50:14 +0000 2006', 'qrt': {}, 'nsfw': False}
 videoVNF_compare={'tweet': 'https://twitter.com/Twitter/status/1263145271946551300', 'url': 'https://video.twimg.com/amplify_video/1263145212760805376/vid/1280x720/9jous8HM0_duxL0w.mp4?tag=13', 'description': 'Testing, testing...\n\nA new way to have a convo with exactly who you want. We’re starting with a small % globally, so keep your 👀 out to see it in action. https://t.co/pV53mvjAVT', 'thumbnail': 'http://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg', 'screen_name': 'Twitter', 'type': 'Video', 'images': ['', '', '', '', ''], 'time': 'Wed May 20 16:31:15 +0000 2020', 'qrt': {}, 'nsfw': False,'verified': True, 'size': {'width': 1920, 'height': 1080}}
@@ -100,6 +101,12 @@ def test_multimediaTweetVNF():
 def test_pollTweetVNF():
     vnf = twitfix.link_to_vnf_from_unofficial_api(testPollTweet)
     compareDict(testPoll_comparePollVNF,vnf['poll'])
+
+def test_qrtTweetVNF():
+    # this is an incredibly lazy test, todo: improve it in the future
+    vnf = twitfix.link_to_vnf_from_unofficial_api(testQRTTweet)
+    assert 'qrt' in vnf
+    assert vnf['qrt']['desc'].startswith("Twitter says I have 382 followers")
 
 ## Test adding to cache ; cache should be empty ##
 def test_addToCache():
