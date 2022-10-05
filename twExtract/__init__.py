@@ -9,12 +9,15 @@ import urllib
 guestToken=None
 graphql_api=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
+authToken = "Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
+# Below token seems to block NSFW? Might be doing something wrong.. But it's the only token which returns full extended_entities objects.
+# authToken = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 
 def getGuestToken(graphql_required=False):
     global guestToken
     global graphql_api
     if guestToken is None:
-        r = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers={"Authorization":"Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"})
+        r = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers={"Authorization":authToken})
         guestToken = json.loads(r.text)["guest_token"]
     if graphql_required and graphql_api is None:
         r = requests.get("https://twitter.com/JohnStokvis/status/1577343957708718080")
@@ -63,7 +66,7 @@ def extractStatusv2(url):
         "withV2Timeline": True
     }
     features = {"responsive_web_graphql_timeline_navigation_enabled":False,"unified_cards_ad_metadata_container_dynamic_card_content_query_enabled":False,"tweetypie_unmention_optimization_enabled":False,"responsive_web_uc_gql_enabled":False,"vibe_api_enabled":False,"responsive_web_edit_tweet_api_enabled":True,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":False,"standardized_nudges_misinfo":False,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":False,"interactive_text_enabled":False,"responsive_web_text_conversations_enabled":False,"responsive_web_enhance_cards_enabled":False}
-    r = requests.get(f"https://twitter.com/i/api/graphql/{graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(variables))}&features={urllib.parse.quote(json.dumps(features))}", headers={"Authorization":"Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw", "x-guest-token":guestToken})
+    r = requests.get(f"https://twitter.com/i/api/graphql/{graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(variables))}&features={urllib.parse.quote(json.dumps(features))}", headers={"Authorization":authToken, "x-guest-token":guestToken})
     output = r.json()
     if "errors" in output:
         # pick the first error and create a twExtractError
@@ -86,7 +89,7 @@ def extractStatus(url):
         # get guest token
         guestToken = getGuestToken()
         # get tweet
-        tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":"Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw", "x-guest-token":guestToken})
+        tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":authToken, "x-guest-token":guestToken})
         output = tweet.json()
         if "errors" in output:
             # pick the first error and create a twExtractError
