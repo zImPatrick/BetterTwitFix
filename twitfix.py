@@ -282,7 +282,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
     if tweetType(tweet) == "Video":
         if tweet['extended_entities']['media'][0]['video_info']['variants']:
             best_bitrate = -1
-            thumb = tweet['extended_entities']['media'][0]['media_url']
+            thumb = tweet['extended_entities']['media'][0]['media_url_https']
             size=tweet['extended_entities']['media'][0]["original_info"]
             for video in tweet['extended_entities']['media'][0]['video_info']['variants']:
                 if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
