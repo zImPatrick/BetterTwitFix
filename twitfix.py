@@ -429,10 +429,10 @@ def embed(video_link, vnf, image):
         image = vnf['images'][image]
         template = 'image.html'
     if vnf['type'] == "Video":
-        #urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
     if vnf['type'] == "":
-        #urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
         
     color = "#7FFFD4" # Green
