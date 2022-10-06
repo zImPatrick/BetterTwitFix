@@ -71,11 +71,12 @@ def twitfix(sub_path):
                     clean = twitter_url
 
                 vnf,e = vnfFromCacheOrDL(clean)
-                if vnf == None:
+                if vnf == None or vnf['images'][0] == {}:
                     if e is not None:
                         return message(msgs.failedToScan+msgs.failedToScanExtra+e)
                     return message(msgs.failedToScan)
-                return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
+                
+                return getTemplate("rawvideo.html",vnf,vnf['images'][0],"","",clean,"","","","")
             else:
                 return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
         else:
@@ -101,11 +102,11 @@ def twitfix(sub_path):
             clean = twitter_url
             
         vnf,e = vnfFromCacheOrDL(clean)
-        if vnf is None:
+        if vnf == None or vnf['images'][0] == {}:
             if e is not None:
                 return message(msgs.failedToScan+msgs.failedToScanExtra+e)
             return message(msgs.failedToScan)
-        return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
+        return getTemplate("rawvideo.html",vnf,vnf['images'][0],"","",clean,"","","","")
 
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
         twitter_url = "https://twitter.com/" + sub_path
@@ -193,6 +194,24 @@ def upgradeVNF(vnf):
             vnf['size']={'width':720,'height':480}
         else:
             vnf['size']={}
+
+    if vnf["type"] != "Text" and type(vnf['images'][0] is not dict):
+        if vnf["type"] == "Image":
+            if (vnf['images'][4] == ''):
+                mediaCount = 0
+            else:
+                mediaCount = int(vnf['images'][4])
+            for i in range(mediaCount):
+                if vnf['images'][i] == '':
+                    vnf['images'][i] = {}
+                elif vnf['type'] == 'Video':
+                    vnf['images'][i]={'url':vnf['images'][i],'type':'Video','thumb':vnf['thumbnail']}
+                elif vnf['type'] == 'Image':
+                    vnf['images'][i]={'url':vnf['images'][i],'type':'Image'}
+        elif vnf["type"] == "Video":
+            vnf['images']=[{'url':vnf['url'],'type':'Video','thumb':vnf['thumbnail']},{},{},{},'1']
+        vnf["type"] = "Multi"
+
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
@@ -217,6 +236,7 @@ def vnfFromCacheOrDL(video_link):
             print(e)
             return None,None
     else:
+        print("cached_vnf: " + str(cached_vnf))
         return upgradeVNF(cached_vnf),None
 
 def direct_video(video_link): # Just get a redirect to a MP4 link from any tweet link
@@ -247,18 +267,20 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
+def tweetInfo(tweet="", desc="", uploader="", screen_name="", pfp="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
+    if images[4] != "":
+        type="Multi"
+    else:
+        type="Text"
     vnf = {
         "tweet"         : tweet,
-        "url"           : url,
         "description"   : desc,
-        "thumbnail"     : thumb,
         "uploader"      : uploader,
         "screen_name"   : screen_name,
         "pfp"           : pfp,
-        "type"          : tweetType,
+        "type"          : type,
         "images"        : images,
         "hits"          : hits,
         "likes"         : likes,
@@ -275,36 +297,34 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         del vnf['poll']
     return vnf
 
-def link_to_vnf_from_tweet_data(tweet,video_link):
-    imgs = ["","","","", ""]
-    print(" ➤ [ + ] Tweet Type: " + tweetType(tweet))
-    # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
-    if tweetType(tweet) == "Video":
-        if tweet['extended_entities']['media'][0]['video_info']['variants']:
+def genMediaObject(apiMedia):
+    type = mediaType(apiMedia)
+    if type == "Video":
+        mediaObj = {"type":type,"url":""}
+        if apiMedia['video_info']['variants']:
             best_bitrate = -1
-            thumb = tweet['extended_entities']['media'][0]['media_url_https']
-            size=tweet['extended_entities']['media'][0]["original_info"]
-            for video in tweet['extended_entities']['media'][0]['video_info']['variants']:
+            mediaObj["thumb"] = apiMedia['media_url_https']
+            mediaObj["size"] = apiMedia["original_info"]
+            for video in apiMedia['video_info']['variants']:
                 if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
-                    url = video['url']
+                    mediaObj["url"] = video['url']
                     best_bitrate = video['bitrate']
-    elif tweetType(tweet) == "Text":
-        url   = ""
-        thumb = ""
-        size  = {}
-    else:
-        imgs = ["","","","", ""]
+    elif type == "Image":
+        mediaObj = {"type":type,"url":apiMedia['media_url_https']}
+    return mediaObj
+
+
+def link_to_vnf_from_tweet_data(tweet,video_link,mediaIndex=0):
+    media = [{},{},{},{}, ""]
+    # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
+    if 'extended_entities' in tweet: # text tweet:
+        media = [{},{},{},{}, ""]
         i = 0
-        for media in tweet['extended_entities']['media']:
-            imgs[i] = media['media_url_https']
+        for twtmedia in tweet['extended_entities']['media']:
+            media[i] = genMediaObject(twtmedia)
             i = i + 1
 
-        #print(imgs)
-        imgs[4] = str(i)
-        url   = ""
-        images= imgs
-        thumb = tweet['extended_entities']['media'][0]['media_url_https']
-        size  = {}
+        media[4] = str(i)
 
     qrt = {}
 
@@ -332,21 +352,19 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         poll=None
 
     vnf = tweetInfo(
-        url, 
         video_link, 
-        text, thumb, 
+        text,
         tweet['user']['name'], 
         tweet['user']['screen_name'], 
-        tweet['user']['profile_image_url'], 
-        tweetType(tweet), 
+        tweet['user']['profile_image_url'],
         likes=tweet['favorite_count'], 
         rts=tweet['retweet_count'], 
         time=tweet['created_at'], 
         qrt=qrt, 
-        images=imgs,
+        images=media,
         nsfw=nsfw,
         verified=tweet['user']['verified'],
-        size=size,
+        size={},
         poll=poll
         )
         
@@ -358,11 +376,6 @@ def link_to_vnf_from_unofficial_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
     tweet = twExtract.extractStatus(video_link)
     print (" ➤ [ ✔ ] Unofficial API Success")
-    return link_to_vnf_from_tweet_data(tweet,video_link)
-
-
-def link_to_vnf_from_api(video_link):
-    tweet = get_tweet_data_from_api(video_link)
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
@@ -377,19 +390,31 @@ def message(text):
         repo    = config['config']['repo'], 
         url     = config['config']['url'] )
 
-def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=""):
-    if ('width' in vnf['size'] and 'height' in vnf['size']):
-        vnf['size']['width'] = min(vnf['size']['width'],2000)
-        vnf['size']['height'] = min(vnf['size']['height'],2000)
+def getTemplate(template,vnf,media,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=""):
+    if ('size' in media and 'width' in media['size'] and 'height' in media['size']):
+        media['size']['width'] = min(media['size']['width'],2000)
+        media['size']['height'] = min(media['size']['height'],2000)
+
+    url = ''
+    thumb=''
+    print("med: "+str(media))
+    if (vnf["type"] != "Text"):
+        if (media['type'] == "Video"):
+            url = media['url']
+            thumb = media['thumb']
+        elif (media['type'] == "Image"):
+            image = media['url']
+            url = media['url']
+
     return render_template(
         template, 
         likes      = vnf['likes'], 
         rts        = vnf['rts'], 
         time       = vnf['time'], 
         screenName = vnf['screen_name'], 
-        vidlink    = vnf['url'], 
+        vidlink    = url, 
         pfp        = vnf['pfp'],  
-        vidurl     = vnf['url'], 
+        vidurl     = url, 
         desc       = desc,
         pic        = image,
         user       = vnf['uploader'], 
@@ -405,7 +430,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         videoSize  = vnf['size'] )
 
 def embed(video_link, vnf, image):
-    print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + vnf['url'])
+    #print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + vnf['url'])
     
     desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
     urlUser = urllib.parse.quote(vnf['uploader'])
@@ -423,24 +448,24 @@ def embed(video_link, vnf, image):
     appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
         template = 'text.html'
-    if vnf['type'] == "Image":
+        media={}
+    if vnf['type'] == "Multi":
         if vnf['images'][4]!="1":
-            appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
-        image = vnf['images'][image]
-        template = 'image.html'
-    if vnf['type'] == "Video":
-        #urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
-        template = 'video.html'
-    if vnf['type'] == "":
-        #urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
-        template = 'video.html'
+            appNamePost = " - Media " + str(image+1) + "/" + str(vnf['images'][4])
+        media = vnf['images'][image]
+        print("embed: "+str(media))
+        if media['type'] == "Image":
+            template = 'image.html'
+        elif media['type'] == "Video":
+            template = 'video.html'
+            urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         
     color = "#7FFFD4" # Green
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
     
-    return getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink)
+    return getTemplate(template,vnf,media,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNamePost)
 
 
 def embedCombined(video_link):
@@ -479,7 +504,7 @@ def embedCombinedVnf(video_link,vnf):
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    return getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality")
+    return getTemplate('image.html',vnf,{'todo':'todo'},desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality")
 
 
 def getPollObject(card):
@@ -503,14 +528,11 @@ def getPollObject(card):
     return poll
 
 
-def tweetType(tweet): # Are we dealing with a Video, Image, or Text tweet?
-    if 'extended_entities' in tweet:
-        if 'video_info' in tweet['extended_entities']['media'][0]:
-            out = "Video"
-        else:
-            out = "Image"
+def mediaType(media): # Are we dealing with a Video, Image, or Text tweet?
+    if 'video_info' in media:
+        out = "Video"
     else:
-        out = "Text"
+        out = "Image"
 
     return out
 

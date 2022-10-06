@@ -20,7 +20,7 @@ def getGuestToken(graphql_required=False):
         r = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers={"Authorization":authToken})
         guestToken = json.loads(r.text)["guest_token"]
     if graphql_required and graphql_api is None:
-        r = requests.get("https://twitter.com/JohnStokvis/status/1577343957708718080")
+        r = requests.get("https://twitter.com/jack/status/20")
         response = r.text
         script_url = re.search(r"https:\/\/abs.twimg.com\/responsive-web\/client-web-legacy\/main.[a-f0-9]+.js", response)[0]
         script = requests.get(script_url).text
