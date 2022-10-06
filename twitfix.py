@@ -322,8 +322,12 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         for eurl in tweet['entities']['urls']:
             text = text.replace(eurl["url"],eurl["expanded_url"])
 
+    ttl = None #default
+
     if 'card' in tweet and tweet['card']['name'].startswith('poll'):
         poll=getPollObject(tweet['card'])
+        if tweet['card']['binding_values']['counts_are_final']['boolean_value'] == False:
+            ttl = datetime.today().replace(microsecond=0) + timedelta(minutes=1)
     else:
         poll=None
 
@@ -343,7 +347,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         nsfw=nsfw,
         verified=tweet['user']['verified'],
         size=size,
-        poll=poll
+        poll=poll,
+        ttl=ttl
         )
         
     return vnf
