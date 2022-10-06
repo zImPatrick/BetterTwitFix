@@ -365,9 +365,9 @@ def link_to_vnf_from_tweet_data(tweet,video_link,mediaIndex=0):
         nsfw=nsfw,
         verified=tweet['user']['verified'],
         size={},
-        poll=poll
+        poll=poll,
         ttl=ttl
-        )
+    )
         
     return vnf
 
