@@ -1,5 +1,4 @@
 import os
-from wsgiref import headers
 os.environ["RUNNING_TESTS"]="1"
 
 import twitfix,twExtract

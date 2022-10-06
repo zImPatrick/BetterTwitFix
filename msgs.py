@@ -1,6 +1,3 @@
-from asyncore import poll
-
-
 failedToScan="Failed to scan your link! This may be due to an incorrect link, private/suspended account, deleted tweet, or Twitter itself might be having issues (Check here: https://api.twitterstat.us/)"
 failedToScanExtra = "\n\nTwitter gave me this error: "
 tweetNotFound="Tweet not found."

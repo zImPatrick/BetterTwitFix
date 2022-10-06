@@ -1,10 +1,7 @@
-from email import utils
-from random import Random, random
 from weakref import finalize
 from flask import Flask, render_template, request, redirect, abort, Response, send_from_directory, url_for, send_file, make_response, jsonify
 from flask_cors import CORS
 import textwrap
-import requests
 import re
 import os
 import urllib.parse
@@ -16,7 +13,6 @@ import msgs
 import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
-import random
 from yt_dlp.utils import ExtractorError
 app = Flask(__name__)
 CORS(app)
@@ -346,8 +342,12 @@ def link_to_vnf_from_tweet_data(tweet,video_link,mediaIndex=0):
         for eurl in tweet['entities']['urls']:
             text = text.replace(eurl["url"],eurl["expanded_url"])
 
+    ttl = None #default
+
     if 'card' in tweet and tweet['card']['name'].startswith('poll'):
         poll=getPollObject(tweet['card'])
+        if tweet['card']['binding_values']['counts_are_final']['boolean_value'] == False:
+            ttl = datetime.today().replace(microsecond=0) + timedelta(minutes=1)
     else:
         poll=None
 
@@ -366,6 +366,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link,mediaIndex=0):
         verified=tweet['user']['verified'],
         size={},
         poll=poll
+        ttl=ttl
         )
         
     return vnf
