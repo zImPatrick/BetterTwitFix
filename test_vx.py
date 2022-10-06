@@ -178,6 +178,15 @@ def test_directEmbed():
 
 def test_message404():
     cache.clearCache()
-    resp = client.get("https://twitter.com/jack/status/12345",headers={"User-Agent":"test"})
+    resp = client.get("/jack/status/12345",headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert msgs.tweetNotFound in str(resp.data)
+
+def test_requestSpecificMixedMedia():
+    cache.clearCache()
+    resp = client.get(testMixedMediaTweet.replace("https://twitter.com","")+"/1",headers={"User-Agent":"test"}) # first image (should be video)
+    assert resp.status_code==200
+    assert testMixedMediaVNF_compare["images"][0]["url"] in str(resp.data)
+    resp = client.get(testMixedMediaTweet.replace("https://twitter.com","")+"/2",headers={"User-Agent":"test"}) # second image
+    assert resp.status_code==200
+    assert testMixedMediaVNF_compare["images"][1]["url"] in str(resp.data)
