@@ -193,7 +193,7 @@ def upgradeVNF(vnf):
         if vnf['qrt'] == {}:
             vnf['qrtURL'] = None
         else: # 
-            vnf['qrtURL'] = f"https://twitter.com/{vnf['qrt']['handle']}/status/{vnf['qrt']['id']}"
+            vnf['qrtURL'] = f"https://twitter.com/{vnf['qrt']['screen_name']}/status/{vnf['qrt']['id']}"
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
