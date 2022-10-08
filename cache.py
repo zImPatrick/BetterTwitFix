@@ -6,7 +6,7 @@ import os
 import boto3
 
 link_cache_system = config['config']['link_cache']
-
+link_cache = {}
 DYNAMO_CACHE_TBL=None
 if link_cache_system=="dynamodb": # pragma: no cover
     DYNAMO_CACHE_TBL=config['config']['table']
@@ -134,7 +134,10 @@ def clearCache():
         link_cache={}
 
 def setCache(value):
+    newCache = {}
+    for key in value:
+        newCache[key.lower()] = value[key]
     global link_cache
     # only intended for use in tests
     if link_cache_system == "ram":
-        link_cache=value
+        link_cache=newCache
