@@ -189,6 +189,11 @@ def upgradeVNF(vnf):
             vnf['size']={'width':720,'height':480}
         else:
             vnf['size']={}
+    if 'qrtURL' not in vnf:
+        if vnf['qrt'] == {}:
+            vnf['qrtURL'] = None
+        else: # 
+            vnf['qrtURL'] = f"https://twitter.com/{vnf['qrt']['handle']}/status/{vnf['qrt']['id']}"
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
@@ -243,7 +248,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrt={}, nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrtURL="", nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
     vnf = {
@@ -260,7 +265,7 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "likes"         : likes,
         "rts"           : rts,
         "time"          : time,
-        "qrt"           : qrt,
+        "qrtURL"        : qrtURL,
         "nsfw"          : nsfw,
         "ttl"           : ttl,
         "verified"      : verified,
@@ -302,14 +307,9 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         thumb = tweet['extended_entities']['media'][0]['media_url_https']
         size  = {}
 
-    qrt = {}
-
-    if 'quoted_status' in tweet:
-        qrt['desc']       = tweet['quoted_status']['full_text']
-        qrt['handle']     = tweet['quoted_status']['user']['name']
-        qrt['screen_name'] = tweet['quoted_status']['user']['screen_name']
-        qrt['verified'] = tweet['quoted_status']['user']['verified']
-        qrt['id'] = tweet['quoted_status']['id_str']
+    qrtURL = None
+    if 'quoted_status' in tweet and 'quoted_status_permalink' in tweet:
+        qrtURL = tweet['quoted_status_permalink']['expanded']
 
     text = tweet['full_text']
 
@@ -320,8 +320,10 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 
     if 'entities' in tweet and 'urls' in tweet['entities']:
         for eurl in tweet['entities']['urls']:
-            text = text.replace(eurl["url"],eurl["expanded_url"])
-
+            if "/status/" in eurl["expanded_url"] and eurl["expanded_url"].startswith("https://twitter.com/"):
+                text = text.replace(eurl["url"], "")
+            else:
+                text = text.replace(eurl["url"],eurl["expanded_url"])
     ttl = None #default
 
     if 'card' in tweet and tweet['card']['name'].startswith('poll'):
@@ -342,7 +344,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         likes=tweet['favorite_count'], 
         rts=tweet['retweet_count'], 
         time=tweet['created_at'], 
-        qrt=qrt, 
+        qrtURL=qrtURL, 
         images=imgs,
         nsfw=nsfw,
         verified=tweet['user']['verified'],
@@ -361,11 +363,6 @@ def link_to_vnf_from_unofficial_api(video_link):
     print (" ➤ [ ✔ ] Unofficial API Success")
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
-
-def link_to_vnf_from_api(video_link):
-    tweet = get_tweet_data_from_api(video_link)
-    return link_to_vnf_from_tweet_data(tweet,video_link)
-
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
     return link_to_vnf_from_unofficial_api(video_link)
 
@@ -378,23 +375,25 @@ def message(text):
         repo    = config['config']['repo'], 
         url     = config['config']['url'] )
 
-def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=""):
-    if ('width' in vnf['size'] and 'height' in vnf['size']):
-        vnf['size']['width'] = min(vnf['size']['width'],2000)
-        vnf['size']['height'] = min(vnf['size']['height'],2000)
+def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix="",embedVNF=None):
+    if (embedVNF is None):
+        embedVNF = vnf
+    if ('width' in embedVNF['size'] and 'height' in embedVNF['size']):
+        embedVNF['size']['width'] = min(embedVNF['size']['width'],2000)
+        embedVNF['size']['height'] = min(embedVNF['size']['height'],2000)
     return render_template(
         template, 
         likes      = vnf['likes'], 
         rts        = vnf['rts'], 
         time       = vnf['time'], 
         screenName = vnf['screen_name'], 
-        vidlink    = vnf['url'], 
+        vidlink    = embedVNF['url'], 
         pfp        = vnf['pfp'],  
-        vidurl     = vnf['url'], 
+        vidurl     = embedVNF['url'], 
         desc       = desc,
         pic        = image,
         user       = vnf['uploader'], 
-        video_link = video_link, 
+        video_link = vnf, 
         color      = color, 
         appname    = config['config']['appname'] + appNameSuffix, 
         repo       = config['config']['repo'], 
@@ -403,10 +402,10 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         urlUser    = urlUser, 
         urlLink    = urlLink,
         tweetLink  = vnf['tweet'],
-        videoSize  = vnf['size'] )
+        videoSize  = embedVNF['size'] )
 
 def embed(video_link, vnf, image):
-    print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + vnf['url'])
+    print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + video_link)
     
     desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
     urlUser = urllib.parse.quote(vnf['uploader'])
@@ -419,11 +418,26 @@ def embed(video_link, vnf, image):
     else:
         pollDisplay=""
 
-    desc=msgs.formatEmbedDesc(vnf['type'],desc,vnf['qrt'],pollDisplay,likeDisplay)
-
+    qrt=None
+    if vnf['qrtURL'] is not None:
+        qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
+        if qrt is not None:
+            desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
+    embedVNF=None
     appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
         template = 'text.html'
+        if qrt is not None and qrt['type'] != "Text":
+            embedVNF=qrt
+            if qrt['type'] == "Image":
+                if embedVNF['images'][4]!="1":
+                    appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
+                image = embedVNF['images'][image]
+                template = 'image.html'
+            elif qrt['type'] == "Video" or qrt['type'] == "":
+                urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+                template = 'video.html'
+            
     if vnf['type'] == "Image":
         if vnf['images'][4]!="1":
             appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
@@ -441,7 +455,7 @@ def embed(video_link, vnf, image):
     if vnf['nsfw'] == True:
         color = "#800020" # Red
     
-    return getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink)
+    return getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNamePost,embedVNF)
 
 
 def embedCombined(video_link):
@@ -468,7 +482,11 @@ def embedCombinedVnf(video_link,vnf):
     else:
         pollDisplay=""
 
-    desc=msgs.formatEmbedDesc(vnf['type'],desc,vnf['qrt'],pollDisplay,likeDisplay)
+    qrt=None
+    if vnf['qrtURL'] is not None:
+        qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
+        if qrt is not None:
+            desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
 
     
     image = "https://vxtwitter.com/rendercombined.jpg?imgs="

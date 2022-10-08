@@ -4,11 +4,11 @@ tweetNotFound="Tweet not found."
 tweetSuspended="This Tweet is from a suspended account." 
 
 def genLikesDisplay(vnf):
-    return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']) + "\n")
+    return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']))
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
-    return ("\n─────────────\n ➤ QRT of " + qrt['handle'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + qrt['desc'] + "'")
+    return ("\n─────────────\n ➤ QRT of " + qrt['uploader'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":\n─────────────\n'" + qrt['description'] + "'")
 
 def genPollDisplay(poll):
     pctSplit=10
