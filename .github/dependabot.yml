@@ -9,5 +9,5 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    allow:
+    ignore:
       - dependency-name: "yt-dlp"
