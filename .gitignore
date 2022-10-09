@@ -11,3 +11,4 @@ _meta
 db/
 .coverage
 htmlcov/
+.idea/
