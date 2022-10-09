@@ -4,3 +4,4 @@ requests==2.27.1
 Pillow==8.4.0
 Flask==2.0.3
 Flask-Cors==3.0.10
+yt-dlp==2022.7.18
