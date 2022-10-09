@@ -6,7 +6,7 @@ import os
 import boto3
 
 link_cache_system = config['config']['link_cache']
-
+link_cache = {}
 DYNAMO_CACHE_TBL=None
 if link_cache_system=="dynamodb": # pragma: no cover
     DYNAMO_CACHE_TBL=config['config']['table']
@@ -44,19 +44,22 @@ def serializeUnknown(obj):
     raise TypeError ("Type %s not serializable" % type(obj))
 
 def addVnfToLinkCache(video_link, vnf):
+    video_link = video_link.lower()
     global link_cache
     try:
         if link_cache_system == "db":
-                out = db.linkCache.insert_one(vnf)
+                out = db.linkCache.update_one(vnf)
                 print(" ➤ [ + ] Link added to DB cache ")
                 return True
         elif link_cache_system == "json":
             link_cache[video_link] = vnf
             with open("links.json", "w") as outfile: 
                 json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
-                return None
+            print(" ➤ [ + ] Link added to JSON cache ")
+            return True
         elif link_cache_system == "ram": # FOR TESTS ONLY
             link_cache[video_link] = vnf
+            print(" ➤ [ + ] Link added to RAM cache ")
         elif link_cache_system == "dynamodb": # pragma: no cover
             vnf["ttl"] = int(vnf["ttl"].strftime('%s'))
             table = client.Table(DYNAMO_CACHE_TBL)
@@ -72,9 +75,10 @@ def addVnfToLinkCache(video_link, vnf):
     except Exception as e:
         print(" ➤ [ X ] Failed to add link to DB cache")
         print(e)
-        return None
+        return False
 
 def getVnfFromLinkCache(video_link):
+    video_link = video_link.lower()
     global link_cache
     if link_cache_system == "db":
         collection = db.linkCache
@@ -130,7 +134,10 @@ def clearCache():
         link_cache={}
 
 def setCache(value):
+    newCache = {}
+    for key in value:
+        newCache[key.lower()] = value[key]
     global link_cache
     # only intended for use in tests
     if link_cache_system == "ram":
-        link_cache=value
+        link_cache=newCache
