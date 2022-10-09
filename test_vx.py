@@ -196,3 +196,12 @@ def test_message404():
     resp = client.get("https://twitter.com/jack/status/12345",headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert msgs.tweetNotFound in str(resp.data)
+
+def test_combine():
+    twt,e = twitfix.vnfFromCacheOrDL(testMultiMediaTweet)
+    img1 = twt["images"][0]
+    img2 = twt["images"][1]
+    resp = client.get(f"/rendercombined.jpg?imgs={img1},{img2}",headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert resp.headers["Content-Type"]=="image/jpeg"
+    assert len(resp.data)>1000
