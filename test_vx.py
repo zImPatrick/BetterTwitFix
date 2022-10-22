@@ -17,6 +17,10 @@ testQrtCeptionTweet="https://twitter.com/CatherineShu/status/585253766271672320"
 testQrtVideoTweet="https://twitter.com/Twitter/status/1494436688554344449"
 testMixedMediaTweet="https://twitter.com/Twitter/status/1577730467436138524"
 
+# I literally picked a random tweet that twitter marked as 'sensitive' without it being like, actually NSFW.
+# Any better suggestions for a tweet to use are welcome
+testNSFWTweet="https://twitter.com/kuyacoy/status/1581185279376838657"
+
 textVNF_compare = {'tweet': 'https://twitter.com/jack/status/20', 'description': 'just setting up my twttr', 'screen_name': 'jack', 'type': 'Text', 'images': [{}, {}, {}, {}, ''], 'time': 'Tue Mar 21 20:50:14 +0000 2006', 'qrtURL': None, 'nsfw': False}
 videoVNF_compare={'tweet': 'https://twitter.com/Twitter/status/1263145271946551300', 'description': 'Testing, testing...\n\nA new way to have a convo with exactly who you want. We’re starting with a small % globally, so keep your 👀 out to see it in action. https://t.co/pV53mvjAVT', 'screen_name': 'Twitter', 'type': 'Multi', 'images': [{"type": "Video","url": "https://video.twimg.com/amplify_video/1263145212760805376/vid/1280x720/9jous8HM0_duxL0w.mp4?tag=13","thumb": "https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg","size": {"width": 1920,"height": 1080}}, {}, {}, {}, '1'], 'time': 'Wed May 20 16:31:15 +0000 2020', 'qrtURL': None, 'nsfw': False,'verified': True}
 testMedia_compare={'tweet': 'https://twitter.com/Twitter/status/1118295916874739714', 'description': 'On profile pages, we used to only show someone’s replies, not the original Tweet 🙄 Now we’re showing both so you can follow the conversation more easily! https://t.co/LSBEZYFqmY', 'screen_name': 'Twitter', 'type': 'Multi', 'images': [{"type": "Image","url": "https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg"},{},{},{},"1"], 'time': 'Tue Apr 16 23:31:38 +0000 2019', 'qrtURL': None, 'nsfw': False, 'size': {}}
@@ -177,6 +181,11 @@ def test_embedFromCache():
     assert resp.status_code==200
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
+
+def test_embedSuggestive():
+    resp = client.get(testNSFWTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert "so i had a bot generate it for me" in str(resp.data)
 
 def test_embedFromOutdatedCache(): # presets a cache that has VNF's with missing fields; there's probably a better way to do this
     cache.setCache({"https://twitter.com/Twitter/status/1118295916874739714":{"description":"On profile pages, we used to only show someone’s replies, not the original Tweet 🙄 Now we’re showing both so you can follow the conversation more easily! https://t.co/LSBEZYFqmY","hits":0,"images":["https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","","","","1"],"likes":5033,"nsfw":False,"pfp":"http://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":754,"screen_name":"Twitter","thumbnail":"https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","time":"Tue Apr 16 23:31:38 +0000 2019","tweet":"https://twitter.com/Twitter/status/1118295916874739714","type":"Image","uploader":"Twitter","url":""},

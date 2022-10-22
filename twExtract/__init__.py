@@ -41,7 +41,7 @@ def extractStatus_fallback(url):
     })
     return status
 
-def extractStatusv2(url):
+def extractStatusv2(url, nsfw=False):
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
@@ -65,7 +65,7 @@ def extractStatusv2(url):
         "withVoice": False,
         "withV2Timeline": True
     }
-    features = {"responsive_web_graphql_timeline_navigation_enabled":False,"unified_cards_ad_metadata_container_dynamic_card_content_query_enabled":False,"tweetypie_unmention_optimization_enabled":False,"responsive_web_uc_gql_enabled":False,"vibe_api_enabled":False,"responsive_web_edit_tweet_api_enabled":True,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":False,"standardized_nudges_misinfo":False,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":False,"interactive_text_enabled":False,"responsive_web_text_conversations_enabled":False,"responsive_web_enhance_cards_enabled":False}
+    features = {"verified_phone_label_enabled":False,"responsive_web_graphql_timeline_navigation_enabled":False,"unified_cards_ad_metadata_container_dynamic_card_content_query_enabled":False,"tweetypie_unmention_optimization_enabled":False,"responsive_web_uc_gql_enabled":False,"vibe_api_enabled":False,"responsive_web_edit_tweet_api_enabled":True,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":False,"standardized_nudges_misinfo":False,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":False,"interactive_text_enabled":False,"responsive_web_text_conversations_enabled":False,"responsive_web_enhance_cards_enabled":False}
     r = requests.get(f"https://twitter.com/i/api/graphql/{graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(variables))}&features={urllib.parse.quote(json.dumps(features))}", headers={"Authorization":authToken, "x-guest-token":guestToken})
     output = r.json()
     if "errors" in output:
@@ -75,6 +75,8 @@ def extractStatusv2(url):
             raise twExtractError.TwExtractError(error["code"], error["message"])
     for tweet in output["data"]["threaded_conversation_with_injections_v2"]["instructions"][0]["entries"]:
         if tweet["entryId"] == f"tweet-{twid}":
+            if 'tombstone' in tweet["content"]["itemContent"]["tweet_results"]["result"] and 'Age-restricted' in tweet["content"]["itemContent"]["tweet_results"]["result"]['tombstone']['text']['text']:
+                return extractStatus_fallback(url)
             return apiConvert.convertTweet(tweet["content"]["itemContent"]["tweet_results"]["result"])
 
     return None
