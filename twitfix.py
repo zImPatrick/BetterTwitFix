@@ -248,7 +248,7 @@ def embed_video(video_link, image=0): # Return Embed from any tweet link
             return message(msgs.failedToScan+msgs.failedToScanExtra+e)
         return message(msgs.failedToScan)
 
-def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrtURL="", nsfw=False,ttl=None,verified=False,size={},poll=None): # Return a dict of video info with default values
+def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp="", tweetType="", images="", hits=0, likes=0, rts=0, time="", qrtURL="", nsfw=False,ttl=None,verified=False,size={},poll=None,isGif=False): # Return a dict of video info with default values
     if (ttl==None):
         ttl = getDefaultTTL()
     vnf = {
@@ -270,7 +270,8 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "ttl"           : ttl,
         "verified"      : verified,
         "size"          : size,
-        "poll"          : poll
+        "poll"          : poll,
+        "isGif"         : isGif
     }
     if (poll is None):
         del vnf['poll']
@@ -279,6 +280,7 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
 def link_to_vnf_from_tweet_data(tweet,video_link):
     imgs = ["","","","", ""]
     print(" ➤ [ + ] Tweet Type: " + tweetType(tweet))
+    isGif=False
     # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
     if tweetType(tweet) == "Video":
         if tweet['extended_entities']['media'][0]['video_info']['variants']:
@@ -306,6 +308,9 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         images= imgs
         thumb = tweet['extended_entities']['media'][0]['media_url_https']
         size  = {}
+
+    if 'extended_entities' in tweet and 'media' in tweet['extended_entities'] and tweet['extended_entities']['media'][0]['type'] == 'animated_gif':
+        isGif=True
 
     qrtURL = None
     if 'quoted_status' in tweet and 'quoted_status_permalink' in tweet:
@@ -350,7 +355,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         verified=tweet['user']['verified'],
         size=size,
         poll=poll,
-        ttl=ttl
+        ttl=ttl,
+        isGif=isGif
         )
         
     return vnf
