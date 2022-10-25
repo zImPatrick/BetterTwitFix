@@ -26,11 +26,6 @@ provider:
     VXTWITTER_REPO: https://github.com/dylanpdx/BetterTwitFix
     VXTWITTER_URL: https://vxtwitter.com
     VXTWITTER_COMBINATION_METHOD: local
-    # Twitter API keys
-    VXTWITTER_TWITTER_API_KEY: none
-    VXTWITTER_TWITTER_API_SECRET: none
-    VXTWITTER_TWITTER_ACCESS_TOKEN: none
-    VXTWITTER_TWITTER_ACCESS_SECRET: none
 
 package:
   patterns:
