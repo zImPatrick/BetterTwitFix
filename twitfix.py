@@ -429,6 +429,8 @@ def embed(video_link, vnf, image):
         qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
         if qrt is not None:
             desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
+    else:
+        desc=msgs.formatEmbedDesc(vnf['type'],desc,None,pollDisplay,likeDisplay)
     embedVNF=None
     appNamePost = ""
     if vnf['type'] == "Text": # Change the template based on tweet type
