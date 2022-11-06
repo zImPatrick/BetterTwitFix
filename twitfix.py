@@ -31,6 +31,7 @@ generate_embed_user_agents = [
     "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)", 
     "TelegramBot (like TwitterBot)", 
     "Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)", 
+    "Synapse (bot; +https://github.com/matrix-org/synapse)",
     "test"]
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
