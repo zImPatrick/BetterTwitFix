@@ -78,7 +78,7 @@ def twitfix(sub_path):
         else:
             print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
             return dir(sub_path)
-    elif request.url.startswith("https://c.vx"):
+    elif request.url.startswith("https://c.vx") or request.url.endswith('/all'):
         twitter_url = sub_path
 
         if match.start() == 0:
