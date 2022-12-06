@@ -56,7 +56,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Deploy
-        run: serverless deploy
+        run: serverless deploy --verbose
         env:
           VXTWITTER_LINK_CACHE: ${{ secrets.VXTWITTER_LINK_CACHE }}
           VXTWITTER_DATABASE: ${{ secrets.VXTWITTER_DATABASE }}
