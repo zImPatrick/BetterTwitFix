@@ -1,0 +1,31 @@
+name: Deploy
+
+concurrency: 
+  group: prod
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [prod]
+  pull_request:
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          cache: 'yarn'
+
+      - name: Install packages
+        run: yarn install --frozen-lockfile
+
+      - name: Deploy
+        run: serverless deploy
