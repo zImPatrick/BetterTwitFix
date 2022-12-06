@@ -1,5 +1,9 @@
 name: Deploy
 
+permissions:
+  id-token: write
+  contents: read
+
 concurrency: 
   group: prod
   cancel-in-progress: true
