@@ -18,14 +18,14 @@ provider:
   environment:
     VXTWITTER_CACHE_TABLE: ${self:custom.tableName}
     RUNNING_SERVERLESS: 1
-    VXTWITTER_LINK_CACHE: dynamodb
-    VXTWITTER_DATABASE: none
-    VXTWITTER_METHOD: hybrid
-    VXTWITTER_COLOR: \#43B581
-    VXTWITTER_APP_NAME: vxTwitter
-    VXTWITTER_REPO: https://github.com/dylanpdx/BetterTwitFix
-    VXTWITTER_URL: https://vxtwitter.com
-    VXTWITTER_COMBINATION_METHOD: local
+    VXTWITTER_LINK_CACHE: ${env:VXTWITTER_LINK_CACHE, 'json'}
+    VXTWITTER_DATABASE: ${env:VXTWITTER_DATABASE, 'none'}
+    VXTWITTER_METHOD: ${env:VXTWITTER_METHOD, 'hybrid'}
+    VXTWITTER_COLOR: ${env:VXTWITTER_COLOR, '#43B581'}
+    VXTWITTER_APP_NAME: ${env:VXTWITTER_APP_NAME, 'vxTwitter'}
+    VXTWITTER_REPO: ${env:VXTWITTER_REPO, 'https://github.com/dylanpdx/BetterTwitFix'}
+    VXTWITTER_URL: ${env:VXTWITTER_URL, 'https://vxtwitter.com'}
+    VXTWITTER_COMBINATION_METHOD: ${env:VXTWITTER_COMBINATION_METHOD, 'local'}
 
 package:
   patterns:
@@ -54,7 +54,7 @@ custom:
     app: twitfix.app
   pythonRequirements:
     layer: true
-    dockerizePip: true
+    dockerizePip: false
 
 	
 resources:
