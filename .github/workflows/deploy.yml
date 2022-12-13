@@ -11,8 +11,6 @@ concurrency:
 on:
   push:
     branches: [prod]
-  pull_request:
-  workflow_dispatch:
 
 
 jobs:
