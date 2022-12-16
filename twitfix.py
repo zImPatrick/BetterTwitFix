@@ -395,6 +395,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         time       = vnf['time'], 
         screenName = vnf['screen_name'], 
         vidlink    = embedVNF['url'], 
+        userLink   = f"https://twitter.com/{vnf['screen_name']}",
         pfp        = vnf['pfp'],  
         vidurl     = embedVNF['url'], 
         desc       = desc,
@@ -408,6 +409,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         urlDesc    = urlDesc, 
         urlUser    = urlUser, 
         urlLink    = urlLink,
+        urlUserLink= urllib.parse.quote(f"https://twitter.com/{vnf['screen_name']}"),
         tweetLink  = vnf['tweet'],
         videoSize  = embedVNF['size'] )
 
