@@ -454,9 +454,14 @@ def embed(video_link, vnf, image):
             appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
         image = vnf['images'][image]
         template = 'image.html'
+
     if vnf['type'] == "Video":
+        if vnf['isGif'] == True and config['config']['gifConvertAPI'] != "" and config['config']['gifConvertAPI'] != "none":
+            vnf['url'] = f"{config['config']['gifConvertAPI']}/convert.mp4?url={vnf['url']}"
+            appNamePost = " - GIF"
         urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
+
     if vnf['type'] == "":
         urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
