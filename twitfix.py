@@ -195,6 +195,8 @@ def upgradeVNF(vnf):
             vnf['qrtURL'] = None
         else: # 
             vnf['qrtURL'] = f"https://twitter.com/{vnf['qrt']['screen_name']}/status/{vnf['qrt']['id']}"
+    if 'isGif' not in vnf:
+        vnf['isGif'] = False
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
