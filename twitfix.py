@@ -195,6 +195,8 @@ def upgradeVNF(vnf):
             vnf['qrtURL'] = None
         else: # 
             vnf['qrtURL'] = f"https://twitter.com/{vnf['qrt']['screen_name']}/status/{vnf['qrt']['id']}"
+    if 'isGif' not in vnf:
+        vnf['isGif'] = False
     return vnf
 
 def getDefaultTTL(): # TTL for deleting items from the database
@@ -395,6 +397,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         time       = vnf['time'], 
         screenName = vnf['screen_name'], 
         vidlink    = embedVNF['url'], 
+        userLink   = f"https://twitter.com/{vnf['screen_name']}",
         pfp        = vnf['pfp'],  
         vidurl     = embedVNF['url'], 
         desc       = desc,
@@ -408,6 +411,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         urlDesc    = urlDesc, 
         urlUser    = urlUser, 
         urlLink    = urlLink,
+        urlUserLink= urllib.parse.quote(f"https://twitter.com/{vnf['screen_name']}"),
         tweetLink  = vnf['tweet'],
         videoSize  = embedVNF['size'] )
 
@@ -452,9 +456,14 @@ def embed(video_link, vnf, image):
             appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
         image = vnf['images'][image]
         template = 'image.html'
+
     if vnf['type'] == "Video":
+        if vnf['isGif'] == True and config['config']['gifConvertAPI'] != "" and config['config']['gifConvertAPI'] != "none":
+            vnf['url'] = f"{config['config']['gifConvertAPI']}/convert.mp4?url={vnf['url']}"
+            appNamePost = " - GIF"
         urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'
+
     if vnf['type'] == "":
         urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
         template = 'video.html'

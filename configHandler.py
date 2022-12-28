@@ -2,7 +2,7 @@ import json
 import os
 
 if ('RUNNING_TESTS' in os.environ):
-    config= {"config":{"link_cache":"ram","database":"","table":"","color":"","appname": "vxTwitter","repo": "https://github.com/dylanpdx/BetterTwitFix","url": "https://vxtwitter.com","combination_method": "local"}}
+    config= {"config":{"link_cache":"ram","database":"","table":"","color":"","appname": "vxTwitter","repo": "https://github.com/dylanpdx/BetterTwitFix","url": "https://vxtwitter.com","combination_method": "local","gifConvertAPI":""}}
 elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '1'): # pragma: no cover
     config = {
             "config":{
@@ -13,7 +13,8 @@ elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] ==
                 "appname": os.environ["VXTWITTER_APP_NAME"], 
                 "repo": os.environ["VXTWITTER_REPO"], 
                 "url": os.environ["VXTWITTER_URL"],
-                "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"] # can either be 'local' or a URL to a server handling requests in the same format
+                "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"], # can either be 'local' or a URL to a server handling requests in the same format
+                "gifConvertAPI":os.environ["VXTWITTER_GIF_CONVERT_API"]
             }
         }
 else:
@@ -29,7 +30,8 @@ else:
                     "appname": "vxTwitter", 
                     "repo": "https://github.com/dylanpdx/BetterTwitFix", 
                     "url": "https://vxtwitter.com",
-                    "combination_method": "local" # can either be 'local' or a URL to a server handling requests in the same format
+                    "combination_method": "local", # can either be 'local' or a URL to a server handling requests in the same format
+                    "gifConvertAPI":""
                 }
             }
 
