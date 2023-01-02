@@ -73,7 +73,7 @@ def lambda_handler(event, context):
     videoLocation = tempfile.mkstemp(suffix=".mp4")[1]
     subprocess.call(["wget","-O",videoLocation,url],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
 
-    videoLocationLooped = loop_video_until_length(videoLocation, 30)
+    videoLocationLooped = loop_video_until_length(videoLocation, 15)
     if videoLocationLooped != videoLocation:
         os.remove(videoLocation)
         videoLocation = videoLocationLooped
