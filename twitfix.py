@@ -78,17 +78,6 @@ def twitfix(sub_path):
         else:
             print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
             return dir(sub_path)
-    elif request.url.startswith("https://c.vx") or request.url.endswith('/all'):
-        twitter_url = sub_path
-
-        if match.start() == 0:
-            twitter_url = "https://twitter.com/" + sub_path
-        
-        if user_agent in generate_embed_user_agents:
-            return embedCombined(twitter_url)
-        else:
-            print(" ➤ [ R ] Redirect to " + twitter_url)
-            return redirect(twitter_url, 301)
     elif request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -122,7 +111,7 @@ def twitfix(sub_path):
             twitter_url = "https://twitter.com/" + sub_path
 
         if user_agent in generate_embed_user_agents:
-            res = embed_video(twitter_url)
+            res = embedCombined(twitter_url)
             return res
 
         else:
