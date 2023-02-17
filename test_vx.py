@@ -165,6 +165,14 @@ def test_embedFromCache():
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
 
+def test_veryLongEmbed():
+    cache.clearCache()
+    cache.setCache({'https://twitter.com/TEST/status/1234':
+                    {"description":"A"*1024,"hits":0,"images":["","","","",""],"likes":1234,"nsfw":False,"pfp":"","qrt":{},"rts":1234,"screen_name":"TEST","thumbnail":"","time":"","tweet":"https://twitter.com/TEST/status/1234","type":"Text","uploader":"Test","url":""}
+                    })
+    resp = client.get('https://twitter.com/TEST/status/1234'.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+
 def test_embedFromOutdatedCache(): # presets a cache that has VNF's with missing fields; there's probably a better way to do this
     cache.setCache({"https://twitter.com/Twitter/status/1118295916874739714":{"description":"On profile pages, we used to only show someone’s replies, not the original Tweet 🙄 Now we’re showing both so you can follow the conversation more easily! https://t.co/LSBEZYFqmY","hits":0,"images":["https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","","","","1"],"likes":5033,"nsfw":False,"pfp":"http://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":754,"screen_name":"Twitter","thumbnail":"https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","time":"Tue Apr 16 23:31:38 +0000 2019","tweet":"https://twitter.com/Twitter/status/1118295916874739714","type":"Image","uploader":"Twitter","url":""},
             "https://twitter.com/Twitter/status/1263145271946551300":{"description":"Testing, testing...\n\nA new way to have a convo with exactly who you want. We’re starting with a small % globally, so keep your 👀 out to see it in action. https://t.co/pV53mvjAVT","hits":0,"images":["","","","",""],"likes":61584,"nsfw":False,"pfp":"http://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":17138,"screen_name":"Twitter","thumbnail":"http://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg","time":"Wed May 20 16:31:15 +0000 2020","tweet":"https://twitter.com/Twitter/status/1263145271946551300","type":"Video","uploader":"Twitter","url":"https://video.twimg.com/amplify_video/1263145212760805376/vid/1280x720/9jous8HM0_duxL0w.mp4?tag=13"},
