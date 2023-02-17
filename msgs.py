@@ -3,6 +3,8 @@ failedToScanExtra = "\n\nTwitter gave me this error: "
 tweetNotFound="Tweet not found."
 tweetSuspended="This Tweet is from a suspended account." 
 
+tweetDescLimit=340
+
 def genLikesDisplay(vnf):
     return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']))
 
@@ -38,9 +40,9 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
         output= body+pollDisplay+likesDisplay
     else:
         output= body + likesDisplay
-    if len(output)>248:
+    if len(output)>tweetDescLimit:
         # find out how many characters we need to remove
-        diff = len(output)-248
+        diff = len(output)-tweetDescLimit
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
         return formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay)
