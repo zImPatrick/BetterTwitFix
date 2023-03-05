@@ -7,7 +7,7 @@ from . import twExtractError
 
 guestToken=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
-
+userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#].*)?$"
 def getGuestToken():
     global guestToken
     if guestToken is None:
@@ -50,6 +50,21 @@ def extractStatus(url):
     except Exception as e:
         return extractStatus_fallback(url)
 
+def extractUser(url):
+    m = re.search(userregex, url)
+    if m is None:
+        raise twExtractError.TwExtractError(400, "Invalid URL")
+    screen_name = m.group(1)
+    # get guest token
+    guestToken = getGuestToken()
+    # get user
+    user = requests.get(f"https://api.twitter.com/1.1/users/show.json?screen_name={screen_name}",headers={"Authorization":"Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw", "x-guest-token":guestToken})
+    output = user.json()
+    if "errors" in output:
+        # pick the first error and create a twExtractError
+        error = output["errors"][0]
+        raise twExtractError.TwExtractError(error["code"], error["message"])
+    return output
 
 def lambda_handler(event, context):
     if ("queryStringParameters" not in event):

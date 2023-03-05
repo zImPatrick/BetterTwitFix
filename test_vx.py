@@ -7,6 +7,7 @@ import msgs
 from flask.testing import FlaskClient
 client = FlaskClient(twitfix.app)
 
+testUser="https://twitter.com/jack"
 testTextTweet="https://twitter.com/jack/status/20"
 testVideoTweet="https://twitter.com/Twitter/status/1263145271946551300"
 testMediaTweet="https://twitter.com/Twitter/status/1118295916874739714"
@@ -39,6 +40,12 @@ def test_textTweetExtract():
     assert tweet["user"]["screen_name"]=="jack"
     assert 'extended_entities' not in tweet
     assert tweet["is_quote_status"]==False
+
+def test_textUserExtract():
+    user = twExtract.extractUser(testUser)
+    assert user["screen_name"]=="jack"
+    assert user["id"]==12
+    assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
 def test_videoTweetExtract():
     tweet = twExtract.extractStatus(testVideoTweet)
