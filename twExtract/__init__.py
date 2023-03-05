@@ -7,7 +7,7 @@ from . import twExtractError
 
 guestToken=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
-userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#].*)?$"
+userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 def getGuestToken():
     global guestToken
     if guestToken is None:
