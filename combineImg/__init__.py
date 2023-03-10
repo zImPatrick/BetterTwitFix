@@ -69,7 +69,8 @@ def combineImages(imageArray, totalWidth, totalHeight,pad=True):
             x += image.size[0]
         y += imageArray[0].size[1]
         x = 0
-        newImage.paste(imageArray[2], (x, y))
+        # paste the final image so that it's centered
+        newImage.paste(imageArray[2], (int((totalWidth - imageArray[2].size[0]) / 2), y))
     elif (len(imageArray) == 4): # if there are four images, combine the first two horizontally, then combine the last two vertically
         for image in imageArray[0:2]:
             newImage.paste(image, (x, y))
@@ -92,7 +93,7 @@ def saveImage(image, name):
 def genImage(imageArray):
     totalSize=getTotalImgSize(imageArray)
     combined = combineImages(imageArray, *totalSize)
-    
+
     finalImg = combined.convert('RGB')
 
     bbox = finalImg.getbbox()
