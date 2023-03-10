@@ -30,9 +30,10 @@ def scaleImageIterable(args):
     targetWidth = args[1]
     targetHeight = args[2]
     pad=args[3]
+    image = image.convert('RGBA')
+    image = ImageOps.expand(image,20)
     if pad:
-        image = image.convert('RGBA')
-        newImg = ImageOps.pad(image, (targetWidth, targetHeight),color=(0, 0, 0, 0))
+        newImg = ImageOps.contain(image, (targetWidth, targetHeight))
     else:
         newImg = ImageOps.fit(image, (targetWidth, targetHeight)) # scale + crop
     return newImg
@@ -91,11 +92,12 @@ def saveImage(image, name):
 def genImage(imageArray):
     totalSize=getTotalImgSize(imageArray)
     combined = combineImages(imageArray, *totalSize)
-    combinedBG = combineImages(imageArray, *totalSize,False)
-    combinedBG = blurImage(combinedBG,50)
-    finalImg = Image.alpha_composite(combinedBG,combined)
-    #finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
-    finalImg = finalImg.convert('RGB')
+    
+    finalImg = combined.convert('RGB')
+
+    bbox = finalImg.getbbox()
+    finalImg = finalImg.crop(bbox)
+
     return finalImg
 
 def downloadImage(url):
