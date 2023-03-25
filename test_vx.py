@@ -8,6 +8,7 @@ from flask.testing import FlaskClient
 client = FlaskClient(twitfix.app)
 
 testUser="https://twitter.com/jack"
+testUserID = "https://twitter.com/i/user/12"
 testUserWeirdURLs=["https://twitter.com/jack?lang=en","https://twitter.com/jack/with_replies","https://twitter.com/jack/media","https://twitter.com/jack/likes","https://twitter.com/jack/with_replies?lang=en","https://twitter.com/jack/media?lang=en","https://twitter.com/jack/likes?lang=en","https://twitter.com/jack/"]
 testTextTweet="https://twitter.com/jack/status/20"
 testVideoTweet="https://twitter.com/Twitter/status/1263145271946551300"
@@ -44,6 +45,12 @@ def test_textTweetExtract():
 
 def test_UserExtract():
     user = twExtract.extractUser(testUser)
+    assert user["screen_name"]=="jack"
+    assert user["id"]==12
+    assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
+
+def test_UserExtractID():
+    user = twExtract.extractUser(testUserID)
     assert user["screen_name"]=="jack"
     assert user["id"]==12
     assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
