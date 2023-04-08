@@ -14,7 +14,13 @@ elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] ==
                 "repo": os.environ["VXTWITTER_REPO"], 
                 "url": os.environ["VXTWITTER_URL"],
                 "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"], # can either be 'local' or a URL to a server handling requests in the same format
-                "gifConvertAPI":os.environ["VXTWITTER_GIF_CONVERT_API"]
+                "gifConvertAPI":os.environ["VXTWITTER_GIF_CONVERT_API"],
+                "workaroundKeys":{
+                    "consumerKey":os.environ["VXTWITTER_WORKAROUND_CONSUMER_KEY"],
+                    "consumerSecret":os.environ["VXTWITTER_WORKAROUND_CONSUMER_SECRET"],
+                    "accessToken":os.environ["VXTWITTER_WORKAROUND_TOKEN"],
+                    "accessTokenSecret":os.environ["VXTWITTER_WORKAROUND_TOKEN_SECRET"]
+                }
             }
         }
 else:
@@ -31,7 +37,8 @@ else:
                     "repo": "https://github.com/dylanpdx/BetterTwitFix", 
                     "url": "https://vxtwitter.com",
                     "combination_method": "local", # can either be 'local' or a URL to a server handling requests in the same format
-                    "gifConvertAPI":""
+                    "gifConvertAPI":"",
+                    "workaroundKeys":{"consumerKey":"","consumerSecret":"","accessToken":"","accessTokenSecret":""}
                 }
             }
 

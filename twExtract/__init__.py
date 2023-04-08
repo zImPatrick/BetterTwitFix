@@ -4,11 +4,24 @@ import json
 import requests
 import re
 from . import twExtractError
+import twitter
+from configHandler import config
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 guestToken=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
+try:
+    auth = twitter.oauth.OAuth(
+        config['config']['workaroundKeys']["accessToken"],
+        config['config']['workaroundKeys']["accessTokenSecret"],
+        config['config']['workaroundKeys']["consumerKey"],
+        config['config']['workaroundKeys']["consumerSecret"]
+    )
+    api = twitter.Twitter(auth=auth)
+except Exception as e:
+    api = None
+
 def getGuestToken():
     global guestToken
     if guestToken is None:
@@ -17,18 +30,17 @@ def getGuestToken():
     return guestToken
 
 def extractStatus_fallback(url):
-    twIE = twitter.TwitterIE()
-    twIE.set_downloader(yt_dlp.YoutubeDL())
-    twid = twIE._match_id(url)
-    status = twIE._call_api(
-    'statuses/show/%s.json' % twid, twid, {
-        'cards_platform': 'Web-12',
-        'include_cards': 1,
-        'include_reply_count': 1,
-        'include_user_entities': 0,
-        'tweet_mode': 'extended',
-    })
-    return status
+    if api is None:
+        raise twExtractError.TwExtractError(500, "Could not extract tweet.")
+    print(" ➤ [ I ] Using fallback method to extract tweet")
+    # get tweet ID
+    m = re.search(pathregex, url)
+    if m is None:
+        raise twExtractError.TwExtractError(400, "Invalid URL")
+    twid = m.group(2)
+    # get tweet
+    tweet = api.statuses.show(_id=twid, tweet_mode="extended")
+    return tweet
 
 
 def extractStatus(url):
