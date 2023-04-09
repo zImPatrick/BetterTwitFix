@@ -275,11 +275,17 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
     isGif=False
     # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
     if tweetType(tweet) == "Video":
-        if tweet['extended_entities']['media'][0]['video_info']['variants']:
+        media=tweet['extended_entities']['media'][0]
+        if media['video_info']['variants']:
             best_bitrate = -1
-            thumb = tweet['extended_entities']['media'][0]['media_url']
-            size=tweet['extended_entities']['media'][0]["original_info"]
-            for video in tweet['extended_entities']['media'][0]['video_info']['variants']:
+            thumb = media['media_url']
+            if 'original_info' in media:
+                size=media["original_info"]
+            elif 'video_info' in media and 'aspect_ratio' in media["video_info"]:
+                size={'width':media["video_info"]["aspect_ratio"][0],'height':media["video_info"]["aspect_ratio"][1]}
+            else:
+                size={'width':720,'height':480}
+            for video in media['video_info']['variants']:
                 if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
                     url = video['url']
                     best_bitrate = video['bitrate']
