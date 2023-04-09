@@ -281,8 +281,12 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
             thumb = media['media_url']
             if 'original_info' in media:
                 size=media["original_info"]
-            elif 'video_info' in media and 'aspect_ratio' in media["video_info"]:
-                size={'width':media["video_info"]["aspect_ratio"][0],'height':media["video_info"]["aspect_ratio"][1]}
+            elif 'sizes' in media and ('large' in media["sizes"] or 'medium' in media["sizes"] or 'small' in media["sizes"] or 'thumb' in media["sizes"]):
+                possibleSizes=['large','medium','small','thumb']
+                for p in possibleSizes:
+                    if p in media["sizes"]:
+                        size={'width':media["sizes"][p]['w'],'height':media["sizes"][p]['h']}
+                        break
             else:
                 size={'width':720,'height':480}
             for video in media['video_info']['variants']:
