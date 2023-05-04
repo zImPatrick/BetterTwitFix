@@ -14,6 +14,7 @@ import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
 from yt_dlp.utils import ExtractorError
+from twitter.api import TwitterHTTPError
 app = Flask(__name__)
 CORS(app)
 
@@ -206,6 +207,11 @@ def vnfFromCacheOrDL(video_link):
             else:
                 exErr.msg=None
             return None,exErr.msg
+        except TwitterHTTPError as twErr:
+            if twErr.e.code == 404:
+                return None,msgs.tweetNotFound
+            else:
+                return None,None
         except Exception as e:
             print(e)
             return None,None
