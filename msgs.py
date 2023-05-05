@@ -3,6 +3,7 @@ failedToScanExtra = "\n\nTwitter gave me this error: "
 tweetNotFound="Tweet not found."
 tweetSuspended="This Tweet is from a suspended account." 
 
+videoDescLimit=220
 tweetDescLimit=340
 
 def genLikesDisplay(vnf):
@@ -21,6 +22,9 @@ def genPollDisplay(poll):
 
 def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
+
+    limit = videoDescLimit if type=="" or type=="Video" else tweetDescLimit
+
     output = ""
     if pollDisplay==None:
         pollDisplay=""
@@ -40,9 +44,9 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
         output= body+pollDisplay+likesDisplay
     else:
         output= body + likesDisplay
-    if len(output)>tweetDescLimit:
+    if len(output)>limit:
         # find out how many characters we need to remove
-        diff = len(output)-tweetDescLimit
+        diff = len(output)-limit
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
         return formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay)

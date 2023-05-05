@@ -453,7 +453,7 @@ def embed(video_link, vnf, image):
                 image = embedVNF['images'][image]
                 template = 'image.html'
             elif qrt['type'] == "Video" or qrt['type'] == "":
-                urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+                urlDesc = urllib.parse.quote(desc)
                 template = 'video.html'
             
     if vnf['type'] == "Image":
@@ -466,11 +466,11 @@ def embed(video_link, vnf, image):
         if vnf['isGif'] == True and config['config']['gifConvertAPI'] != "" and config['config']['gifConvertAPI'] != "none":
             vnf['url'] = f"{config['config']['gifConvertAPI']}/convert.mp4?url={vnf['url']}"
             appNamePost = " - GIF"
-        urlDesc = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        urlDesc = urllib.parse.quote(desc)
         template = 'video.html'
 
     if vnf['type'] == "":
-        urlDesc  = urllib.parse.quote(textwrap.shorten(desc, width=220, placeholder="..."))
+        urlDesc  = urllib.parse.quote(desc)
         template = 'video.html'
         
     color = "#7FFFD4" # Green
