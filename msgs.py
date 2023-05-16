@@ -23,7 +23,7 @@ def genPollDisplay(poll):
 def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
-    limit = videoDescLimit if type=="" or type=="Video" else tweetDescLimit
+    limit = videoDescLimit if type=="" or type=="Video" or (qrt!=None and (qrt["type"]=="" or qrt["type"]=="Video")) else tweetDescLimit
 
     output = ""
     if pollDisplay==None:
