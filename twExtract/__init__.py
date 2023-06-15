@@ -1,26 +1,17 @@
 import yt_dlp
 from yt_dlp.extractor import twitter
+import uuid
 import json
 import requests
 import re
+import random
 from . import twExtractError
-import twitter
 from configHandler import config
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 guestToken=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
-try:
-    auth = twitter.oauth.OAuth(
-        config['config']['workaroundKeys']["accessToken"],
-        config['config']['workaroundKeys']["accessTokenSecret"],
-        config['config']['workaroundKeys']["consumerKey"],
-        config['config']['workaroundKeys']["consumerSecret"]
-    )
-    api = twitter.Twitter(auth=auth)
-except Exception as e:
-    api = None
 
 def getGuestToken():
     global guestToken
@@ -30,17 +21,25 @@ def getGuestToken():
     return guestToken
 
 def extractStatus_fallback(url):
-    if api is None:
-        raise twExtractError.TwExtractError(500, "Could not extract tweet.")
-    print(" ➤ [ I ] Using fallback method to extract tweet")
-    # get tweet ID
-    m = re.search(pathregex, url)
-    if m is None:
-        raise twExtractError.TwExtractError(400, "Invalid URL")
-    twid = m.group(2)
-    # get tweet
-    tweet = api.statuses.show(_id=twid, tweet_mode="extended")
-    return tweet
+    try:
+        # get tweet ID
+        m = re.search(pathregex, url)
+        if m is None:
+            raise twExtractError.TwExtractError(400, "Extract error")
+        twid = m.group(2)
+        # get tweet
+
+        authToken=random.choice(config["config"]["workaroundTokens"].split(","))
+        csrfToken=str(uuid.uuid4()).replace('-', '')
+        tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+        output = tweet.json()
+        if "errors" in output:
+            # pick the first error and create a twExtractError
+            error = output["errors"][0]
+            raise twExtractError.TwExtractError(error["code"], error["message"])
+        return output
+    except Exception as e:
+        raise twExtractError.TwExtractError(400, "Extract error")
 
 
 def extractStatus(url):
