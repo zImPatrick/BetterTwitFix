@@ -15,6 +15,7 @@ elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] ==
                 "url": os.environ["VXTWITTER_URL"],
                 "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"], # can either be 'local' or a URL to a server handling requests in the same format
                 "gifConvertAPI":os.environ["VXTWITTER_GIF_CONVERT_API"],
+                "workaroundTokens":os.environ["VXTWITTER_WORKAROUND_TOKENS"],
                 "workaroundKeys":{
                     "consumerKey":os.environ["VXTWITTER_WORKAROUND_CONSUMER_KEY"],
                     "consumerSecret":os.environ["VXTWITTER_WORKAROUND_CONSUMER_SECRET"],
