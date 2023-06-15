@@ -28,16 +28,19 @@ def extractStatus_fallback(url):
             raise twExtractError.TwExtractError(400, "Extract error")
         twid = m.group(2)
         # get tweet
-
-        authToken=random.choice(config["config"]["workaroundTokens"].split(","))
-        csrfToken=str(uuid.uuid4()).replace('-', '')
-        tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
-        output = tweet.json()
-        if "errors" in output:
-            # pick the first error and create a twExtractError
-            error = output["errors"][0]
-            raise twExtractError.TwExtractError(error["code"], error["message"])
-        return output
+        tokens = config["config"]["workaroundTokens"].split(",")
+        for authToken in tokens:
+            try:
+                csrfToken=str(uuid.uuid4()).replace('-', '')
+                tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+                output = tweet.json()
+                if "errors" in output:
+                    # try another token
+                    continue
+            except Exception as e:
+                continue
+            return output
+        raise twExtractError.TwExtractError(400, "Extract error")
     except Exception as e:
         raise twExtractError.TwExtractError(400, "Extract error")
 
