@@ -56,30 +56,7 @@ def twitfix(sub_path):
     user_agent = request.headers.get('user-agent')
     match = pathregex.search(sub_path)
 
-    if request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
-        if match.start() == 0:
-            twitter_url = "https://twitter.com/" + sub_path
-        if user_agent in generate_embed_user_agents:
-            print( " ➤ [ D ] d.vx link shown to discord user-agent!")
-            if request.url.endswith(".mp4") and "?" not in request.url:
-                
-                if "?" not in request.url:
-                    clean = twitter_url[:-4]
-                else:
-                    clean = twitter_url
-
-                vnf,e = vnfFromCacheOrDL(clean)
-                if vnf == None:
-                    if e is not None:
-                        return message(msgs.failedToScan+msgs.failedToScanExtra+e)
-                    return message(msgs.failedToScan)
-                return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
-            else:
-                return message("To use a direct MP4 link in discord, remove anything past '?' and put '.mp4' at the end")
-        else:
-            print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
-            return dir(sub_path)
-    elif request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
+    if request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
         
         if "?" not in request.url:
@@ -93,7 +70,21 @@ def twitfix(sub_path):
                 return message(msgs.failedToScan+msgs.failedToScanExtra+e)
             return message(msgs.failedToScan)
         return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
-
+    elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
+        if user_agent in generate_embed_user_agents:
+            twitter_url = config['config']['url'] + "/"+sub_path
+            print( " ➤ [ D ] d.vx link shown to discord user-agent!")
+            if request.url.endswith(".mp4") and "?" not in request.url:
+                if "?" not in request.url:
+                    clean = twitter_url[:-4]
+                else:
+                    clean = twitter_url
+            else:
+                clean = twitter_url
+            return redirect(clean+".mp4", 301)
+        else:
+            print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
+            return dir(sub_path)
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -375,6 +366,17 @@ def link_to_vnf_from_unofficial_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
     tweet = twExtract.extractStatus(video_link)
     print (" ➤ [ ✔ ] Unofficial API Success")
+
+    if "extended_entities" not in tweet:
+        # check if any entities with urls ending in /video/XXX or /photo/XXX exist
+        if "entities" in tweet and "urls" in tweet["entities"]:
+            for url in tweet["entities"]["urls"]:
+                if "/video/" in url["expanded_url"] or "/photo/" in url["expanded_url"]:
+                    subTweet = twExtract.extractStatus(url["expanded_url"])
+                    if "extended_entities" in subTweet:
+                        tweet["extended_entities"] = subTweet["extended_entities"]
+                    break
+
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying

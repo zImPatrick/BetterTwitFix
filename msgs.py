@@ -29,7 +29,7 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     if pollDisplay==None:
         pollDisplay=""
 
-    if qrt!=None and not (type=="" or type=="Video"):
+    if qrt!=None:
 
         qrtDisplay=genQrtDisplay(qrt)
         if 'id' in qrt and ('https://twitter.com/'+qrt['screen_name']+'/status/'+qrt['id']) in body:
@@ -39,7 +39,7 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
         qrt=None
 
     if type=="" or type=="Video":
-        output = body+pollDisplay
+        output = body+pollDisplay+likesDisplay
     elif qrt==None:
         output= body+pollDisplay+likesDisplay
     else:
