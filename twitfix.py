@@ -375,6 +375,17 @@ def link_to_vnf_from_unofficial_api(video_link):
     print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
     tweet = twExtract.extractStatus(video_link)
     print (" ➤ [ ✔ ] Unofficial API Success")
+
+    if "extended_entities" not in tweet:
+        # check if any entities with urls ending in /video/XXX or /photo/XXX exist
+        if "entities" in tweet and "urls" in tweet["entities"]:
+            for url in tweet["entities"]["urls"]:
+                if "/video/" in url["expanded_url"] or "/photo/" in url["expanded_url"]:
+                    subTweet = twExtract.extractStatus(url["expanded_url"])
+                    if "extended_entities" in subTweet:
+                        tweet["extended_entities"] = subTweet["extended_entities"]
+                    break
+
     return link_to_vnf_from_tweet_data(tweet,video_link)
 
 def link_to_vnf(video_link): # Return a VideoInfo object or die trying
