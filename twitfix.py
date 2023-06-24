@@ -15,6 +15,7 @@ from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
 from yt_dlp.utils import ExtractorError
 from twitter.api import TwitterHTTPError
+import vxlogging as log
 app = Flask(__name__)
 CORS(app)
 
@@ -73,7 +74,7 @@ def twitfix(sub_path):
     elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
         if user_agent in generate_embed_user_agents:
             twitter_url = config['config']['url'] + "/"+sub_path
-            print( " ➤ [ D ] d.vx link shown to discord user-agent!")
+            log.debug( "d.vx link shown to discord user-agent!")
             if request.url.endswith(".mp4") and "?" not in request.url:
                 if "?" not in request.url:
                     clean = twitter_url[:-4]
@@ -83,7 +84,7 @@ def twitfix(sub_path):
                 clean = twitter_url
             return redirect(clean+".mp4", 301)
         else:
-            print(" ➤ [ R ] Redirect to MP4 using d.fxtwitter.com")
+            log.debug("Redirect to MP4 using d.fxtwitter.com")
             return dir(sub_path)
     elif request.url.endswith("/1") or request.url.endswith("/2") or request.url.endswith("/3") or request.url.endswith("/4") or request.url.endswith("%2F1") or request.url.endswith("%2F2") or request.url.endswith("%2F3") or request.url.endswith("%2F4"):
         twitter_url = "https://twitter.com/" + sub_path
@@ -107,7 +108,7 @@ def twitfix(sub_path):
             return res
 
         else:
-            print(" ➤ [ R ] Redirect to " + twitter_url)
+            log.debug("Redirect to " + twitter_url)
             return redirect(twitter_url, 301)
     else:
         return message("This doesn't appear to be a twitter URL")
@@ -129,7 +130,7 @@ def dir(sub_path):
             return res
 
         else:
-            print(" ➤ [ R ] Redirect to direct MP4 URL")
+            log.debug("Redirect to direct MP4 URL")
             return direct_video(twitter_url)
     else:
         return redirect(url, 301)
@@ -204,7 +205,7 @@ def vnfFromCacheOrDL(video_link):
             else:
                 return None,None
         except Exception as e:
-            print(e)
+            log.error(e)
             return None,None
     else:
         return upgradeVNF(cached_vnf),None
@@ -268,7 +269,7 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
 
 def link_to_vnf_from_tweet_data(tweet,video_link):
     imgs = ["","","","", ""]
-    print(" ➤ [ + ] Tweet Type: " + tweetType(tweet))
+    log.debug("Tweet Type: " + tweetType(tweet))
     isGif=False
     # Check to see if tweet has a video, if not, make the url passed to the VNF the first t.co link in the tweet
     if tweetType(tweet) == "Video":
@@ -301,7 +302,6 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
             imgs[i] = media['media_url_https']
             i = i + 1
 
-        #print(imgs)
         imgs[4] = str(i)
         url   = ""
         images= imgs
@@ -363,15 +363,16 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 
 def link_to_vnf_from_unofficial_api(video_link):
     tweet=None
-    print(" ➤ [ + ] Attempting to download tweet info from UNOFFICIAL Twitter API")
+    log.info("Attempting to download tweet info: "+video_link)
     tweet = twExtract.extractStatus(video_link)
-    print (" ➤ [ ✔ ] Unofficial API Success")
+    log.success("Unofficial API Success")
 
     if "extended_entities" not in tweet:
         # check if any entities with urls ending in /video/XXX or /photo/XXX exist
         if "entities" in tweet and "urls" in tweet["entities"]:
             for url in tweet["entities"]["urls"]:
                 if "/video/" in url["expanded_url"] or "/photo/" in url["expanded_url"]:
+                    log.info("Extra tweet info found in entities: "+video_link+" -> "+url["expanded_url"])
                     subTweet = twExtract.extractStatus(url["expanded_url"])
                     if "extended_entities" in subTweet:
                         tweet["extended_entities"] = subTweet["extended_entities"]
@@ -423,7 +424,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         videoSize  = embedVNF['size'] )
 
 def embed(video_link, vnf, image):
-    print(" ➤ [ E ] Embedding " + vnf['type'] + ": " + video_link)
+    log.info("Embedding " + vnf['type'] + ": " + video_link)
     
     desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
     urlUser = urllib.parse.quote(vnf['uploader'])
