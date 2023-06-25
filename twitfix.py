@@ -70,7 +70,7 @@ def twitfix(sub_path):
             if e is not None:
                 return message(msgs.failedToScan+msgs.failedToScanExtra+e)
             return message(msgs.failedToScan)
-        return getTemplate("rawvideo.html",vnf,"","",clean,"","","","")
+        return make_cached_vnf_response(vnf,getTemplate("rawvideo.html",vnf,"","",clean,"","","",""))
     elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
         if user_agent in generate_embed_user_agents:
             twitter_url = config['config']['url'] + "/"+sub_path
@@ -161,7 +161,7 @@ def rendercombined():
     finalImg = finalImg.convert("RGB")
     finalImg.save(imgIo, 'JPEG',quality=70)
     imgIo.seek(0)
-    return send_file(imgIo, mimetype='image/jpeg')
+    return send_file(imgIo, mimetype='image/jpeg',max_age=86400)
 
 def upgradeVNF(vnf):
     # Makes sure any VNF object passed through this has proper fields if they're added in later versions
@@ -183,6 +183,23 @@ def upgradeVNF(vnf):
 
 def getDefaultTTL(): # TTL for deleting items from the database
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
+
+def secondsUntilTTL(ttl):
+    if ttl < datetime.today().replace(microsecond=0):
+        return 0
+    return (ttl - datetime.today().replace(microsecond=0)).total_seconds()
+
+def make_cached_vnf_response(vnf,response):
+    try:
+        if vnf['ttl'] == None or vnf['ttl'] < datetime.today().replace(microsecond=0) or 'ttl' not in vnf:
+            return response
+        resp = make_response(response)
+        resp.cache_control.max_age = secondsUntilTTL(vnf['ttl'])
+        resp.cache_control.public = True
+        return resp
+    except Exception as e:
+        log.error("Error making cached response: " + str(e))
+        return response
 
 def vnfFromCacheOrDL(video_link):
     cached_vnf = getVnfFromLinkCache(video_link)
@@ -481,14 +498,14 @@ def embed(video_link, vnf, image):
     if vnf['nsfw'] == True:
         color = "#800020" # Red
     
-    return getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNamePost,embedVNF)
+    return make_cached_vnf_response(vnf,getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNamePost,embedVNF))
 
 
 def embedCombined(video_link):
     vnf,e = vnfFromCacheOrDL(video_link)
 
     if vnf != None:
-        return embedCombinedVnf(video_link, vnf)
+        return make_cached_vnf_response(vnf,embedCombinedVnf(video_link, vnf))
     else:
         if e is not None:
             return message(msgs.failedToScan+msgs.failedToScanExtra+e)
@@ -524,7 +541,7 @@ def embedCombinedVnf(video_link,vnf):
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    return getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality")
+    return make_cached_vnf_response(vnf,getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality"))
 
 
 def getPollObject(card):
