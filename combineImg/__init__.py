@@ -134,7 +134,7 @@ def lambda_handler(event, context):
             return {'statusCode':400,'body':'Invalid image URL'}
     combined = genImageFromURL(images)
     if (combined == None):
-        return {'statusCode':400,'body':'Failed to download image(s)'}
+        return {'statusCode':500,'body':'Failed to download image(s)'}
     buffered = BytesIO()
     combined.save(buffered,format="JPEG",quality=60)
     combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
