@@ -133,7 +133,8 @@ def lambda_handler(event, context):
         'statusCode': 200,
         "headers": 
         {
-            "Content-Type": "image/jpeg"
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "max-age=86400"
         },
         'body': combined_str,
         'isBase64Encoded': True
