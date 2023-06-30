@@ -99,7 +99,12 @@ def genImage(imageArray):
     return finalImg
 
 def downloadImage(url):
-    return Image.open(BytesIO(get(url).content))
+    for i in range(3):
+        try:
+            return Image.open(BytesIO(get(url).content))
+        except:
+            pass
+    return None
 
 def genImageFromURL(urlArray):
     # this method avoids storing the images in disk, instead they're stored in memory
@@ -110,6 +115,8 @@ def genImageFromURL(urlArray):
         imageArray = [executor.submit(downloadImage, url) for url in urlArray]
         imageArray = [future.result() for future in imageArray]
     print(f"Images downloaded in: {timer() - start}s")
+    if (None in imageArray): # return none if any of the images failed to download
+        return None
     start = timer()
     finalImg = genImage(imageArray)
     print(f"Image generated in: {timer() - start}s")
@@ -126,6 +133,8 @@ def lambda_handler(event, context):
         if not img.startswith("https://pbs.twimg.com"):
             return {'statusCode':400,'body':'Invalid image URL'}
     combined = genImageFromURL(images)
+    if (combined == None):
+        return {'statusCode':400,'body':'Failed to download image(s)'}
     buffered = BytesIO()
     combined.save(buffered,format="JPEG",quality=60)
     combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
