@@ -134,7 +134,7 @@ def lambda_handler(event, context):
         "headers": 
         {
             "Content-Type": "image/jpeg",
-            "Cache-Control": "max-age=86400"
+            "Cache-Control": "public, max-age=86400"
         },
         'body': combined_str,
         'isBase64Encoded': True

@@ -36,10 +36,13 @@ generate_embed_user_agents = [
     "Synapse (bot; +https://github.com/matrix-org/synapse)",
     "test"]
 
+def isValidUserAgent(user_agent):
+    return user_agent in generate_embed_user_agents
+
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
     user_agent = request.headers.get('user-agent')
-    if user_agent in generate_embed_user_agents:
+    if isValidUserAgent(user_agent):
         return message("TwitFix is an attempt to fix twitter video embeds in discord! created by Robin Universe :)\n\n💖\n\nClick me to be redirected to the repo!")
     else:
         return redirect(config['config']['repo'], 301)
@@ -72,7 +75,7 @@ def twitfix(sub_path):
             return message(msgs.failedToScan)
         return make_cached_vnf_response(vnf,getTemplate("rawvideo.html",vnf,"","",clean,"","","",""))
     elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
-        if user_agent in generate_embed_user_agents:
+        if isValidUserAgent(user_agent):
             twitter_url = config['config']['url'] + "/"+sub_path
             log.debug( "d.vx link shown to discord user-agent!")
             if request.url.endswith(".mp4") and "?" not in request.url:
@@ -103,7 +106,7 @@ def twitfix(sub_path):
         if match.start() == 0:
             twitter_url = "https://twitter.com/" + sub_path
 
-        if user_agent in generate_embed_user_agents:
+        if isValidUserAgent(user_agent):
             res = embedCombined(twitter_url)
             return res
 
@@ -125,7 +128,7 @@ def dir(sub_path):
         if match.start() == 0:
             twitter_url = "https://twitter.com/" + url
 
-        if user_agent in generate_embed_user_agents:
+        if isValidUserAgent(user_agent):
             res = embed_video(twitter_url)
             return res
 
