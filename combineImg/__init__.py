@@ -30,10 +30,9 @@ def scaleImageIterable(args):
     targetWidth = args[1]
     targetHeight = args[2]
     pad=args[3]
-    image = image.convert('RGBA')
-    image = ImageOps.expand(image,20)
     if pad:
-        newImg = ImageOps.contain(image, (targetWidth, targetHeight))
+        image = image.convert('RGBA')
+        newImg = ImageOps.pad(image, (targetWidth, targetHeight),color=(0, 0, 0, 0))
     else:
         newImg = ImageOps.fit(image, (targetWidth, targetHeight)) # scale + crop
     return newImg
@@ -69,8 +68,7 @@ def combineImages(imageArray, totalWidth, totalHeight,pad=True):
             x += image.size[0]
         y += imageArray[0].size[1]
         x = 0
-        # paste the final image so that it's centered
-        newImage.paste(imageArray[2], (int((totalWidth - imageArray[2].size[0]) / 2), y))
+        newImage.paste(imageArray[2], (x, y))
     elif (len(imageArray) == 4): # if there are four images, combine the first two horizontally, then combine the last two vertically
         for image in imageArray[0:2]:
             newImage.paste(image, (x, y))
@@ -93,16 +91,20 @@ def saveImage(image, name):
 def genImage(imageArray):
     totalSize=getTotalImgSize(imageArray)
     combined = combineImages(imageArray, *totalSize)
-
-    finalImg = combined.convert('RGB')
-
-    bbox = finalImg.getbbox()
-    finalImg = finalImg.crop(bbox)
-
+    combinedBG = combineImages(imageArray, *totalSize,False)
+    combinedBG = blurImage(combinedBG,50)
+    finalImg = Image.alpha_composite(combinedBG,combined)
+    #finalImg = ImageOps.pad(finalImg, findImageWithMostPixels(imageArray).size,color=(0, 0, 0, 0))
+    finalImg = finalImg.convert('RGB')
     return finalImg
 
 def downloadImage(url):
-    return Image.open(BytesIO(get(url).content))
+    for i in range(3):
+        try:
+            return Image.open(BytesIO(get(url).content))
+        except:
+            pass
+    return None
 
 def genImageFromURL(urlArray):
     # this method avoids storing the images in disk, instead they're stored in memory
@@ -113,6 +115,8 @@ def genImageFromURL(urlArray):
         imageArray = [executor.submit(downloadImage, url) for url in urlArray]
         imageArray = [future.result() for future in imageArray]
     print(f"Images downloaded in: {timer() - start}s")
+    if (None in imageArray): # return none if any of the images failed to download
+        return None
     start = timer()
     finalImg = genImage(imageArray)
     print(f"Image generated in: {timer() - start}s")
@@ -129,6 +133,8 @@ def lambda_handler(event, context):
         if not img.startswith("https://pbs.twimg.com"):
             return {'statusCode':400,'body':'Invalid image URL'}
     combined = genImageFromURL(images)
+    if (combined == None):
+        return {'statusCode':500,'body':'Failed to download image(s)'}
     buffered = BytesIO()
     combined.save(buffered,format="JPEG",quality=60)
     combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
@@ -136,7 +142,8 @@ def lambda_handler(event, context):
         'statusCode': 200,
         "headers": 
         {
-            "Content-Type": "image/jpeg"
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "public, max-age=86400"
         },
         'body': combined_str,
         'isBase64Encoded': True
