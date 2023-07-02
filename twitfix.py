@@ -110,6 +110,8 @@ def twitfix(sub_path):
 
         if match.start() == 0:
             twitter_url = "https://twitter.com/" + sub_path
+        else:
+            twitter_url = "https://" + sub_path
 
         if isValidUserAgent(user_agent):
             res = embedCombined(twitter_url)
@@ -539,8 +541,8 @@ def embedCombinedVnf(video_link,vnf):
         if qrt is not None:
             desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
 
-    
-    image = "https://vxtwitter.com/rendercombined.jpg?imgs="
+    host = config['config']['url']
+    image = f"{host}/rendercombined.jpg?imgs="
     for i in range(0,int(vnf['images'][4])):
         image = image + vnf['images'][i] + ","
     image = image[:-1] # Remove last comma
