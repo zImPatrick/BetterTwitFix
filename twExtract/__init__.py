@@ -27,6 +27,8 @@ def extractStatus_fallback(url):
         if m is None:
             raise twExtractError.TwExtractError(400, "Extract error")
         twid = m.group(2)
+        if config["config"]["workaroundTokens"] == None:
+            raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
         # get tweet
         tokens = config["config"]["workaroundTokens"].split(",")
         for authToken in tokens:

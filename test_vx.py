@@ -1,5 +1,4 @@
 import os
-os.environ["RUNNING_TESTS"]="1"
 
 import twitfix,twExtract
 import cache

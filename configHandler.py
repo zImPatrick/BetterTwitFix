@@ -1,26 +1,24 @@
 import json
 import os
 
-if ('RUNNING_TESTS' in os.environ):
-    config= {"config":{"link_cache":"ram","database":"","table":"","color":"","appname": "vxTwitter","repo": "https://github.com/dylanpdx/BetterTwitFix","url": "https://vxtwitter.com","combination_method": "local","gifConvertAPI":""}}
-elif ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '1'): # pragma: no cover
+if ('RUNNING_SERVERLESS' in os.environ and os.environ['RUNNING_SERVERLESS'] == '1'): # pragma: no cover
     config = {
             "config":{
-                "link_cache":os.environ["VXTWITTER_LINK_CACHE"],
-                "database":os.environ["VXTWITTER_DATABASE"],
-                "table":os.environ["VXTWITTER_CACHE_TABLE"],
-                "color":os.environ["VXTWITTER_COLOR"], 
-                "appname": os.environ["VXTWITTER_APP_NAME"], 
-                "repo": os.environ["VXTWITTER_REPO"], 
-                "url": os.environ["VXTWITTER_URL"],
-                "combination_method": os.environ["VXTWITTER_COMBINATION_METHOD"], # can either be 'local' or a URL to a server handling requests in the same format
-                "gifConvertAPI":os.environ["VXTWITTER_GIF_CONVERT_API"],
-                "workaroundTokens":os.environ["VXTWITTER_WORKAROUND_TOKENS"],
+                "link_cache":os.getenv("VXTWITTER_LINK_CACHE","none"),
+                "database":os.getenv("VXTWITTER_DATABASE",""),
+                "table":os.getenv("VXTWITTER_CACHE_TABLE",""),
+                "color":os.getenv("VXTWITTER_COLOR",""), 
+                "appname": os.getenv("VXTWITTER_APP_NAME","vxTwitter"), 
+                "repo": os.getenv("VXTWITTER_REPO","https://github.com/dylanpdx/BetterTwitFix"), 
+                "url": os.getenv("VXTWITTER_URL","https://vxtwitter.com"),
+                "combination_method": os.getenv("VXTWITTER_COMBINATION_METHOD","local"), # can either be 'local' or a URL to a server handling requests in the same format
+                "gifConvertAPI":os.getenv("VXTWITTER_GIF_CONVERT_API",""),
+                "workaroundTokens":os.getenv("VXTWITTER_WORKAROUND_TOKENS",None),
                 "workaroundKeys":{
-                    "consumerKey":os.environ["VXTWITTER_WORKAROUND_CONSUMER_KEY"],
-                    "consumerSecret":os.environ["VXTWITTER_WORKAROUND_CONSUMER_SECRET"],
-                    "accessToken":os.environ["VXTWITTER_WORKAROUND_TOKEN"],
-                    "accessTokenSecret":os.environ["VXTWITTER_WORKAROUND_TOKEN_SECRET"]
+                    "consumerKey":os.getenv("VXTWITTER_WORKAROUND_CONSUMER_KEY"),
+                    "consumerSecret":os.getenv("VXTWITTER_WORKAROUND_CONSUMER_SECRET"),
+                    "accessToken":os.getenv("VXTWITTER_WORKAROUND_TOKEN"),
+                    "accessTokenSecret":os.getenv("VXTWITTER_WORKAROUND_TOKEN_SECRET")
                 }
             }
         }
