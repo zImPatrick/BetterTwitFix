@@ -26,9 +26,9 @@ RUN yum -y install tar gzip zlib freetype-devel \
 RUN pip install -U --force-reinstall pillow-simd
 RUN pip install requests
 
-
 # Copy function code
 COPY __init__.py ${LAMBDA_TASK_ROOT}/app.py
+COPY 500.jpg ${LAMBDA_TASK_ROOT}/500.jpg
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "app.lambda_handler" ] 

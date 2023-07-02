@@ -93,6 +93,10 @@ def combineImages(imageArray, totalWidth, totalHeight,pad=True):
 def saveImage(image, name):
     image.save(name)
 
+def get500ImgBase64():
+    data = open("500.jpg","rb").read()
+    return (base64.b64encode(data)).decode('ascii')
+
 # combine up to four images into a single image
 def genImage(imageArray):
     totalSize=getTotalImgSize(imageArray)
@@ -140,7 +144,7 @@ def lambda_handler(event, context):
             return {'statusCode':400,'body':'Invalid image URL'}
     combined = genImageFromURL(images)
     if (combined == None):
-        return {'statusCode':500,'body':'Failed to download image(s)'}
+        return {'statusCode':200,'body':get500ImgBase64(),'isBase64Encoded':True,'headers':{"Content-Type": "image/jpeg","Cache-Control": "public, max-age=86400"}}
     buffered = BytesIO()
     combined.save(buffered,format="JPEG",quality=60)
     combined_str=base64.b64encode(buffered.getvalue()).decode('ascii')
