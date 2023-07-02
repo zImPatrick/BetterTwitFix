@@ -37,7 +37,11 @@ generate_embed_user_agents = [
     "test"]
 
 def isValidUserAgent(user_agent):
-    return user_agent in generate_embed_user_agents
+    if user_agent in generate_embed_user_agents:
+        return True
+    elif "WhatsApp/" in user_agent:
+        return True
+    return False
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
