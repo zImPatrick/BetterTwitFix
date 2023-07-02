@@ -55,7 +55,13 @@ def combineImages(imageArray, totalWidth, totalHeight,pad=True):
     # image generation is needed
     topImg = findImageWithMostPixels(imageArray)
     newImage = Image.new("RGBA", (totalWidth, totalHeight),(0, 0, 0, 0))
+    thirdImg = None
+    if len(imageArray) == 3:
+        thirdImg = imageArray[2]
+        imageArray = imageArray[0:2]
     imageArray = scaleAllImagesToSameSize(imageArray,topImg.size[0],topImg.size[1],pad)
+    if thirdImg: # workaround to avoid scaling the third image twice
+        imageArray.append(thirdImg)
     if (len(imageArray) == 2): # if there are two images, combine them horizontally
         for image in imageArray:
             newImage.paste(image, (x, y))
