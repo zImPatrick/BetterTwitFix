@@ -7,7 +7,10 @@ videoDescLimit=220
 tweetDescLimit=340
 
 def genLikesDisplay(vnf):
-    return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']))
+    if vnf['rts'] > 0:
+        return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']))
+    else:
+        return ("\n\n💖 " + str(vnf['likes']))
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
