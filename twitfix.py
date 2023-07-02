@@ -205,7 +205,7 @@ def secondsUntilTTL(ttl):
 
 def make_cached_vnf_response(vnf,response):
     try:
-        if vnf['ttl'] == None or vnf['ttl'] < datetime.today().replace(microsecond=0) or 'ttl' not in vnf:
+        if 'ttl' not in vnf or vnf['ttl'] == None or secondsUntilTTL(vnf['ttl']) < datetime.today().replace(microsecond=0):
             return response
         resp = make_response(response)
         resp.cache_control.max_age = secondsUntilTTL(vnf['ttl'])
