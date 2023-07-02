@@ -64,8 +64,6 @@ def twitfix(sub_path):
 
     user_agent = request.headers.get('user-agent')
     match = pathregex.search(sub_path)
-    if match is not None:
-        sub_path = match.group(0)
 
     if request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
