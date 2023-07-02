@@ -239,7 +239,7 @@ def test_directEmbed():
 def test_message404():
     resp = client.get("https://twitter.com/jack/status/12345",headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert msgs.failedToScan in str(resp.data)
+    assert "Failed to scan your link!" in str(resp.data)
 
 def test_combine():
     twt,e = twitfix.vnfFromCacheOrDL(testMultiMediaTweet)
