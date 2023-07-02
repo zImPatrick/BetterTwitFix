@@ -37,7 +37,11 @@ generate_embed_user_agents = [
     "test"]
 
 def isValidUserAgent(user_agent):
-    return user_agent in generate_embed_user_agents
+    if user_agent in generate_embed_user_agents:
+        return True
+    elif "WhatsApp/" in user_agent:
+        return True
+    return False
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
@@ -57,8 +61,11 @@ def oembedend():
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
 def twitfix(sub_path):
+
     user_agent = request.headers.get('user-agent')
     match = pathregex.search(sub_path)
+    if match is not None:
+        sub_path = match.group(0)
 
     if request.url.endswith(".mp4") or request.url.endswith("%2Emp4"):
         twitter_url = "https://twitter.com/" + sub_path
