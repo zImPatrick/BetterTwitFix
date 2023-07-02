@@ -111,7 +111,11 @@ def twitfix(sub_path):
         if match.start() == 0:
             twitter_url = "https://twitter.com/" + sub_path
         else:
-            twitter_url = "https://" + sub_path
+            # URL normalization messes up the URL, so we have to fix it
+            if sub_path.startswith("https:/"):
+                twitter_url = sub_path.replace("https:/", "https://", 1)
+            elif sub_path.startswith("http:/"):
+                twitter_url = sub_path.replace("http:/", "http://", 1)
 
         if isValidUserAgent(user_agent):
             res = embedCombined(twitter_url)
