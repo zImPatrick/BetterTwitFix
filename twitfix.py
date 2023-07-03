@@ -199,13 +199,12 @@ def getDefaultTTL(): # TTL for deleting items from the database
     return datetime.today().replace(microsecond=0) + timedelta(days=1)
 
 def secondsUntilTTL(ttl):
-    if ttl < datetime.today().replace(microsecond=0):
-        return 0
-    return (ttl - datetime.today().replace(microsecond=0)).total_seconds()
+    untilTTL = ttl - datetime.today().replace(microsecond=0)
+    return untilTTL.total_seconds()
 
 def make_cached_vnf_response(vnf,response):
     try:
-        if 'ttl' not in vnf or vnf['ttl'] == None or secondsUntilTTL(vnf['ttl']) < datetime.today().replace(microsecond=0):
+        if 'ttl' not in vnf or vnf['ttl'] == None or secondsUntilTTL(vnf['ttl']) <= 0:
             return response
         resp = make_response(response)
         resp.cache_control.max_age = secondsUntilTTL(vnf['ttl'])
