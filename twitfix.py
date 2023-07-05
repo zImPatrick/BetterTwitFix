@@ -228,7 +228,7 @@ def vnfFromCacheOrDL(video_link):
             elif 'suspended' in exErr.msg:
                 exErr.msg=msgs.tweetSuspended
             else:
-                exErr.msg=None
+                exErr.msg=msgs.tweetNotFound
             log.error("VNF Get failed: " + video_link + " " + str(exErr))
             return None,exErr.msg
         except TwitterHTTPError as twErr:
