@@ -32,7 +32,7 @@ Edit config.json to fit your setup
 
 First, get everything updated by running `sudo apt-get update`
 
-Verify Python is installed by running `python3 --version` or `python --version`. Versions 3.7, 3.8, 3.9, and 3.10 are supported (This includes versions like 3.10.7)
+Verify Python is installed by running `python3 --version` or `python --version`. Versions 3.8, 3.9, and 3.10 are supported (This includes versions like 3.10.7)
 
 Run the following command: `git clone https://github.com/dylanpdx/BetterTwitFix`
 This will download all the code for vxTwitter. Once that is done, you can run `cd BetterTwitFix` to enter the newly downloaded folder. 
