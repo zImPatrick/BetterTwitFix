@@ -118,12 +118,13 @@ def twitfix(sub_path):
                     for i in tmedia:
                         if "video_info" in i:
                             # find the highest bitrate
-                            highest = 0
+                            highest = -1
+                            besturl=""
                             for j in i["video_info"]["variants"]:
-                                if "bitrate" in j:
-                                    if j["bitrate"] > highest:
-                                        highest = j["bitrate"]
-                            media.append(j["url"])
+                                if j['content_type'] == "video/mp4" and j['bitrate'] > best_bitrate:
+                                    besturl = j['url']
+                                    best_bitrate = i['bitrate']
+                            media.append(besturl)
                         else:
                             media.append(i["media_url_https"])
                 if "hashtags" in tweetL["extended_entities"]:
