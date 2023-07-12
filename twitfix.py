@@ -104,6 +104,52 @@ def twitfix(sub_path):
 
         image = ( int(request.url[-1]) - 1 )
         return embed_video(clean, image)
+    elif request.url.startswith("https://api.vx"):
+        twitter_url = "https://twitter.com/" + sub_path
+        try:
+            tweet = twExtract.extractStatusV2(twitter_url)
+            tweetL = tweet["legacy"]
+            userL = tweet["core"]["user_results"]["result"]["legacy"]
+            media=[]
+            hashtags=[]
+            if "extended_entities" in tweetL:
+                if "media" in tweetL["extended_entities"]:
+                    tmedia=tweetL["extended_entities"]["media"]
+                    for i in tmedia:
+                        if "video_info" in i:
+                            # find the highest bitrate
+                            highest = 0
+                            for j in i["video_info"]["variants"]:
+                                if "bitrate" in j:
+                                    if j["bitrate"] > highest:
+                                        highest = j["bitrate"]
+                            media.append(j["url"])
+                        else:
+                            media.append(i["media_url_https"])
+                if "hashtags" in tweetL["extended_entities"]:
+                    for i in tweetL["extended_entities"]["hashtags"]:
+                        hashtags.append(i["text"])
+            apiObject = {
+                "text": tweetL["full_text"],
+                "likes": tweetL["favorite_count"],
+                "retweets": tweetL["retweet_count"],
+                "replies": tweetL["reply_count"],
+                "date": tweetL["created_at"],
+                "user_screen_name": userL["screen_name"],
+                "user_name": userL["name"],
+                "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweetL["id_str"],
+                "tweetID": tweetL["id_str"],
+                "mediaURLs": media,
+                "hashtags": hashtags
+            }
+
+
+            if tweet is None:
+                abort(500)
+            return apiObject
+        except Exception as e:
+            log.error(e)
+            abort(500)
 
     if match is not None:
         twitter_url = sub_path

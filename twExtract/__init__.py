@@ -6,12 +6,18 @@ import requests
 import re
 import random
 from . import twExtractError
+import urllib.parse
 from configHandler import config
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
+v2Bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 guestToken=None
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
+
+v2Features='{"rweb_lists_timeline_redesign_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":false,"tweet_awards_web_tipping_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_media_download_video_enabled":false,"responsive_web_enhance_cards_enabled":false}'
+v2graphql_api="NmCeCgkVlsRGS1cAwqtgmw"
+v2fieldToggles='{"withAuxiliaryUserLabels":false,"withArticleRichContentState":false}'
 
 def getGuestToken():
     global guestToken
@@ -94,6 +100,32 @@ def extractStatus_syndication(url):
     #output['user']['']
 
     return output
+
+def extractStatusV2(url):
+    # get tweet ID
+    m = re.search(pathregex, url)
+    if m is None:
+        raise twExtractError.TwExtractError(400, "Extract error")
+    twid = m.group(2)
+    if config["config"]["workaroundTokens"] == None:
+        raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
+    # get tweet
+    tokens = config["config"]["workaroundTokens"].split(",")
+    for authToken in tokens:
+        try:
+            csrfToken=str(uuid.uuid4()).replace('-', '')
+            vars = json.loads('{"focalTweetId":"x","referrer":"messages","with_rux_injections":false,"includePromotedContent":true,"withCommunity":true,"withQuickPromoteEligibilityTweetFields":true,"withBirdwatchNotes":true,"withVoice":true,"withV2Timeline":true}')
+            vars['focalTweetId'] = str(twid)
+            tweet = requests.get(f"https://twitter.com/i/api/graphql/{v2graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}&fieldToggles={urllib.parse.quote(v2fieldToggles)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            output = tweet.json()
+            if "errors" in output:
+                # try another token
+                continue
+            tweet=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries'][0]["content"]["itemContent"]["tweet_results"]["result"]
+        except Exception as e:
+            continue
+        return tweet
+    raise twExtractError.TwExtractError(400, "Extract error")
 
 def extractStatus(url):
     methods=[extractStatus_guestToken,extractStatus_syndication,extractStatus_token]
