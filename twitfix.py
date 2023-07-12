@@ -142,7 +142,10 @@ def twitfix(sub_path):
                 "mediaURLs": media,
                 "hashtags": hashtags
             }
-
+            try:
+                apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
+            except:
+                pass
 
             if tweet is None:
                 abort(500)
