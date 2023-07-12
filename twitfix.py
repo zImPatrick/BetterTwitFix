@@ -108,6 +108,8 @@ def twitfix(sub_path):
         twitter_url = "https://twitter.com/" + sub_path
         try:
             tweet = twExtract.extractStatusV2(twitter_url)
+            if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
+                tweet=tweet['tweet']
             tweetL = tweet["legacy"]
             userL = tweet["core"]["user_results"]["result"]["legacy"]
             media=[]
@@ -118,12 +120,13 @@ def twitfix(sub_path):
                     for i in tmedia:
                         if "video_info" in i:
                             # find the highest bitrate
-                            highest = 0
+                            highest = -1
+                            besturl=""
                             for j in i["video_info"]["variants"]:
-                                if "bitrate" in j:
-                                    if j["bitrate"] > highest:
-                                        highest = j["bitrate"]
-                            media.append(j["url"])
+                                if j['content_type'] == "video/mp4" and j['bitrate'] > best_bitrate:
+                                    besturl = j['url']
+                                    best_bitrate = i['bitrate']
+                            media.append(besturl)
                         else:
                             media.append(i["media_url_https"])
                 if "hashtags" in tweetL["extended_entities"]:
