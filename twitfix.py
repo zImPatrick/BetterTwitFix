@@ -120,12 +120,12 @@ def twitfix(sub_path):
                     for i in tmedia:
                         if "video_info" in i:
                             # find the highest bitrate
-                            highest = -1
+                            best_bitrate = -1
                             besturl=""
                             for j in i["video_info"]["variants"]:
                                 if j['content_type'] == "video/mp4" and j['bitrate'] > best_bitrate:
                                     besturl = j['url']
-                                    best_bitrate = i['bitrate']
+                                    best_bitrate = j['bitrate']
                             media.append(besturl)
                         else:
                             media.append(i["media_url_https"])
