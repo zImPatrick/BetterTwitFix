@@ -104,10 +104,12 @@ def twitfix(sub_path):
 
         image = ( int(request.url[-1]) - 1 )
         return embed_video(clean, image)
-    elif request.url.startswith("https://api.vx"):
+    elif True:
         twitter_url = "https://twitter.com/" + sub_path
         try:
             tweet = twExtract.extractStatusV2(twitter_url)
+            if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
+                tweet=tweet['tweet']
             tweetL = tweet["legacy"]
             userL = tweet["core"]["user_results"]["result"]["legacy"]
             media=[]
