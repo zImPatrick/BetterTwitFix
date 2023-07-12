@@ -249,6 +249,7 @@ def secondsUntilTTL(ttl):
     return untilTTL.total_seconds()
 
 def make_cached_vnf_response(vnf,response):
+    return response
     try:
         if 'ttl' not in vnf or vnf['ttl'] == None or secondsUntilTTL(vnf['ttl']) <= 0:
             return response
