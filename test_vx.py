@@ -200,6 +200,7 @@ def test_embedSuggestive():
     resp = client.get(testNSFWTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert "so i had a bot generate it for me" in str(resp.data)
+    assert "FfF_gKwXgAIpnpD" in str(resp.data)
 
 def test_veryLongEmbed():
     cache.clearCache()
