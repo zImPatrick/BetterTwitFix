@@ -70,7 +70,7 @@ def extractStatus_syndication(url):
     # https://github.com/mikf/gallery-dl/blob/46cae04aa3a113c7b6bbee1bb468669564b14ae8/gallery_dl/extractor/twitter.py#L1784
     m = re.search(pathregex, url)
     if m is None:
-        return extractStatus_token(url)
+        raise twExtractError.TwExtractError(400, "Extract error")
     twid = m.group(2)
     tweet = requests.get("https://cdn.syndication.twimg.com/tweet-result?id=" + twid)
     
@@ -122,13 +122,29 @@ def extractStatusV2(url):
                 # try another token
                 continue
             tweet=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries'][0]["content"]["itemContent"]["tweet_results"]["result"]
+            if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
+                tweet=tweet['tweet']
         except Exception as e:
             continue
         return tweet
     raise twExtractError.TwExtractError(400, "Extract error")
 
+def extractStatusV2Legacy(url):
+    tweet = extractStatusV2(url)
+    if 'errors' in tweet or 'legacy' not in tweet:
+        raise twExtractError.TwExtractError(400, "Extract error")
+    tweet['legacy']['user'] = tweet["core"]["user_results"]["result"]["legacy"]
+    tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
+    if 'card' in tweet:
+        tweet['legacy']['card'] = tweet['card']['legacy']
+    if 'extended_entities' in tweet['legacy']:
+        tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
+        for media in tweet['legacy']['extended_entities']['media']:
+            media['media_url'] = media['media_url_https']
+    return tweet['legacy']
+
 def extractStatus(url):
-    methods=[extractStatus_guestToken,extractStatus_syndication,extractStatus_token]
+    methods=[extractStatus_guestToken,extractStatus_syndication,extractStatus_token,extractStatusV2Legacy]
     for method in methods:
         try:
             return method(url)

@@ -108,8 +108,6 @@ def twitfix(sub_path):
         twitter_url = "https://twitter.com/" + sub_path
         try:
             tweet = twExtract.extractStatusV2(twitter_url)
-            if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
-                tweet=tweet['tweet']
             tweetL = tweet["legacy"]
             userL = tweet["core"]["user_results"]["result"]["legacy"]
             media=[]
@@ -399,7 +397,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
         isGif=True
 
     qrtURL = None
-    if 'quoted_status' in tweet and 'quoted_status_permalink' in tweet:
+    if 'quoted_status_permalink' in tweet:
         qrtURL = tweet['quoted_status_permalink']['expanded']
 
     text = tweet['full_text']
@@ -417,11 +415,14 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
                 text = text.replace(eurl["url"],eurl["expanded_url"])
     ttl = None #default
 
-    if 'card' in tweet and tweet['card']['name'].startswith('poll'):
-        poll=getPollObject(tweet['card'])
-        if tweet['card']['binding_values']['counts_are_final']['boolean_value'] == False:
-            ttl = datetime.today().replace(microsecond=0) + timedelta(minutes=1)
-    else:
+    try:
+        if 'card' in tweet and tweet['card']['name'].startswith('poll'):
+            poll=getPollObject(tweet['card'])
+            if tweet['card']['binding_values']['counts_are_final']['boolean_value'] == False:
+                ttl = datetime.today().replace(microsecond=0) + timedelta(minutes=1)
+        else:
+            poll=None
+    except:
         poll=None
 
     vnf = tweetInfo(
