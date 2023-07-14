@@ -117,11 +117,20 @@ def extractStatusV2(url):
             vars = json.loads('{"focalTweetId":"x","referrer":"messages","with_rux_injections":false,"includePromotedContent":true,"withCommunity":true,"withQuickPromoteEligibilityTweetFields":true,"withBirdwatchNotes":true,"withVoice":true,"withV2Timeline":true}')
             vars['focalTweetId'] = str(twid)
             tweet = requests.get(f"https://twitter.com/i/api/graphql/{v2graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}&fieldToggles={urllib.parse.quote(v2fieldToggles)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            if tweet.status_code == 429:
+                # try another token
+                continue
             output = tweet.json()
             if "errors" in output:
                 # try another token
                 continue
-            tweet=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries'][0]["content"]["itemContent"]["tweet_results"]["result"]
+            entries=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries']
+            tweetEntry=None
+            for entry in entries:
+                if 'entryId' in entry and entry['entryId'] == "tweet-"+twid:
+                    tweetEntry=entry
+                    break
+            tweet=tweetEntry["content"]["itemContent"]["tweet_results"]["result"]
             if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
                 tweet=tweet['tweet']
         except Exception as e:
