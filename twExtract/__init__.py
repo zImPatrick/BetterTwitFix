@@ -15,9 +15,8 @@ pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
 
-v2Features='{"rweb_lists_timeline_redesign_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":false,"tweet_awards_web_tipping_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_media_download_video_enabled":false,"responsive_web_enhance_cards_enabled":false}'
-v2graphql_api="NmCeCgkVlsRGS1cAwqtgmw"
-v2fieldToggles='{"withAuxiliaryUserLabels":false,"withArticleRichContentState":false}'
+v2Features='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"super_follow_tweet_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"creator_subscriptions_subscription_count_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
+v2graphql_api="2OOZWmw8nAtUHVnXXQhgaA"
 
 def getGuestToken():
     global guestToken
@@ -114,9 +113,9 @@ def extractStatusV2(url):
     for authToken in tokens:
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
-            vars = json.loads('{"focalTweetId":"x","referrer":"messages","with_rux_injections":false,"includePromotedContent":true,"withCommunity":true,"withQuickPromoteEligibilityTweetFields":true,"withBirdwatchNotes":true,"withVoice":true,"withV2Timeline":true}')
-            vars['focalTweetId'] = str(twid)
-            tweet = requests.get(f"https://twitter.com/i/api/graphql/{v2graphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}&fieldToggles={urllib.parse.quote(v2fieldToggles)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            vars = json.loads('{"includeTweetImpression":true,"includeHasBirdwatchNotes":false,"includeEditPerspective":false,"rest_ids":["x"],"includeEditControl":true,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
+            vars['rest_ids'][0] = str(twid)
+            tweet = requests.get(f"https://twitter.com/i/api/graphql/{v2graphql_api}/TweetResultsByIdsQuery?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
             if tweet.status_code == 429:
                 # try another token
                 continue
@@ -124,13 +123,14 @@ def extractStatusV2(url):
             if "errors" in output:
                 # try another token
                 continue
-            entries=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries']
+            entries=output['data']['tweet_results']
             tweetEntry=None
             for entry in entries:
-                if 'entryId' in entry and entry['entryId'] == "tweet-"+twid:
-                    tweetEntry=entry
+                result = entry['result']
+                if 'rest_id' in result and result['rest_id'] == twid:
+                    tweetEntry=result
                     break
-            tweet=tweetEntry["content"]["itemContent"]["tweet_results"]["result"]
+            tweet=tweetEntry
             if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
                 tweet=tweet['tweet']
         except Exception as e:
@@ -142,7 +142,7 @@ def extractStatusV2Legacy(url):
     tweet = extractStatusV2(url)
     if 'errors' in tweet or 'legacy' not in tweet:
         raise twExtractError.TwExtractError(400, "Extract error")
-    tweet['legacy']['user'] = tweet["core"]["user_results"]["result"]["legacy"]
+    tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
     tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
     if 'card' in tweet:
         tweet['legacy']['card'] = tweet['card']['legacy']
@@ -150,6 +150,8 @@ def extractStatusV2Legacy(url):
         tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
         for media in tweet['legacy']['extended_entities']['media']:
             media['media_url'] = media['media_url_https']
+    if 'tweet_card' in tweet:
+        tweet['legacy']['card'] = tweet['tweet_card']['legacy']
     return tweet['legacy']
 
 def extractStatus(url):
