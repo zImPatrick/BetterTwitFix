@@ -109,7 +109,7 @@ def twitfix(sub_path):
         try:
             tweet = twExtract.extractStatusV2(twitter_url)
             tweetL = tweet["legacy"]
-            userL = tweet["core"]["user_results"]["result"]["legacy"]
+            userL = tweet["core"]["user_result"]["result"]["legacy"]
             media=[]
             hashtags=[]
             if "extended_entities" in tweetL:
@@ -138,8 +138,8 @@ def twitfix(sub_path):
                 "date": tweetL["created_at"],
                 "user_screen_name": userL["screen_name"],
                 "user_name": userL["name"],
-                "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweetL["id_str"],
-                "tweetID": tweetL["id_str"],
+                "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweetL["conversation_id_str"],
+                "tweetID": tweetL["conversation_id_str"],
                 "mediaURLs": media,
                 "hashtags": hashtags
             }
