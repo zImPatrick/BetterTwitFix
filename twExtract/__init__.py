@@ -119,7 +119,13 @@ def extractStatusV2(url):
             if tweet.status_code == 429:
                 # try another token
                 continue
+            try:
+                rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
+                print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
+            except: # for some reason the header is not always present
+                pass
             output = tweet.json()
+            
             if "errors" in output:
                 # try another token
                 continue
