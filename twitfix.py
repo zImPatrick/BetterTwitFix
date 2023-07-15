@@ -37,6 +37,7 @@ generate_embed_user_agents = [
     "test"]
 
 def isValidUserAgent(user_agent):
+    return True
     if user_agent in generate_embed_user_agents:
         return True
     elif "WhatsApp/" in user_agent:
