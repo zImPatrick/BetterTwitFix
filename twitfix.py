@@ -204,6 +204,10 @@ def dir(sub_path):
 def favicon(): # pragma: no cover
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
+@app.route('/apple-touch-icon.png')
+def apple_touch_icon(): # pragma: no cover
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png',mimetype='image/png')
+
 @app.route("/rendercombined.jpg")
 def rendercombined():
     # get "imgs" from request arguments
