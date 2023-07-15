@@ -128,8 +128,8 @@ def twitfix(sub_path):
                             media.append(besturl)
                         else:
                             media.append(i["media_url_https"])
-                if "hashtags" in tweetL["extended_entities"]:
-                    for i in tweetL["extended_entities"]["hashtags"]:
+                if "hashtags" in tweetL["entities"]:
+                    for i in tweetL["entities"]["hashtags"]:
                         hashtags.append(i["text"])
             apiObject = {
                 "text": tweetL["full_text"],
