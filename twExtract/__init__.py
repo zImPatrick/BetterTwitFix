@@ -133,12 +133,12 @@ def extractStatusV2(url):
             tweetEntry=None
             for entry in entries:
                 result = entry['result']
+                if '__typename' in result and result['__typename'] == 'TweetWithVisibilityResults':
+                    result=result['tweet']
                 if 'rest_id' in result and result['rest_id'] == twid:
                     tweetEntry=result
                     break
             tweet=tweetEntry
-            if '__typename' in tweet and tweet['__typename'] == 'TweetWithVisibilityResults':
-                tweet=tweet['tweet']
         except Exception as e:
             continue
         return tweet
@@ -161,8 +161,7 @@ def extractStatusV2Legacy(url):
     return tweet['legacy']
 
 def extractStatus(url):
-    #methods=[extractStatus_guestToken,extractStatus_syndication,extractStatus_token,extractStatusV2Legacy]
-    methods=[extractStatus_syndication,extractStatusV2Legacy]
+    methods=[extractStatus_guestToken,extractStatus_syndication,extractStatus_token,extractStatusV2Legacy]
     for method in methods:
         try:
             return method(url)
