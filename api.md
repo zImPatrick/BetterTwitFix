@@ -3,7 +3,7 @@
 The VXTwitter API currently returns information about tweets. If you want more functionality added, please [Open an issue!](https://github.com/dylanpdx/BetterTwitFix/issues)
 
 The following fields are returned:
-```json
+```js
 {
     "date": "Wed Oct 05 18:40:30 +0000 2022", // Date the tweet was posted
     "date_epoch": 1664995230, // Epoch date the tweet was posted
