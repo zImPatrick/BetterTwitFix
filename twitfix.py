@@ -112,11 +112,13 @@ def twitfix(sub_path):
             tweetL = tweet["legacy"]
             userL = tweet["core"]["user_result"]["result"]["legacy"]
             media=[]
+            media_extended=[]
             hashtags=[]
             if "extended_entities" in tweetL:
                 if "media" in tweetL["extended_entities"]:
                     tmedia=tweetL["extended_entities"]["media"]
                     for i in tmedia:
+                        extendedInfo={}
                         if "video_info" in i:
                             # find the highest bitrate
                             best_bitrate = -1
@@ -126,8 +128,31 @@ def twitfix(sub_path):
                                     besturl = j['url']
                                     best_bitrate = j['bitrate']
                             media.append(besturl)
+                            extendedInfo["url"] = besturl
+                            extendedInfo["type"] = "video"
+                            altText = None
+                            extendedInfo["size"] = {"width":i["original_info"]["width"],"height":i["original_info"]["height"]}
+                            if "ext_alt_text" in i:
+                                altText=i["ext_alt_text"]
+                            if "duration_millis" in i["video_info"]:
+                                extendedInfo["duration_millis"] = i["video_info"]["duration_millis"]
+                            else:
+                                extendedInfo["duration_millis"] = 0
+                            extendedInfo["thumbnail_url"] = i["media_url_https"]
+                            extendedInfo["altText"] = altText
+                            media_extended.append(extendedInfo)
                         else:
                             media.append(i["media_url_https"])
+                            extendedInfo["url"] = i["media_url_https"]
+                            altText=None
+                            if "ext_alt_text" in i:
+                                altText=i["ext_alt_text"]
+                            extendedInfo["altText"] = altText
+                            extendedInfo["type"] = "image"
+                            extendedInfo["size"] = {"width":i["original_info"]["width"],"height":i["original_info"]["height"]}
+                            extendedInfo["thumbnail_url"] = i["media_url_https"]
+                            media_extended.append(extendedInfo)
+
                 if "hashtags" in tweetL["entities"]:
                     for i in tweetL["entities"]["hashtags"]:
                         hashtags.append(i["text"])
@@ -142,6 +167,7 @@ def twitfix(sub_path):
                 "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweetL["conversation_id_str"],
                 "tweetID": tweetL["conversation_id_str"],
                 "mediaURLs": media,
+                "media_extended": media_extended,
                 "hashtags": hashtags
             }
             try:
