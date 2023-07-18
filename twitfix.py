@@ -176,11 +176,11 @@ def twitfix(sub_path):
                 pass
 
             if tweet is None:
-                abort(500)
+                abort(500, '{"message": "Failed to extract tweet (Twitter API error)"}')
             return apiObject
         except Exception as e:
             log.error(e)
-            abort(500)
+            abort(500, '{"message": "Failed to extract tweet (Processing error)"}')
 
     if match is not None:
         twitter_url = sub_path
