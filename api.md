@@ -7,7 +7,7 @@ The following fields are returned:
 {
     "date": "Wed Oct 05 18:40:30 +0000 2022", // Date the tweet was posted
     "date_epoch": 1664995230, // Epoch date the tweet was posted
-    "hashtags": ["so","cool"], // String of hashtags in the tweet (without the actual hashtag)
+    "hashtags": ["so","cool"], // Array of hashtags in the tweet (without the actual hashtag)
     "likes": 21664, // the amount of likes the tweet has
     "mediaURLs": [ // A url for any media in the tweet (videos, gifs, images)
         "https://video.twimg.com/tweet_video/FeU5fh1XkA0vDAE.mp4",
