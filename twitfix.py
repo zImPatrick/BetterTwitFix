@@ -176,10 +176,12 @@ def twitfix(sub_path):
                 pass
 
             if tweet is None:
+                log.error("API Get failed: " + twitter_url + " (Tweet null)")
                 abort(500, '{"message": "Failed to extract tweet (Twitter API error)"}')
+            log.success("API Get success")
             return apiObject
         except Exception as e:
-            log.error(e)
+            log.error("API Get failed: " + twitter_url + " " + str(e))
             abort(500, '{"message": "Failed to extract tweet (Processing error)"}')
 
     if match is not None:
@@ -302,7 +304,7 @@ def vnfFromCacheOrDL(video_link):
         try:
             vnf = link_to_vnf(video_link)
             addVnfToLinkCache(video_link, vnf)
-            log.success("VNF Get success: " + video_link)
+            log.success("VNF Get success")
             return vnf,None
         except (ExtractorError, twExtract.twExtractError.TwExtractError) as exErr:
             if 'HTTP Error 404' in exErr.msg or 'No status found with that ID' in exErr.msg:
