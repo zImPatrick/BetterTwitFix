@@ -164,8 +164,8 @@ def twitfix(sub_path):
                 "date": tweetL["created_at"],
                 "user_screen_name": userL["screen_name"],
                 "user_name": userL["name"],
-                "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweetL["conversation_id_str"],
-                "tweetID": tweetL["conversation_id_str"],
+                "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweet["rest_id"],
+                "tweetID": tweet["rest_id"],
                 "mediaURLs": media,
                 "media_extended": media_extended,
                 "hashtags": hashtags
