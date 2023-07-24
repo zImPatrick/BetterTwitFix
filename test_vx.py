@@ -224,8 +224,8 @@ def test_embedFromOutdatedCache(): # presets a cache that has VNF's with missing
     assert resp.status_code==200
     resp = client.get(testMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    #resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    #assert resp.status_code==200
+    resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
     # qrt
     resp = client.get(testQrtVideoTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
