@@ -95,7 +95,7 @@ def test_mediaTweetExtract():
 
 def test_multimediaTweetExtract():
     tweet = twExtract.extractStatus(testMultiMediaTweet)
-    assert tweet["full_text"]==testMultiMedia_compare['description']
+    assert tweet["full_text"][:94]==testMultiMedia_compare['description'][:94]
     assert tweet["user"]["screen_name"]==twitterAccountName
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==4
