@@ -93,7 +93,7 @@ def twitfix(sub_path):
             if e is not None:
                 return abort(500,"Failed to scan tweet: "+e)
             return abort(500,"Failed to scan tweet")
-        return make_cached_vnf_response(vnf,getTemplate("txt.html",vnf,vnf["description"],"",clean,"","","",""))
+        return make_content_type_response(getTemplate("txt.html",vnf,vnf["description"],"",clean,"","","",""),"text/plain")
     elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
         if isValidUserAgent(user_agent):
             twitter_url = config['config']['url'] + "/"+sub_path
@@ -305,6 +305,11 @@ def getDefaultTTL(): # TTL for deleting items from the database
 def secondsUntilTTL(ttl):
     untilTTL = ttl - datetime.today().replace(microsecond=0)
     return untilTTL.total_seconds()
+
+def make_content_type_response(response, content_type):
+    resp = make_response(response)
+    resp.headers['Content-Type'] = content_type
+    return resp
 
 def make_cached_vnf_response(vnf,response):
     return response
