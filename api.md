@@ -45,3 +45,6 @@ The following fields are returned:
     "user_screen_name": "Twitter" // The actual handle of the user, i.e "NintendoAmerica"
 }
 ```
+
+Additionally, you can add the `include_txt` parameter. Setting it to 'true' will include an additional media URL, a link to a .txt containing basic tweet information.
+`include_txt` can also be set to `ifnomedia`, which will only add a link to the .txt if there is no media URLs in the tweet.
