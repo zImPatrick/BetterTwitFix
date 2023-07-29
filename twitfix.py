@@ -80,6 +80,20 @@ def twitfix(sub_path):
                 return message(msgs.failedToScan+msgs.failedToScanExtra+e)
             return message(msgs.failedToScan)
         return make_cached_vnf_response(vnf,getTemplate("rawvideo.html",vnf,"","",clean,"","","",""))
+    elif request.url.endswith(".txt") or request.url.endswith("%2Etxt"):
+        twitter_url = "https://twitter.com/" + sub_path
+        
+        if "?" not in request.url:
+            clean = twitter_url[:-4]
+        else:
+            clean = twitter_url
+            
+        vnf,e = vnfFromCacheOrDL(clean)
+        if vnf is None:
+            if e is not None:
+                return abort(500,"Failed to scan tweet: "+e)
+            return abort(500,"Failed to scan tweet")
+        return make_cached_vnf_response(vnf,getTemplate("txt.html",vnf,vnf["description"],"",clean,"","","",""))
     elif request.url.startswith("https://d.vx"): # Matches d.fx? Try to give the user a direct link
         if isValidUserAgent(user_agent):
             twitter_url = config['config']['url'] + "/"+sub_path
@@ -156,6 +170,13 @@ def twitfix(sub_path):
                 if "hashtags" in tweetL["entities"]:
                     for i in tweetL["entities"]["hashtags"]:
                         hashtags.append(i["text"])
+
+            include_txt = request.args.get("include_txt", "false")
+
+            if include_txt == "true" or (include_txt == "ifnomedia" and len(media)==0):
+                txturl = config['config']['url']+"/"+userL["screen_name"]+"/status/"+tweet["rest_id"]+".txt"
+                media.append(txturl)
+                media_extended.append({"url":txturl,"type":"txt"})
             apiObject = {
                 "text": tweetL["full_text"],
                 "likes": tweetL["favorite_count"],
