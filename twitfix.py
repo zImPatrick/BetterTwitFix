@@ -169,6 +169,8 @@ def twitfix(sub_path):
                             media.append(besturl)
                             extendedInfo["url"] = besturl
                             extendedInfo["type"] = "video"
+                            if (i["type"] == "animated_gif"):
+                                extendedInfo["type"] = "gif"
                             altText = None
                             extendedInfo["size"] = {"width":i["original_info"]["width"],"height":i["original_info"]["height"]}
                             if "ext_alt_text" in i:
