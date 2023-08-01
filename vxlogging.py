@@ -39,6 +39,9 @@ def debug(message):
 
 def get_exception_traceback_str(exc: Exception) -> str:
     # Ref: https://stackoverflow.com/a/76584117/
-    file = StringIO()
-    traceback.print_exception(exc, file=file)
-    return file.getvalue().rstrip()
+    try:
+        file = StringIO()
+        traceback.print_exception(exc, file=file)
+        return file.getvalue().rstrip()
+    except:
+        return str(exc)
