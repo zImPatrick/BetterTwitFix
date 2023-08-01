@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 import combineImg
 from datetime import date,datetime, timedelta
-from io import BytesIO
+from io import BytesIO, StringIO
 import msgs
 import twExtract as twExtract
 from configHandler import config
@@ -17,6 +17,7 @@ from yt_dlp.utils import ExtractorError
 from twitter.api import TwitterHTTPError
 import vxlogging as log
 import zipfile
+import traceback
 app = Flask(__name__)
 CORS(app)
 
@@ -236,7 +237,7 @@ def twitfix(sub_path):
             log.success("API Get success")
             return apiObject
         except Exception as e:
-            log.error("API Get failed: " + twitter_url + " " + str(e))
+            log.error("API Get failed: " + twitter_url + " " + log.get_exception_traceback_str(e))
             abort(500, '{"message": "Failed to extract tweet (Processing error)"}')
 
     if match is not None:
@@ -373,17 +374,17 @@ def vnfFromCacheOrDL(video_link):
                 exErr.msg=msgs.tweetSuspended
             else:
                 exErr.msg=msgs.tweetNotFound
-            log.error("VNF Get failed: " + video_link + " " + str(exErr))
+                
+            log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(exErr))
             return None,exErr.msg
         except TwitterHTTPError as twErr:
-            log.error("VNF Get failed: " + video_link + " " + str(twErr))
+            log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(twErr))
             if twErr.e.code == 404:
                 return None,msgs.tweetNotFound
             else:
                 return None,None
         except Exception as e:
-            log.error("VNF Get failed: " + video_link + " " + str(e))
-            log.error(e)
+            log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(e))
             return None,None
     else:
         return upgradeVNF(cached_vnf),None

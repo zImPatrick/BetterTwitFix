@@ -1,5 +1,7 @@
 IS_DEBUG = False
 from flask import  request
+from io import StringIO
+import traceback
 def generic(message):
     invocation_id = None
     try:
@@ -34,3 +36,9 @@ def debug(message):
     if IS_DEBUG:
         message = str(message)
         generic(f" > [ D ] {message}")
+
+def get_exception_traceback_str(exc: Exception) -> str:
+    # Ref: https://stackoverflow.com/a/76584117/
+    file = StringIO()
+    traceback.print_exception(exc, file=file)
+    return file.getvalue().rstrip()
