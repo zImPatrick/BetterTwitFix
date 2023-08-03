@@ -165,7 +165,7 @@ def extractStatus(url):
     for method in methods:
         try:
             return method(url)
-        except twExtractError.TwExtractError as e:
+        except Exception as e:
             continue
     raise twExtractError.TwExtractError(400, "Extract error")
 
