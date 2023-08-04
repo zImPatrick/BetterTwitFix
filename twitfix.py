@@ -59,7 +59,8 @@ def oembedend():
     user  = request.args.get("user", None)
     link  = request.args.get("link", None)
     ttype = request.args.get("ttype", None)
-    return  oEmbedGen(desc, user, link, ttype)
+    provName = request.args.get("provider",None)
+    return  oEmbedGen(desc, user, link, ttype,providerName=provName)
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
 def twitfix(sub_path):
@@ -376,12 +377,6 @@ def vnfFromCacheOrDL(video_link):
                 
             log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(exErr))
             return None,exErr.msg
-        except TwitterHTTPError as twErr:
-            log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(twErr))
-            if twErr.e.code == 404:
-                return None,msgs.tweetNotFound
-            else:
-                return None,None
         except Exception as e:
             log.error("VNF Get failed: " + video_link + " " + log.get_exception_traceback_str(e))
             return None,None
@@ -633,7 +628,7 @@ def embed(video_link, vnf, image):
             embedVNF=qrt
             if qrt['type'] == "Image":
                 if embedVNF['images'][4]!="1":
-                    appNamePost = " - Image " + str(image+1) + "/" + str(vnf['images'][4])
+                    appNamePost = " - Image " + str(image+1) + " of " + str(vnf['images'][4])
                 image = embedVNF['images'][image]
                 template = 'image.html'
             elif qrt['type'] == "Video" or qrt['type'] == "":
@@ -741,11 +736,13 @@ def tweetType(tweet): # Are we dealing with a Video, Image, or Text tweet?
     return out
 
 
-def oEmbedGen(description, user, video_link, ttype):
+def oEmbedGen(description, user, video_link, ttype,providerName=None):
+    if providerName == None:
+        providerName = config['config']['appname']
     out = {
             "type"          : ttype,
             "version"       : "1.0",
-            "provider_name" : config['config']['appname'],
+            "provider_name" : providerName,
             "provider_url"  : config['config']['repo'],
             "title"         : description,
             "author_name"   : user,
