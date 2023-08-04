@@ -5,4 +5,3 @@ Pillow==10.0.0
 Flask==2.2.3
 Flask-Cors==4.0.0
 yt-dlp==2022.7.18
-twitter==1.19.6

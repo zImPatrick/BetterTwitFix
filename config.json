@@ -9,6 +9,7 @@
         "table": "[database table here]",
         "url": "https://vxtwitter.com",
         "combination_method": "local",
-        "gifConvertAPI": "local"
+        "gifConvertAPI": "local",
+        "workaroundTokens":null
     }
 }

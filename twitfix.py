@@ -14,7 +14,6 @@ import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
 from yt_dlp.utils import ExtractorError
-from twitter.api import TwitterHTTPError
 import vxlogging as log
 import zipfile
 import traceback
