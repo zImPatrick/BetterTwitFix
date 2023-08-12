@@ -602,7 +602,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
 def embed(video_link, vnf, image):
     log.info("Embedding " + vnf['type'] + ": " + video_link)
     
-    desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
+    desc    = re.sub(r' https:\/\/t\.co\/\S+(?=\s|$)', '', vnf['description'])
     urlUser = urllib.parse.quote(vnf['uploader'])
     urlDesc = urllib.parse.quote(desc)
     urlLink = urllib.parse.quote(video_link)
