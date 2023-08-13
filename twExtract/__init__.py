@@ -35,6 +35,7 @@ def extractStatus_token(url):
         raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = config["config"]["workaroundTokens"].split(",")
+    random.shuffle(tokens)
     for authToken in tokens:
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
@@ -110,6 +111,7 @@ def extractStatusV2(url):
         raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = config["config"]["workaroundTokens"].split(",")
+    random.shuffle(tokens)
     for authToken in tokens:
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
@@ -185,6 +187,7 @@ def extractUser(url):
     screen_name = m.group(1)
     # get user
     tokens = config["config"]["workaroundTokens"].split(",")
+    random.shuffle(tokens)
     for authToken in tokens:
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
