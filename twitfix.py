@@ -45,6 +45,10 @@ def isValidUserAgent(user_agent):
         return True
     return False
 
+@app.route('/robots.txt')
+def robots():
+    return "User-agent: *\nDisallow: /"
+
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
     user_agent = request.headers.get('user-agent')
