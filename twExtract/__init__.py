@@ -147,7 +147,10 @@ def extractStatusV2(url):
 def extractStatusV2Legacy(url):
     tweet = extractStatusV2(url)
     if 'errors' in tweet or 'legacy' not in tweet:
-        raise twExtractError.TwExtractError(400, "Extract error")
+        if 'errors' in tweet:
+            raise twExtractError.TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
+        else:
+            raise twExtractError.TwExtractError(400, "Extract error (no legacy data)")
     tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
     tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
     if 'card' in tweet:
