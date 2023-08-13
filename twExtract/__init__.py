@@ -161,7 +161,7 @@ def extractStatusV2Legacy(url):
     return tweet['legacy']
 
 def extractStatus(url):
-    methods=[extractStatus_syndication,extractStatusV2Legacy]
+    methods=[extractStatusV2Legacy]
     for method in methods:
         try:
             return method(url)
