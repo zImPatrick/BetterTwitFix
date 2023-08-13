@@ -487,6 +487,8 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
     qrtURL = None
     if 'quoted_status_permalink' in tweet:
         qrtURL = tweet['quoted_status_permalink']['expanded']
+    elif 'quoted_status_id_str' in tweet:
+        qrtURL = "https://twitter.com/i/status/" + tweet['quoted_status_id_str']
 
     text = tweet['full_text']
 
