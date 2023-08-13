@@ -74,7 +74,7 @@ def extractStatus_syndication(url):
     tweet = requests.get("https://cdn.syndication.twimg.com/tweet-result?id=" + twid)
     
     
-    if tweet.status_code == 404 or tweet.status_code == 403:
+    if tweet.status_code == 404:
         raise twExtractError.TwExtractError(404, "Tweet not found")
     output = tweet.json()
     if "errors" in output:
