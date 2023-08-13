@@ -1,6 +1,7 @@
 failedToScan="Failed to scan your link! This may be due to an incorrect link, private/suspended account, deleted tweet, or recent changes to Twitter's API (Thanks, Elon!)."
 failedToScanExtra = "\n\nTwitter gave me this error: "
 tweetNotFound="Tweet not found."
+unknownError="Unknown Error"
 tweetSuspended="This Tweet is from a suspended account." 
 
 videoDescLimit=220
