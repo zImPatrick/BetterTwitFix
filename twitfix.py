@@ -371,7 +371,7 @@ def vnfFromCacheOrDL(video_link):
             addVnfToLinkCache(video_link, vnf)
             log.success("VNF Get success")
             return vnf,None
-        except (ExtractorError, twExtract.twExtractError.TwExtractError) as exErr:
+        except (ExtractorError, twExtract.TwExtractError) as exErr:
             if 'HTTP Error 404' in exErr.msg or 'No status found with that ID' in exErr.msg:
                 exErr.msg=msgs.tweetNotFound
             elif 'suspended' in exErr.msg:
