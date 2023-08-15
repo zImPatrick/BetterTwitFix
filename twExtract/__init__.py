@@ -48,6 +48,7 @@ def extractStatus_token(url,workaroundTokens):
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
+        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
@@ -147,6 +148,7 @@ def extractStatusV2(url,workaroundTokens):
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
+        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             vars = json.loads('{"includeTweetImpression":true,"includeHasBirdwatchNotes":false,"includeEditPerspective":false,"rest_ids":["x"],"includeEditControl":true,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
@@ -155,14 +157,10 @@ def extractStatusV2(url,workaroundTokens):
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
                 print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
-                if (rateLimitRemaining == "0"):
-                    usedTokens.append(authToken)
-                    continue
             except: # for some reason the header is not always present
                 pass
             if tweet.status_code == 429:
                 # try another token
-                usedTokens.append(authToken)
                 continue
             output = tweet.json()
             
@@ -232,6 +230,7 @@ def extractUser(url,workaroundTokens):
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
+        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             reqHeaders = {"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"}
