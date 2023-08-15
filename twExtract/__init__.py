@@ -4,7 +4,6 @@ import requests
 import re
 import os
 import random
-from . import twExtractError
 import urllib.parse
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 v2Bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
@@ -16,6 +15,14 @@ userIDregex = r"\/i\/user\/(\d+)"
 v2Features='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"super_follow_tweet_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"creator_subscriptions_subscription_count_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
 v2graphql_api="2OOZWmw8nAtUHVnXXQhgaA"
 usedTokens=[]
+
+class TwExtractError(Exception):
+    def __init__(self, code, message):
+        self.code = code
+        self.msg = message
+
+    def __str__(self):
+        return self.msg
 
 def getGuestToken():
     global guestToken
@@ -29,10 +36,10 @@ def extractStatus_token(url,workaroundTokens):
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
-        raise twExtractError.TwExtractError(400, "Extract error")
+        raise TwExtractError(400, "Extract error")
     twid = m.group(2)
     if workaroundTokens == None:
-        raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
+        raise TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = workaroundTokens
     tokens = [i for i in tokens if i not in usedTokens]
@@ -51,7 +58,7 @@ def extractStatus_token(url,workaroundTokens):
         except Exception as e:
             continue
         return output
-    raise twExtractError.TwExtractError(400, "Extract error")
+    raise TwExtractError(400, "Extract error")
 
 def extractStatus_guestToken(url):
     # get tweet ID
@@ -67,25 +74,25 @@ def extractStatus_guestToken(url):
     if "errors" in output:
         # pick the first error and create a twExtractError
         error = output["errors"][0]
-        raise twExtractError.TwExtractError(error["code"], error["message"])
+        raise TwExtractError(error["code"], error["message"])
     return output
 
-def extractStatus_syndication(url):
+def extractStatus_syndication(url,workaroundTokens=None):
     # https://github.com/mikf/gallery-dl/blob/46cae04aa3a113c7b6bbee1bb468669564b14ae8/gallery_dl/extractor/twitter.py#L1784
     m = re.search(pathregex, url)
     if m is None:
-        raise twExtractError.TwExtractError(400, "Extract error")
+        raise TwExtractError(400, "Extract error")
     twid = m.group(2)
     tweet = requests.get("https://cdn.syndication.twimg.com/tweet-result?id=" + twid)
     
     
     if tweet.status_code == 404:
-        raise twExtractError.TwExtractError(404, "Tweet not found")
+        raise TwExtractError(404, "Tweet not found")
     output = tweet.json()
     if "errors" in output:
         # pick the first error and create a twExtractError
         error = output["errors"][0]
-        raise twExtractError.TwExtractError(error["code"], error["message"])
+        raise TwExtractError(error["code"], error["message"])
     
     # change returned data to match the one from the other methods
     output['full_text'] = output['text']
@@ -108,7 +115,7 @@ def extractStatus_syndication(url):
 def extractStatus_twExtractProxy(url):
     proxies = os.getenv("VXTWITTER_PROXIES",None)
     if proxies is None:
-        raise twExtractError.TwExtractError(400, "Extract error")
+        raise TwExtractError(400, "Extract error")
     proxies = proxies.split(',')
     random.shuffle(proxies)
     for proxy in proxies:
@@ -127,10 +134,10 @@ def extractStatusV2(url,workaroundTokens):
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
-        raise twExtractError.TwExtractError(400, "Extract error")
+        raise TwExtractError(400, "Extract error")
     twid = m.group(2)
     if workaroundTokens == None:
-        raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
+        raise TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = workaroundTokens
     print("Number of tokens used: "+str(len(usedTokens)))
@@ -175,15 +182,15 @@ def extractStatusV2(url,workaroundTokens):
         except Exception as e:
             continue
         return tweet
-    raise twExtractError.TwExtractError(400, "Extract error")
+    raise TwExtractError(400, "Extract error")
 
 def extractStatusV2Legacy(url,workaroundTokens):
     tweet = extractStatusV2(url,workaroundTokens)
     if 'errors' in tweet or 'legacy' not in tweet:
         if 'errors' in tweet:
-            raise twExtractError.TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
+            raise TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
         else:
-            raise twExtractError.TwExtractError(400, "Extract error (no legacy data)")
+            raise TwExtractError(400, "Extract error (no legacy data)")
     tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
     tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
     if 'card' in tweet:
@@ -204,7 +211,7 @@ def extractStatus(url,workaroundTokens=None):
         except Exception as e:
             print(f"{method.__name__} method failed: {str(e)}")
             continue
-    raise twExtractError.TwExtractError(400, "Extract error")
+    raise TwExtractError(400, "Extract error")
 
 def extractUser(url,workaroundTokens):
     global usedTokens
@@ -213,7 +220,7 @@ def extractUser(url,workaroundTokens):
     if m is None:
         m = re.search(userregex, url)
         if m is None:
-            raise twExtractError.TwExtractError(400, "Invalid URL")
+            raise TwExtractError(400, "Invalid URL")
         else:
             useId=False
     screen_name = m.group(1)
@@ -236,11 +243,11 @@ def extractUser(url,workaroundTokens):
             if "errors" in output:
                 # pick the first error and create a twExtractError
                 error = output["errors"][0]
-                raise twExtractError.TwExtractError(error["code"], error["message"])
+                raise TwExtractError(error["code"], error["message"])
             return output
         except Exception as e:
             continue
-    raise twExtractError.TwExtractError(400, "Extract error")
+    raise TwExtractError(400, "Extract error")
 
 #def extractUserByID(id):
     
