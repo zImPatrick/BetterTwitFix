@@ -119,7 +119,7 @@ def extractStatusV2(url):
         raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = config["config"]["workaroundTokens"].split(",")
-    print("Number of tokens: "+str(len(tokens)))
+    print("Number of tokens used: "+str(len(usedTokens)))
     tokens = [i for i in tokens if i not in usedTokens]
     if len(tokens) == 0:
         tokens = config["config"]["workaroundTokens"].split(",")
