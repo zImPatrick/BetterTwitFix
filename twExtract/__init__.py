@@ -6,7 +6,6 @@ import os
 import random
 from . import twExtractError
 import urllib.parse
-from configHandler import config
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 v2Bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 guestToken=None
@@ -106,6 +105,23 @@ def extractStatus_syndication(url):
 
     return output
 
+def extractStatus_twExtractProxy(url):
+    proxies = os.getenv("VXTWITTER_PROXIES",None)
+    if proxies is None:
+        raise twExtractError.TwExtractError(400, "Extract error")
+    proxies = proxies.split(',')
+    random.shuffle(proxies)
+    for proxy in proxies:
+        try:
+            tweet = requests.get(f"{proxy}?url={urllib.parse.quote(url)}")
+            output = tweet.json()
+            if "errors" in output:
+                # try another token
+                continue
+        except Exception as e:
+            continue
+        return output
+
 def extractStatusV2(url,workaroundTokens):
     global usedTokens
     # get tweet ID
@@ -181,7 +197,7 @@ def extractStatusV2Legacy(url,workaroundTokens):
     return tweet['legacy']
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2Legacy]
+    methods=[extractStatus_syndication,extractStatusV2Legacy,extractStatus_twExtractProxy]
     for method in methods:
         try:
             return method(url,workaroundTokens)

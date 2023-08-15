@@ -1,5 +1,5 @@
 FROM public.ecr.aws/lambda/python:3.8
-RUN pip install yt-dlp
+RUN pip install requests==2.31.0
 
 
 # Copy function code
