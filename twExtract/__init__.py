@@ -5,6 +5,7 @@ import re
 import os
 import random
 import urllib.parse
+import math
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 v2Bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 guestToken=None
@@ -71,8 +72,33 @@ def extractStatus_guestToken(url):
         raise TwExtractError(error["code"], error["message"])
     return output
 
-def calcSyndicationToken(twID):
-    return 'x' # wip
+digits = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+def baseConversion(x, base):
+    result = ''
+    i = int(x)
+    while i > 0:
+        result = digits[i % base] + result
+        i = i // base
+    if int(x) != x:
+        result += '.'
+        i = x - int(x)
+        d = 0
+        while i != int(i):
+            result += digits[int(i * base % base)]
+            i = i * base
+            d += 1
+            if d >= 8:
+                break
+    return result
+
+def calcSyndicationToken(idStr):
+    id = int(idStr) / 1000000000000000 * math.pi
+    o = baseConversion(x=id, base=int(math.pow(6, 2)))
+    c = o.replace('0', '').replace('.', '')
+    if c == '':
+        c = '0'
+    return c
 
 def extractStatus_syndication(url,workaroundTokens=None):
     # https://github.com/mikf/gallery-dl/blob/46cae04aa3a113c7b6bbee1bb468669564b14ae8/gallery_dl/extractor/twitter.py#L1784

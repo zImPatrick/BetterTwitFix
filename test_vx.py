@@ -44,6 +44,15 @@ def compareDict(original,compare):
         else:
             compareDict(original[key],compare[key])
 
+## Specific API tests ##
+def test_syndicationAPI():
+    tweet = twExtract.extractStatus_syndication(testMediaTweet,workaroundTokens=tokens)
+    assert tweet["full_text"]==testMedia_compare['description']
+
+def test_v2API():
+    tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
+    assert tweet["full_text"]==testMedia_compare['description']
+
 ## Tweet retrieve tests ##
 def test_textTweetExtract():
     tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
@@ -254,3 +263,6 @@ def test_combine():
     assert resp.status_code==200
     assert resp.headers["Content-Type"]=="image/jpeg"
     assert len(resp.data)>1000
+
+def test_calcSyndicationToken():
+    assert twExtract.calcSyndicationToken("1691389765483200513") == "43lnobuxzql"
