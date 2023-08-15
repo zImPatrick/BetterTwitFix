@@ -71,13 +71,16 @@ def extractStatus_guestToken(url):
         raise TwExtractError(error["code"], error["message"])
     return output
 
+def calcSyndicationToken(twID):
+    return 'x' # wip
+
 def extractStatus_syndication(url,workaroundTokens=None):
     # https://github.com/mikf/gallery-dl/blob/46cae04aa3a113c7b6bbee1bb468669564b14ae8/gallery_dl/extractor/twitter.py#L1784
     m = re.search(pathregex, url)
     if m is None:
         raise TwExtractError(400, "Extract error")
     twid = m.group(2)
-    tweet = requests.get("https://cdn.syndication.twimg.com/tweet-result?id=" + twid)
+    tweet = requests.get("https://cdn.syndication.twimg.com/tweet-result?id=" + twid+"&token="+calcSyndicationToken(twid))
     
     
     if tweet.status_code == 404:
