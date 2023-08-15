@@ -14,7 +14,6 @@ userIDregex = r"\/i\/user\/(\d+)"
 
 v2Features='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"super_follow_tweet_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"creator_subscriptions_subscription_count_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
 v2graphql_api="2OOZWmw8nAtUHVnXXQhgaA"
-usedTokens=[]
 
 class TwExtractError(Exception):
     def __init__(self, code, message):
@@ -32,7 +31,6 @@ def getGuestToken():
     return guestToken
 
 def extractStatus_token(url,workaroundTokens):
-    global usedTokens
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
@@ -42,13 +40,8 @@ def extractStatus_token(url,workaroundTokens):
         raise TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = workaroundTokens
-    tokens = [i for i in tokens if i not in usedTokens]
-    if len(tokens) == 0:
-        tokens = workaroundTokens
-        usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
-        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             tweet = requests.get("https://api.twitter.com/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
@@ -131,7 +124,6 @@ def extractStatus_twExtractProxy(url,workaroundTokens=None):
         return output
 
 def extractStatusV2(url,workaroundTokens):
-    global usedTokens
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
@@ -141,14 +133,8 @@ def extractStatusV2(url,workaroundTokens):
         raise TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
     tokens = workaroundTokens
-    print("Number of tokens used: "+str(len(usedTokens)))
-    tokens = [i for i in tokens if i not in usedTokens]
-    if len(tokens) == 0:
-        tokens = workaroundTokens
-        usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
-        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             vars = json.loads('{"includeTweetImpression":true,"includeHasBirdwatchNotes":false,"includeEditPerspective":false,"rest_ids":["x"],"includeEditControl":true,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
@@ -212,7 +198,6 @@ def extractStatus(url,workaroundTokens=None):
     raise TwExtractError(400, "Extract error")
 
 def extractUser(url,workaroundTokens):
-    global usedTokens
     useId=True
     m = re.search(userIDregex, url)
     if m is None:
@@ -224,13 +209,8 @@ def extractUser(url,workaroundTokens):
     screen_name = m.group(1)
     # get user
     tokens = workaroundTokens
-    tokens = [i for i in tokens if i not in usedTokens]
-    if len(tokens) == 0:
-        tokens = workaroundTokens
-        usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
-        usedTokens.append(authToken)
         try:
             csrfToken=str(uuid.uuid4()).replace('-', '')
             reqHeaders = {"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"}
