@@ -112,7 +112,7 @@ def extractStatus_syndication(url,workaroundTokens=None):
 
     return output
 
-def extractStatus_twExtractProxy(url):
+def extractStatus_twExtractProxy(url,workaroundTokens=None):
     proxies = os.getenv("VXTWITTER_PROXIES",None)
     if proxies is None:
         raise TwExtractError(400, "Extract error")
