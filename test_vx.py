@@ -32,6 +32,8 @@ testMultiMedia_compare={'tweet': 'https://twitter.com/Twitter/status/11541723245
 testPoll_comparePoll={"name":"poll2choice_text_only","binding_values":{"choice1_label":{"type":"STRING","string_value":"Mean one thing"},"choice2_label":{"type":"STRING","string_value":"Mean multiple things"},"end_datetime_utc":{"type":"STRING","string_value":"2015-10-06T22:57:24Z"},"counts_are_final":{"type":"BOOLEAN","boolean_value":True},"choice2_count":{"type":"STRING","string_value":"33554"},"choice1_count":{"type":"STRING","string_value":"124875"},"last_updated_datetime_utc":{"type":"STRING","string_value":"2015-10-06T22:57:31Z"},"duration_minutes":{"type":"STRING","string_value":"1440"}}}
 testPoll_comparePollVNF={'total_votes': 158429, 'choices': [{'text': 'Mean one thing', 'votes': 124875, 'percent': 78.8}, {'text': 'Mean multiple things', 'votes': 33554, 'percent': 21.2}]}
 
+tokens=os.getenv("VXTWITTER_WORKAROUND_TOKENS",None).split(',')
+
 def compareDict(original,compare):
     for key in original:
         assert key in compare
@@ -44,35 +46,35 @@ def compareDict(original,compare):
 
 ## Tweet retrieve tests ##
 def test_textTweetExtract():
-    tweet = twExtract.extractStatus(testTextTweet)
+    tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==textVNF_compare['description']
     assert tweet["user"]["screen_name"]=="jack"
     assert 'extended_entities' not in tweet
     
 def test_extractV2(): # remove this when v2 is default
-    tweet = twExtract.extractStatusV2(testTextTweet)
+    tweet = twExtract.extractStatusV2(testTextTweet,workaroundTokens=tokens)
 
 def test_UserExtract():
-    user = twExtract.extractUser(testUser)
+    user = twExtract.extractUser(testUser,workaroundTokens=tokens)
     assert user["screen_name"]=="jack"
     assert user["id"]==12
     assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
 def test_UserExtractID():
-    user = twExtract.extractUser(testUserID)
+    user = twExtract.extractUser(testUserID,workaroundTokens=tokens)
     assert user["screen_name"]=="jack"
     assert user["id"]==12
     assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
 def test_UserExtractWeirdURLs():
     for url in testUserWeirdURLs:
-        user = twExtract.extractUser(url)
+        user = twExtract.extractUser(url,workaroundTokens=tokens)
         assert user["screen_name"]=="jack"
         assert user["id"]==12
         assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
 def test_videoTweetExtract():
-    tweet = twExtract.extractStatus(testVideoTweet)
+    tweet = twExtract.extractStatus(testVideoTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==videoVNF_compare['description']
     assert tweet["user"]["screen_name"]==twitterAccountName
     assert 'extended_entities' in tweet
@@ -83,7 +85,7 @@ def test_videoTweetExtract():
     
 
 def test_mediaTweetExtract():
-    tweet = twExtract.extractStatus(testMediaTweet)
+    tweet = twExtract.extractStatus(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMedia_compare['description']
     assert tweet["user"]["screen_name"]==twitterAccountName
     assert 'extended_entities' in tweet
@@ -94,7 +96,7 @@ def test_mediaTweetExtract():
     
 
 def test_multimediaTweetExtract():
-    tweet = twExtract.extractStatus(testMultiMediaTweet)
+    tweet = twExtract.extractStatus(testMultiMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"][:94]==testMultiMedia_compare['description'][:94]
     assert tweet["user"]["screen_name"]==twitterAccountName
     assert 'extended_entities' in tweet
@@ -107,12 +109,12 @@ def test_multimediaTweetExtract():
     assert video["type"]=="photo"
 
 def test_pollTweetExtract():
-    tweet = twExtract.extractStatus("https://twitter.com/norm/status/651169346518056960")
+    tweet = twExtract.extractStatus("https://twitter.com/norm/status/651169346518056960",workaroundTokens=tokens)
     assert 'card' in tweet
     compareDict(testPoll_comparePoll,tweet['card'])
 
 def test_NSFW_TweetExtract():
-    tweet = twExtract.extractStatus(testNSFWTweet) # For now just test that there's no error
+    tweet = twExtract.extractStatus(testNSFWTweet,workaroundTokens=tokens) # For now just test that there's no error
 
 ## VNF conversion test ##
 def test_textTweetVNF():

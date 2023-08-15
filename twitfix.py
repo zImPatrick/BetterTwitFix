@@ -152,7 +152,7 @@ def twitfix(sub_path):
     elif request.url.startswith("https://api.vx"):
         twitter_url = "https://twitter.com/" + sub_path
         try:
-            tweet = twExtract.extractStatusV2(twitter_url)
+            tweet = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
             tweetL = tweet["legacy"]
             userL = tweet["core"]["user_result"]["result"]["legacy"]
             media=[]
@@ -546,7 +546,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
 def link_to_vnf_from_unofficial_api(video_link):
     tweet=None
     log.info("Attempting to download tweet info: "+video_link)
-    tweet = twExtract.extractStatus(video_link)
+    tweet = twExtract.extractStatus(video_link,workaroundTokens=config['config']['workaroundTokens'].split(','))
     log.success("Unofficial API Success")
 
     if "extended_entities" not in tweet:
@@ -555,7 +555,7 @@ def link_to_vnf_from_unofficial_api(video_link):
             for url in tweet["entities"]["urls"]:
                 if "/video/" in url["expanded_url"] or "/photo/" in url["expanded_url"]:
                     log.info("Extra tweet info found in entities: "+video_link+" -> "+url["expanded_url"])
-                    subTweet = twExtract.extractStatus(url["expanded_url"])
+                    subTweet = twExtract.extractStatus(url["expanded_url"],workaroundTokens=config['config']['workaroundTokens'].split(','))
                     if "extended_entities" in subTweet:
                         tweet["extended_entities"] = subTweet["extended_entities"]
                     break

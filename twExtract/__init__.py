@@ -1,9 +1,8 @@
-import yt_dlp
-from yt_dlp.extractor import twitter
 import uuid
 import json
 import requests
 import re
+import os
 import random
 from . import twExtractError
 import urllib.parse
@@ -26,20 +25,20 @@ def getGuestToken():
         guestToken = json.loads(r.text)["guest_token"]
     return guestToken
 
-def extractStatus_token(url):
+def extractStatus_token(url,workaroundTokens):
     global usedTokens
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
         raise twExtractError.TwExtractError(400, "Extract error")
     twid = m.group(2)
-    if config["config"]["workaroundTokens"] == None:
+    if workaroundTokens == None:
         raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
-    tokens = config["config"]["workaroundTokens"].split(",")
+    tokens = workaroundTokens
     tokens = [i for i in tokens if i not in usedTokens]
     if len(tokens) == 0:
-        tokens = config["config"]["workaroundTokens"].split(",")
+        tokens = workaroundTokens
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
@@ -107,21 +106,21 @@ def extractStatus_syndication(url):
 
     return output
 
-def extractStatusV2(url):
+def extractStatusV2(url,workaroundTokens):
     global usedTokens
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
         raise twExtractError.TwExtractError(400, "Extract error")
     twid = m.group(2)
-    if config["config"]["workaroundTokens"] == None:
+    if workaroundTokens == None:
         raise twExtractError.TwExtractError(400, "Extract error (no tokens defined)")
     # get tweet
-    tokens = config["config"]["workaroundTokens"].split(",")
+    tokens = workaroundTokens
     print("Number of tokens used: "+str(len(usedTokens)))
     tokens = [i for i in tokens if i not in usedTokens]
     if len(tokens) == 0:
-        tokens = config["config"]["workaroundTokens"].split(",")
+        tokens = workaroundTokens
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
@@ -162,8 +161,8 @@ def extractStatusV2(url):
         return tweet
     raise twExtractError.TwExtractError(400, "Extract error")
 
-def extractStatusV2Legacy(url):
-    tweet = extractStatusV2(url)
+def extractStatusV2Legacy(url,workaroundTokens):
+    tweet = extractStatusV2(url,workaroundTokens)
     if 'errors' in tweet or 'legacy' not in tweet:
         if 'errors' in tweet:
             raise twExtractError.TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
@@ -181,17 +180,17 @@ def extractStatusV2Legacy(url):
         tweet['legacy']['card'] = tweet['tweet_card']['legacy']
     return tweet['legacy']
 
-def extractStatus(url):
+def extractStatus(url,workaroundTokens=None):
     methods=[extractStatus_syndication,extractStatusV2Legacy]
     for method in methods:
         try:
-            return method(url)
+            return method(url,workaroundTokens)
         except Exception as e:
             print(f"{method.__name__} method failed: {str(e)}")
             continue
     raise twExtractError.TwExtractError(400, "Extract error")
 
-def extractUser(url):
+def extractUser(url,workaroundTokens):
     global usedTokens
     useId=True
     m = re.search(userIDregex, url)
@@ -203,10 +202,10 @@ def extractUser(url):
             useId=False
     screen_name = m.group(1)
     # get user
-    tokens = config["config"]["workaroundTokens"].split(",")
+    tokens = workaroundTokens
     tokens = [i for i in tokens if i not in usedTokens]
     if len(tokens) == 0:
-        tokens = config["config"]["workaroundTokens"].split(",")
+        tokens = workaroundTokens
         usedTokens.clear()
     random.shuffle(tokens)
     for authToken in tokens:
@@ -239,5 +238,5 @@ def lambda_handler(event, context):
     url = event["queryStringParameters"].get("url","")
     return {
         'statusCode': 200,
-        'body': extractStatus(url)
+        'body': extractStatus(url,workaroundTokens=os.getenv("VXTWITTER_WORKAROUND_TOKENS",None).split(','))
     }
