@@ -215,6 +215,10 @@ def twitfix(sub_path):
                 media.append(zipurl)
                 media_extended.append({"url":zipurl,"type":"zip"})
 
+            qrtURL = None
+            if 'quoted_status_id_str' in tweetL:
+                qrtURL = "https://twitter.com/i/status/" + tweetL['quoted_status_id_str']
+
             apiObject = {
                 "text": tweetL["full_text"],
                 "likes": tweetL["favorite_count"],
@@ -228,7 +232,9 @@ def twitfix(sub_path):
                 "conversationID": tweetL["conversation_id_str"],
                 "mediaURLs": media,
                 "media_extended": media_extended,
-                "hashtags": hashtags
+                "possibly_sensitive": tweetL["possibly_sensitive"],
+                "hashtags": hashtags,
+                "qrtURL": qrtURL,
             }
             try:
                 apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
