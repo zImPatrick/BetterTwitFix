@@ -219,6 +219,9 @@ def twitfix(sub_path):
             if 'quoted_status_id_str' in tweetL:
                 qrtURL = "https://twitter.com/i/status/" + tweetL['quoted_status_id_str']
 
+            if 'possibly_sensitive' not in tweetL:
+                tweetL['possibly_sensitive'] = False
+
             apiObject = {
                 "text": tweetL["full_text"],
                 "likes": tweetL["favorite_count"],
