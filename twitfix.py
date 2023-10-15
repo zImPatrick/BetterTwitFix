@@ -16,7 +16,7 @@ from cache import addVnfToLinkCache,getVnfFromLinkCache
 from yt_dlp.utils import ExtractorError
 import vxlogging as log
 import zipfile
-import traceback
+import html
 app = Flask(__name__)
 CORS(app)
 
@@ -222,13 +222,22 @@ def twitfix(sub_path):
             if 'possibly_sensitive' not in tweetL:
                 tweetL['possibly_sensitive'] = False
 
+            twText = html.unescape(tweetL["full_text"])
+
+            if 'entities' in tweetL and 'urls' in tweetL['entities']:
+                for eurl in tweetL['entities']['urls']:
+                    if "/status/" in eurl["expanded_url"] and eurl["expanded_url"].startswith("https://twitter.com/"):
+                        twText = twText.replace(eurl["url"], "")
+                    else:
+                        twText = twText.replace(eurl["url"],eurl["expanded_url"])
+
             apiObject = {
-                "text": tweetL["full_text"],
+                "text": twText,
                 "likes": tweetL["favorite_count"],
                 "retweets": tweetL["retweet_count"],
                 "replies": tweetL["reply_count"],
                 "date": tweetL["created_at"],
-                "user_screen_name": userL["screen_name"],
+                "user_screen_name": html.unescape(userL["screen_name"]),
                 "user_name": userL["name"],
                 "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweet["rest_id"],
                 "tweetID": tweet["rest_id"],
