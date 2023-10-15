@@ -15,7 +15,7 @@ def genLikesDisplay(vnf):
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
-    return ("\n【QRT of " + qrt['uploader'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['description'] + "'")
+    return ("\n\n【QRT of " + qrt['uploader'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['description'] + "'")
 
 def genPollDisplay(poll):
     pctSplit=10
