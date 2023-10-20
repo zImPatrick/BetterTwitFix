@@ -1,4 +1,4 @@
-# vxTwitter
+# vxTwitter / fixvx
 (A fork of TwitFix)
 Basic flask server that serves fixed twitter video embeds to desktop discord by using either the Twitter API or Youtube-DL to grab tweet video information. This also automatically embeds the first link in the text of non video tweets (API Only)
 
@@ -11,6 +11,8 @@ Additionally, vxTwitter has a 'none' cache option, which is intended to be used 
 ## How to use the hosted version
 
 Just replace twitter.com with vxtwitter.com on the link to the tweet! `https://twitter.com/jack/status/20` -> `https://vxtwitter.com/jack/status/20`
+
+You can also replace x.com links with fixvx.com
 
 ## API
 If you're a nerd like me and want to use information about a tweet in your code, you can make a request to `api.vxtwitter.com` to get basic information about a tweet:
