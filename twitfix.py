@@ -695,6 +695,15 @@ def embedCombined(video_link):
         return message(msgs.failedToScan)
 
 def embedCombinedVnf(video_link,vnf):
+    qrt=None
+    if vnf['qrtURL'] is not None:
+        qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
+
+    if (vnf['type'] != "Image" or vnf['images'][4] == "1") and qrt is not None and qrt['type'] == "Image":
+        if qrt['images'][4]!="1":
+            vnf['images'] = qrt['images']
+            vnf['type'] = "Image"
+
     if vnf['type'] != "Image" or vnf['images'][4] == "1":
         return embed(video_link, vnf, 0)
     desc    = re.sub(r' http.*t\.co\S+', '', vnf['description'])
@@ -708,11 +717,9 @@ def embedCombinedVnf(video_link,vnf):
     else:
         pollDisplay=""
 
-    qrt=None
-    if vnf['qrtURL'] is not None:
-        qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
-        if qrt is not None:
-            desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
+
+    if qrt is not None:
+        desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
 
     host = config['config']['url']
     image = f"{host}/rendercombined.jpg?imgs="
