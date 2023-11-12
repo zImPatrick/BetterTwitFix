@@ -20,7 +20,7 @@ import html
 app = Flask(__name__)
 CORS(app)
 
-pathregex = re.compile("\\w{1,15}\\/(status|statuses)\\/\\d{2,20}")
+pathregex = re.compile("\\w{1,15}\\/(status|statuses)\\/(\\d{2,20})")
 generate_embed_user_agents = [
     "facebookexternalhit/1.1",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36",
@@ -44,6 +44,13 @@ def isValidUserAgent(user_agent):
     elif "WhatsApp/" in user_agent:
         return True
     return False
+
+def getTweetIdFromUrl(url):
+    match = pathregex.search(url)
+    if match is not None:
+        return match.group(2)
+    else:
+        return None
 
 @app.route('/robots.txt')
 def robots():
@@ -456,7 +463,8 @@ def tweetInfo(url, tweet="", desc="", thumb="", uploader="", screen_name="", pfp
         "verified"      : verified,
         "size"          : size,
         "poll"          : poll,
-        "isGif"         : isGif
+        "isGif"         : isGif,
+        "tweetId"       : int(getTweetIdFromUrl(tweet))
     }
     if (poll is None):
         del vnf['poll']
