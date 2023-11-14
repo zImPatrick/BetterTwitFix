@@ -165,6 +165,12 @@ def twitfix(sub_path):
             media=[]
             media_extended=[]
             hashtags=[]
+            communityNote=None
+            try:
+                if "birdwatch_pivot" in tweet:
+                    communityNote=tweet["birdwatch_pivot"]["note"]["summary"]["text"]
+            except:
+                pass
             if "extended_entities" in tweetL:
                 if "media" in tweetL["extended_entities"]:
                     tmedia=tweetL["extended_entities"]["media"]
@@ -246,6 +252,7 @@ def twitfix(sub_path):
                 "date": tweetL["created_at"],
                 "user_screen_name": html.unescape(userL["screen_name"]),
                 "user_name": userL["name"],
+                "user_profile_image_url": userL["profile_image_url_https"],
                 "tweetURL": "https://twitter.com/"+userL["screen_name"]+"/status/"+tweet["rest_id"],
                 "tweetID": tweet["rest_id"],
                 "conversationID": tweetL["conversation_id_str"],
@@ -254,6 +261,7 @@ def twitfix(sub_path):
                 "possibly_sensitive": tweetL["possibly_sensitive"],
                 "hashtags": hashtags,
                 "qrtURL": qrtURL,
+                "communityNote": communityNote
             }
             try:
                 apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
