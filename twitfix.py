@@ -715,7 +715,7 @@ def embedCombinedVnf(video_link,vnf):
     if vnf['qrtURL'] is not None:
         qrt,e=vnfFromCacheOrDL(vnf['qrtURL'])
 
-    if (vnf['type'] != "Image") and qrt is not None and qrt['type'] == "Image":
+    if vnf['type'] != "Image" and vnf['type'] != "Video" and qrt is not None and qrt['type'] == "Image":
         if qrt['images'][4]!="1":
             vnf['images'] = qrt['images']
             vnf['type'] = "Image"
