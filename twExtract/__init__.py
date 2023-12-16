@@ -290,7 +290,7 @@ def extractStatus(url,workaroundTokens=None):
         try:
             return method(url,workaroundTokens)
         except Exception as e:
-            print(f"{method.__name__} method failed: {str(e)}")
+            print(f"{method.__name__} method failed: {str(e)} for {url}")
             continue
     raise TwExtractError(400, "Extract error")
 
