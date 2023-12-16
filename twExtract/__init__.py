@@ -276,7 +276,7 @@ def extractStatusV2AnonLegacy(url,workaroundTokens):
     return tweet['legacy']
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2Legacy,extractStatus_twExtractProxy]
+    methods=[extractStatusV2AnonLegacy,extractStatus_syndication,extractStatusV2Legacy,extractStatus_twExtractProxy]
     for method in methods:
         try:
             return method(url,workaroundTokens)

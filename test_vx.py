@@ -52,6 +52,10 @@ def test_syndicationAPI():
     tweet = twExtract.extractStatus_syndication(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMediaTweet_compare['description']
 
+def test_extractStatusV2Anon():
+    tweet = twExtract.extractStatusV2AnonLegacy(testMediaTweet,None)
+    assert tweet["full_text"]==testMediaTweet_compare['description']
+
 def test_v2API():
     tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMediaTweet_compare['description']
