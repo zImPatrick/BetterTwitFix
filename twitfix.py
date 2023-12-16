@@ -156,12 +156,20 @@ def twitfix(sub_path):
 
         image = ( int(request.url[-1]) - 1 )
         return embed_video(clean, image)
-    elif request.url.startswith("https://api.vx"):
+    elif True:#request.url.startswith("https://api.vx"):
         twitter_url = "https://twitter.com/" + sub_path
         try:
-            tweet = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
+            try:
+                tweet = twExtract.extractStatusV2Anon(twitter_url)
+            except:
+                tweet = None
+            if tweet is None:
+                tweet = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
             tweetL = tweet["legacy"]
-            userL = tweet["core"]["user_result"]["result"]["legacy"]
+            if "user_result" in tweet["core"]:
+                userL = tweet["core"]["user_result"]["result"]["legacy"]
+            elif "user_results" in tweet["core"]:
+                userL = tweet["core"]["user_results"]["result"]["legacy"]
             media=[]
             media_extended=[]
             hashtags=[]

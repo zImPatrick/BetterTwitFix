@@ -53,8 +53,15 @@ def test_syndicationAPI():
     assert tweet["full_text"]==testMediaTweet_compare['description']
 
 def test_extractStatusV2Anon():
+    tweet = twExtract.extractStatusV2AnonLegacy(testTextTweet,None)
+    assert tweet["full_text"]==testTextTweet_compare['description']
+    tweet = twExtract.extractStatusV2AnonLegacy(testVideoTweet,None)
+    assert tweet["full_text"]==testVideoTweet_compare['description']
     tweet = twExtract.extractStatusV2AnonLegacy(testMediaTweet,None)
     assert tweet["full_text"]==testMediaTweet_compare['description']
+    tweet = twExtract.extractStatusV2AnonLegacy(testMultiMediaTweet,None)
+    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['description'][:94]
+    
 
 def test_v2API():
     tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
