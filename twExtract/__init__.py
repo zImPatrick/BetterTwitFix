@@ -9,6 +9,7 @@ import math
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 v2Bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 guestToken=None
+guestTokenUses=0
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
@@ -29,9 +30,17 @@ class TwExtractError(Exception):
 
 def getGuestToken():
     global guestToken
+    global guestTokenUses
     if guestToken is None:
         r = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers={"Authorization":v2Bearer})
         guestToken = json.loads(r.text)["guest_token"]
+    else:
+        guestTokenUses+=1
+        if guestTokenUses > 10:
+            gtTemp = guestToken
+            guestToken = None
+            guestTokenUses = 0
+            return gtTemp
     return guestToken
 
 def extractStatus_token(url,workaroundTokens):
