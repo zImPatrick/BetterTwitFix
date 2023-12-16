@@ -42,7 +42,7 @@ def getGuestToken():
         guestTokenUses = 0
     else:
         guestTokenUses+=1
-        if guestTokenUses > 10:
+        if guestTokenUses > 40:
             gtTemp = guestToken
             guestToken = None
             guestTokenUses = 0
