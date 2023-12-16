@@ -156,7 +156,7 @@ def twitfix(sub_path):
 
         image = ( int(request.url[-1]) - 1 )
         return embed_video(clean, image)
-    elif True:#request.url.startswith("https://api.vx"):
+    elif request.url.startswith("https://api.vx"):
         twitter_url = "https://twitter.com/" + sub_path
         try:
             try:
