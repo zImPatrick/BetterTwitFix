@@ -1,0 +1,28 @@
+<script>
+function androidOrIOS() {
+    const userAgent = navigator.userAgent;
+    if(/android/i.test(userAgent)){
+        return 'android';
+    }
+    if(/iPad|iPhone|iPod/i.test(userAgent)){
+        return 'ios';
+    }
+    return 'unknown';
+}
+
+function redirect() {
+    const os = androidOrIOS();
+    if(os === 'android'){
+        window.location.href = 'twitter://status?status_id=1674915987789950982';
+        window.location.href = 'https://twitter.com/pdxdylan/status/1674915987789950982'
+    }
+    if(os === 'ios'){
+        window.location.href = 'twitter://status?id=1674915987789950982';
+        setTimeout(() => {
+            window.location.href = 'https://twitter.com/pdxdylan/status/1674915987789950982'
+        }, 100);
+    }
+}
+
+redirect();
+</script>

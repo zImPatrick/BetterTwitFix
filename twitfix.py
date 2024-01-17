@@ -19,7 +19,7 @@ import zipfile
 import html
 app = Flask(__name__)
 CORS(app)
-
+user_agent=""
 pathregex = re.compile("\\w{1,15}\\/(status|statuses)\\/(\\d{2,20})")
 generate_embed_user_agents = [
     "facebookexternalhit/1.1",
@@ -58,6 +58,7 @@ def robots():
 
 @app.route('/') # If the useragent is discord, return the embed, if not, redirect to configured repo directly
 def default():
+    global user_agent
     user_agent = request.headers.get('user-agent')
     if isValidUserAgent(user_agent):
         return message("TwitFix is an attempt to fix twitter video embeds in discord! created by Robin Universe :)\n\n💖\n\nClick me to be redirected to the repo!")
@@ -75,7 +76,7 @@ def oembedend():
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
 def twitfix(sub_path):
-
+    global user_agent
     user_agent = request.headers.get('user-agent')
     match = pathregex.search(sub_path)
 
@@ -92,7 +93,7 @@ def twitfix(sub_path):
             if e is not None:
                 return message(msgs.failedToScan+msgs.failedToScanExtra+e)
             return message(msgs.failedToScan)
-        return make_cached_vnf_response(vnf,getTemplate("rawvideo.html",vnf,"","",clean,"","","",""))
+        return make_cached_vnf_response(vnf,getTemplate("rawvideo.html",vnf,"",[],clean,"","","",""))
     elif request.url.endswith(".txt") or request.url.endswith("%2Etxt"):
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -106,7 +107,7 @@ def twitfix(sub_path):
             if e is not None:
                 return abort(500,"Failed to scan tweet: "+e)
             return abort(500,"Failed to scan tweet")
-        return make_content_type_response(getTemplate("txt.html",vnf,vnf["description"],"",clean,"","","",""),"text/plain")
+        return make_content_type_response(getTemplate("txt.html",vnf,vnf["description"],[],clean,"","","",""),"text/plain")
     elif request.url.endswith(".zip") or request.url.endswith("%2Ezip"): # for certain types of archival software (i.e Hydrus)
         twitter_url = "https://twitter.com/" + sub_path
         
@@ -310,6 +311,7 @@ def twitfix(sub_path):
         
 @app.route('/dir/<path:sub_path>') # Try to return a direct link to the MP4 on twitters servers
 def dir(sub_path):
+    global user_agent
     user_agent = request.headers.get('user-agent')
     url   = sub_path
     match = pathregex.search(url)
@@ -616,7 +618,7 @@ def message(text):
         repo    = config['config']['repo'], 
         url     = config['config']['url'] )
 
-def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix="",embedVNF=None):
+def getTemplate(template,vnf,desc,images,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix="",embedVNF=None):
     if (embedVNF is None):
         embedVNF = vnf
     if ('width' in embedVNF['size'] and 'height' in embedVNF['size']):
@@ -633,7 +635,7 @@ def getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink
         pfp        = vnf['pfp'],  
         vidurl     = embedVNF['url'], 
         desc       = desc,
-        pic        = image,
+        pic        = images,
         user       = vnf['uploader'], 
         video_link = vnf, 
         color      = color, 
@@ -705,7 +707,7 @@ def embed(video_link, vnf, image):
     if vnf['nsfw'] == True:
         color = "#800020" # Red
     
-    return make_cached_vnf_response(vnf,getTemplate(template,vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNamePost,embedVNF))
+    return make_cached_vnf_response(vnf,getTemplate(template,vnf,desc,[image],video_link,color,urlDesc,urlUser,urlLink,appNamePost,embedVNF))
 
 
 def embedCombined(video_link):
@@ -745,17 +747,25 @@ def embedCombinedVnf(video_link,vnf):
     if qrt is not None:
         desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
 
-    host = config['config']['url']
-    image = f"{host}/rendercombined.jpg?imgs="
-    for i in range(0,int(vnf['images'][4])):
-        image = image + vnf['images'][i] + ","
-    image = image[:-1] # Remove last comma
+    suffix=""
+    if 'Discord' in user_agent:
+        images = []
+        for i in range(0,int(vnf['images'][4])):
+            images.append(vnf['images'][i])
+    else:
+        host = config['config']['url']
+        image = f"{host}/rendercombined.jpg?imgs="
+        for i in range(0,int(vnf['images'][4])):
+            image = image + vnf['images'][i] + ","
+        image = image[:-1] # Remove last comma
+        images=[image]
+        suffix=" - View original tweet for full quality"
 
     color = "#7FFFD4" # Green
 
     if vnf['nsfw'] == True:
         color = "#800020" # Red
-    return make_cached_vnf_response(vnf,getTemplate('image.html',vnf,desc,image,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=" - View original tweet for full quality"))
+    return make_cached_vnf_response(vnf,getTemplate('image.html',vnf,desc,images,video_link,color,urlDesc,urlUser,urlLink,appNameSuffix=suffix))
 
 
 def getPollObject(card):

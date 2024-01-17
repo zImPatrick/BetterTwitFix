@@ -20,7 +20,20 @@
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
-<meta name="twitter:image" content="{{ pic }}" />
+<meta name="twitter:image" content="{{ pic[0] }}" />
+
+{% if pic[1] %}
+<meta name="twitter:image" content="{{ pic[1] }}" />
+{% endif %}
+
+{% if pic[2] %}
+<meta name="twitter:image" content="{{ pic[2] }}" />
+{% endif %}
+
+{% if pic[3] %}
+<meta name="twitter:image" content="{{ pic[3] }}" />
+{% endif %}
+
 <meta name="twitter:creator" content="@{{ user }}" />
 
 <meta property="og:description" content="{{ desc }}" />

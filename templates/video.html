@@ -18,7 +18,7 @@
 <meta property="og:video:width" content="{{ videoSize['width'] }}" />
 <meta property="og:video:height" content="{{ videoSize['height'] }}" />
 <meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
-<meta property="og:image" content="{{ pic }}" />
+<meta property="og:image" content="{{ pic[0] }}" />
 <meta property="og:description" content="{{ desc }}" />
 
 <link rel="alternate" href="{{ url }}/oembed.json?desc={{ urlUser }}&user={{ urlDesc }}&link={{ urlUserLink }}&ttype=video&provider={{ appname }}" type="application/json+oembed" title="{{ user }}">
