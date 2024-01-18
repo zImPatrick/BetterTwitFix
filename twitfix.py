@@ -748,18 +748,18 @@ def embedCombinedVnf(video_link,vnf):
         desc=msgs.formatEmbedDesc(vnf['type'],desc,qrt,pollDisplay,likeDisplay)
 
     suffix=""
-    if 'Discord' in user_agent:
-        images = []
-        for i in range(0,int(vnf['images'][4])):
-            images.append(vnf['images'][i])
-    else:
-        host = config['config']['url']
-        image = f"{host}/rendercombined.jpg?imgs="
-        for i in range(0,int(vnf['images'][4])):
-            image = image + vnf['images'][i] + ","
-        image = image[:-1] # Remove last comma
-        images=[image]
-        suffix=" - View original tweet for full quality"
+    #if 'Discord' in user_agent:
+    #    images = []
+    #    for i in range(0,int(vnf['images'][4])):
+    #        images.append(vnf['images'][i])
+    #else:
+    host = config['config']['url']
+    image = f"{host}/rendercombined.jpg?imgs="
+    for i in range(0,int(vnf['images'][4])):
+        image = image + vnf['images'][i] + ","
+    image = image[:-1] # Remove last comma
+    images=[image]
+    suffix=" - View original tweet for full quality"
 
     color = "#7FFFD4" # Green
 
