@@ -203,13 +203,21 @@ def extractStatusV2(url,workaroundTokens):
             entries=output['data']['tweet_results']
             tweetEntry=None
             for entry in entries:
+                if 'result' not in entry:
+                    continue
                 result = entry['result']
                 if '__typename' in result and result['__typename'] == 'TweetWithVisibilityResults':
                     result=result['tweet']
+                elif '__typename' in result and result['__typename'] == 'TweetUnavailable':
+                    if 'reason' in result:
+                        return {'error':'Tweet unavailable: '+result['reason']}
+                    return {'error':'Tweet unavailable'}
                 if 'rest_id' in result and result['rest_id'] == twid:
                     tweetEntry=result
                     break
             tweet=tweetEntry
+            if tweet is None:
+                return {'error':'Tweet not found (404); May be due to invalid tweet, changes in Twitter\'s API, or a protected account.'}
         except Exception as e:
             continue
         return tweet

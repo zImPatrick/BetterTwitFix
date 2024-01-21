@@ -166,6 +166,12 @@ def twitfix(sub_path):
                 tweet = None
             if tweet is None:
                 tweet = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
+            if 'error' in tweet:
+                response = make_response(jsonify(tweet), 500)
+                response.headers['Content-Type'] = 'application/json'
+                response.cache_control.max_age = 3600
+                response.cache_control.public = True
+                return response
             tweetL = tweet["legacy"]
             if "user_result" in tweet["core"]:
                 userL = tweet["core"]["user_result"]["result"]["legacy"]
