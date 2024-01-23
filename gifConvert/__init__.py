@@ -63,7 +63,7 @@ def loop_video_until_length(filename, length):
         new_filename = tempfile.mkstemp(suffix=".mp4")[1]
         edits = calcEdits(video_length,loops)
         #out = subprocess.call(["ffmpeg","-stream_loop",str(loops),"-i",filename,"-c","copy","-y",new_filename],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
-        subprocess.run(["./mp4box", "-add",filename,"-edits",f'1={edits}',new_filename])
+        subprocess.run(["./MP4Box", "-add",filename,"-edits",f'1={edits}',new_filename])
         return new_filename
     else:
         return filename
