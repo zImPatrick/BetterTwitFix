@@ -47,13 +47,23 @@ def get_video_length_seconds(filename):
     result_string = result.stdout.decode('utf-8').split()[0]
     return float(result_string)
 
+def calcEdits(vlen,loopTimes):
+    st="r"
+    currTime=0.0
+    for i in range(loopTimes):
+        st+=f'e{str(currTime)}-9999,0'
+        currTime+=vlen
+    return st
+
 def loop_video_until_length(filename, length):
     # use stream_loop to loop video until it's at least length seconds long
     video_length = get_video_length_seconds(filename)
     if video_length < length:
         loops = int(length/video_length)
         new_filename = tempfile.mkstemp(suffix=".mp4")[1]
-        out = subprocess.call(["./ffmpeg","-stream_loop",str(loops),"-i",filename,"-c","copy","-y",new_filename],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+        edits = calcEdits(video_length,loops)
+        #out = subprocess.call(["ffmpeg","-stream_loop",str(loops),"-i",filename,"-c","copy","-y",new_filename],stdout=subprocess.DEVNULL,stderr=subprocess.STDOUT)
+        subprocess.run(["./mp4box", "-add",filename,"-edits",f'1={edits}',new_filename])
         return new_filename
     else:
         return filename
