@@ -36,6 +36,7 @@ generate_embed_user_agents = [
     "TelegramBot (like TwitterBot)", 
     "Mozilla/5.0 (compatible; January/1.0; +https://gitlab.insrt.uk/revolt/january)", 
     "Synapse (bot; +https://github.com/matrix-org/synapse)",
+    "Iframely/1.3.1 (+https://iframely.com/docs/about)",
     "test"]
 
 def isValidUserAgent(user_agent):
