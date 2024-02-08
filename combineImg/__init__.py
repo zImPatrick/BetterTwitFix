@@ -4,6 +4,7 @@ from io import BytesIO
 import base64
 import concurrent.futures
 from time import time as timer
+from urllib.parse import urlparse 
 
 # find the highest res image in an array of images
 def findImageWithMostPixels(imageArray):
@@ -139,10 +140,11 @@ def lambda_handler(event, context):
             "body": "Invalid request."
         }
     images = event["queryStringParameters"].get("imgs","").split(",")
-    for img in images:
-        if not img.startswith("https://pbs.twimg.com"):
-            return {'statusCode':400,'body':'Invalid image URL'}
-    combined = genImageFromURL(images)
+    for img in imgs:
+        result = urlparse(img)
+        if result.hostname != "pbs.twimg.com" or result.scheme != "https":
+            abort(400)
+        combined = genImageFromURL(images)
     if (combined == None):
         return {'statusCode':200,'body':get500ImgBase64(),'isBase64Encoded':True,'headers':{"Content-Type": "image/jpeg","Cache-Control": "public, max-age=86400"}}
     buffered = BytesIO()

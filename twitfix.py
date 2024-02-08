@@ -17,6 +17,7 @@ from yt_dlp.utils import ExtractorError
 import vxlogging as log
 import zipfile
 import html
+from urllib.parse import urlparse 
 app = Flask(__name__)
 CORS(app)
 user_agent=""
@@ -360,7 +361,8 @@ def rendercombined():
         abort(400)
     #check that each image starts with "https://pbs.twimg.com"
     for img in imgs:
-        if not img.startswith("https://pbs.twimg.com"):
+        result = urlparse(img)
+        if result.hostname != "pbs.twimg.com" or result.scheme != "https":
             abort(400)
     finalImg= combineImg.genImageFromURL(imgs)
     imgIo = BytesIO()
