@@ -140,10 +140,13 @@ def lambda_handler(event, context):
             "body": "Invalid request."
         }
     images = event["queryStringParameters"].get("imgs","").split(",")
-    for img in imgs:
+    for img in images:
         result = urlparse(img)
         if result.hostname != "pbs.twimg.com" or result.scheme != "https":
-            abort(400)
+            return {
+                "statusCode": 400,
+                "body": "Invalid request."
+            }
         combined = genImageFromURL(images)
     if (combined == None):
         return {'statusCode':200,'body':get500ImgBase64(),'isBase64Encoded':True,'headers':{"Content-Type": "image/jpeg","Cache-Control": "public, max-age=86400"}}
