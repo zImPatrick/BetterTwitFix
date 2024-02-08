@@ -1,3 +1,5 @@
+from numerize import numerize 
+
 failedToScan="Failed to scan your link! This may be due to an incorrect link, private/suspended account, deleted tweet, or recent changes to Twitter's API (Thanks, Elon!)."
 failedToScanExtra = "\n\nTwitter gave me this error: "
 tweetNotFound="Tweet not found."
@@ -9,9 +11,9 @@ tweetDescLimit=340
 
 def genLikesDisplay(vnf):
     if vnf['rts'] > 0:
-        return ("\n\n💖 " + str(vnf['likes']) + " 🔁 " + str(vnf['rts']))
+        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['rts']))
     else:
-        return ("\n\n💖 " + str(vnf['likes']))
+        return ("\n\n💖 " + numerize.numerize(vnf['likes']))
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
