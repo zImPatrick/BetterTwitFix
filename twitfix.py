@@ -198,7 +198,7 @@ def twitfix(sub_path):
                             best_bitrate = -1
                             besturl=""
                             for j in i["video_info"]["variants"]:
-                                if j['content_type'] == "video/mp4" and j['bitrate'] > best_bitrate:
+                                if j['content_type'] == "video/mp4" and '/hevc/' not in j["url"] and j['bitrate'] > best_bitrate:
                                     besturl = j['url']
                                     best_bitrate = j['bitrate']
                             media.append(besturl)
@@ -518,7 +518,7 @@ def link_to_vnf_from_tweet_data(tweet,video_link):
             else:
                 size={'width':720,'height':480}
             for video in media['video_info']['variants']:
-                if video['content_type'] == "video/mp4" and video['bitrate'] > best_bitrate:
+                if video['content_type'] == "video/mp4" and '/hevc/' not in video["url"] and video['bitrate'] > best_bitrate:
                     url = video['url']
                     best_bitrate = video['bitrate']
     elif tweetType(tweet) == "Text":
