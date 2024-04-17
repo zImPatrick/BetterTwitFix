@@ -1,10 +1,8 @@
 {% extends 'base.html' %} {% block head %}
-<meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
-<meta content="{{ color }}" name="theme-color" />
-<meta property="og:site_name" content="{{ appname }}">
+
 
 <meta name="twitter:card" content="player" />
-<meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
+{% include 'tweetCommon.html' %}
 <meta name="twitter:image" content="{{ pic }}" />
 <meta name="twitter:player:width" content="{{ videoSize['width'] }}" />
 <meta name="twitter:player:height" content="{{ videoSize['height'] }}" />
@@ -17,7 +15,6 @@
 <meta property="og:video:type" content="video/mp4" />
 <meta property="og:video:width" content="{{ videoSize['width'] }}" />
 <meta property="og:video:height" content="{{ videoSize['height'] }}" />
-<meta name="twitter:title" content="{{ user }} (@{{ screenName }}) {% if verified %}☑️{% else %}{% endif %}" />
 <meta property="og:image" content="{{ pic[0] }}" />
 <meta property="og:description" content="{{ desc }}" />
 

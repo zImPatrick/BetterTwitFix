@@ -48,11 +48,11 @@ def compareDict(original,compare):
             compareDict(original[key],compare[key])
 
 ## Specific API tests ##
-def test_syndicationAPI():
+def test_twextract_syndicationAPI():
     tweet = twExtract.extractStatus_syndication(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMediaTweet_compare['description']
 
-def test_extractStatusV2Anon():
+def test_twextract_extractStatusV2Anon():
     tweet = twExtract.extractStatusV2AnonLegacy(testTextTweet,None)
     assert tweet["full_text"]==testTextTweet_compare['description']
     tweet = twExtract.extractStatusV2AnonLegacy(testVideoTweet,None)
@@ -63,40 +63,40 @@ def test_extractStatusV2Anon():
     assert tweet["full_text"][:94]==testMultiMediaTweet_compare['description'][:94]
     
 
-def test_v2API():
+def test_twextract_v2API():
     tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMediaTweet_compare['description']
 
 ## Tweet retrieve tests ##
-def test_textTweetExtract():
+def test_twextract_textTweetExtract():
     tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testTextTweet_compare['description']
     assert tweet["user"]["screen_name"]=="jack"
     assert 'extended_entities' not in tweet
     
-def test_extractV2(): # remove this when v2 is default
+def test_twextract_extractV2(): # remove this when v2 is default
     tweet = twExtract.extractStatusV2(testTextTweet,workaroundTokens=tokens)
 
-def test_UserExtract():
+def test_twextract_UserExtract():
     user = twExtract.extractUser(testUser,workaroundTokens=tokens)
     assert user["screen_name"]=="jack"
     assert user["id"]==12
     assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
-def test_UserExtractID():
+def test_twextract_UserExtractID():
     user = twExtract.extractUser(testUserID,workaroundTokens=tokens)
     assert user["screen_name"]=="jack"
     assert user["id"]==12
     assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
-def test_UserExtractWeirdURLs():
+def test_twextract_UserExtractWeirdURLs():
     for url in testUserWeirdURLs:
         user = twExtract.extractUser(url,workaroundTokens=tokens)
         assert user["screen_name"]=="jack"
         assert user["id"]==12
         assert user["created_at"] == "Tue Mar 21 20:50:14 +0000 2006"
 
-def test_videoTweetExtract():
+def test_twextract_videoTweetExtract():
     tweet = twExtract.extractStatus(testVideoTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testVideoTweet_compare['description']
     assert 'extended_entities' in tweet
@@ -106,7 +106,7 @@ def test_videoTweetExtract():
     assert video["type"]=="video"
     
 
-def test_mediaTweetExtract():
+def test_twextract_mediaTweetExtract():
     tweet = twExtract.extractStatus(testMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"]==testMediaTweet_compare['description']
     assert 'extended_entities' in tweet
@@ -116,7 +116,7 @@ def test_mediaTweetExtract():
     assert video["type"]=="photo"
     
 
-def test_multimediaTweetExtract():
+def test_twextract_multimediaTweetExtract():
     tweet = twExtract.extractStatus(testMultiMediaTweet,workaroundTokens=tokens)
     assert tweet["full_text"][:94]==testMultiMediaTweet_compare['description'][:94]
     assert 'extended_entities' in tweet
@@ -128,12 +128,12 @@ def test_multimediaTweetExtract():
     assert video["media_url_https"]==testMultiMediaTweet_compare["images"][1]
     assert video["type"]=="photo"
 
-def test_pollTweetExtract():
+def test_twextract_pollTweetExtract():
     tweet = twExtract.extractStatus("https://twitter.com/norm/status/651169346518056960",workaroundTokens=tokens)
     assert 'card' in tweet
     compareDict(testPoll_comparePoll,tweet['card'])
 
-def test_NSFW_TweetExtract():
+def test_twextract_NSFW_TweetExtract():
     tweet = twExtract.extractStatus(testNSFWTweet,workaroundTokens=tokens) # For now just test that there's no error
 
 ## VNF conversion test ##

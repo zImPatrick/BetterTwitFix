@@ -10,8 +10,8 @@ videoDescLimit=220
 tweetDescLimit=340
 
 def genLikesDisplay(vnf):
-    if vnf['rts'] > 0:
-        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['rts']))
+    if vnf['retweets'] > 0:
+        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['retweets']))
     else:
         return ("\n\n💖 " + numerize.numerize(vnf['likes']))
 

@@ -90,6 +90,24 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
             else:
                 twText = twText.replace(eurl["url"],eurl["expanded_url"])
 
+    # check if all extended media are the same type
+    sameMedia = False
+    if len(media_extended) > 1:
+        sameMedia = True
+        for i in media_extended:
+            if i["type"] != media_extended[0]["type"]:
+                sameMedia = False
+                break
+
+    combinedMediaUrl = None
+    if sameMedia and media_extended[0]["type"] == "image":
+        host=config['config']['url']
+        combinedMediaUrl = f'{host}/rendercombined.jpg?imgs='
+        for i in media:
+            combinedMediaUrl += i + ","
+        combinedMediaUrl = combinedMediaUrl[:-1]
+
+
     apiObject = {
         "text": twText,
         "likes": tweetL["favorite_count"],
@@ -107,7 +125,10 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
         "possibly_sensitive": tweetL["possibly_sensitive"],
         "hashtags": hashtags,
         "qrtURL": qrtURL,
-        "communityNote": communityNote
+        "communityNote": communityNote,
+        "allSameType": sameMedia,
+        "hasMedia": len(media) > 0,
+        "combinedMediaUrl": combinedMediaUrl
     }
     try:
         apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
