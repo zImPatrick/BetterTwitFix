@@ -61,6 +61,6 @@ def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
         diff = len(output)-limit
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
-        return formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay)
+        return formatEmbedDesc(type,body,qrt,pollData,likesDisplay)
     else:
         return output
