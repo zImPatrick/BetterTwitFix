@@ -1,31 +1,32 @@
 import os
 
 import twExtract
+import utils
 from vx_testdata import *
 
 def test_twextract_syndicationAPI():
     tweet = twExtract.extractStatus_syndication(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['text']
+    assert utils.stripEndTCO(utils.stripEndTCO(tweet["full_text"]))==testMediaTweet_compare['text']
 
 def test_twextract_extractStatusV2Anon():
     tweet = twExtract.extractStatusV2AnonLegacy(testTextTweet,None)
-    assert tweet["full_text"]==testTextTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testTextTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testVideoTweet,None)
-    assert tweet["full_text"]==testVideoTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testVideoTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testMediaTweet,None)
-    assert tweet["full_text"]==testMediaTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testMediaTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testMultiMediaTweet,None)
-    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['text'][:94]
+    assert utils.stripEndTCO(tweet["full_text"])[:94]==testMultiMediaTweet_compare['text'][:94]
     
 
 def test_twextract_v2API():
     tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testMediaTweet_compare['text']
 
 ## Tweet retrieve tests ##
 def test_twextract_textTweetExtract():
     tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testTextTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testTextTweet_compare['text']
     assert tweet["user"]["screen_name"]=="jack"
     assert 'extended_entities' not in tweet
     
@@ -53,7 +54,7 @@ def test_twextract_UserExtractWeirdURLs():
 
 def test_twextract_videoTweetExtract():
     tweet = twExtract.extractStatus(testVideoTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testVideoTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testVideoTweet_compare['text']
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==1
     video = tweet['extended_entities']["media"][0]
@@ -63,7 +64,7 @@ def test_twextract_videoTweetExtract():
 
 def test_twextract_mediaTweetExtract():
     tweet = twExtract.extractStatus(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['text']
+    assert utils.stripEndTCO(tweet["full_text"])==testMediaTweet_compare['text']
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==1
     video = tweet['extended_entities']["media"][0]
@@ -74,7 +75,7 @@ def test_twextract_mediaTweetExtract():
 
 def test_twextract_multimediaTweetExtract():
     tweet = twExtract.extractStatus(testMultiMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['text'][:94]
+    assert utils.stripEndTCO(tweet["full_text"])[:94]==testMultiMediaTweet_compare['text'][:94]
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==3
     video = tweet['extended_entities']["media"][0]
