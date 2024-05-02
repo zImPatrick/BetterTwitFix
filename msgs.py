@@ -22,11 +22,11 @@ def genQrtDisplay(qrt):
 def genPollDisplay(poll):
     pctSplit=10
     output="\n\n"
-    for choice in poll["choices"]:
-        output+=choice["text"]+"\n"+("█"*int(choice["percent"]/pctSplit)) +" "+str(choice["percent"])+"%\n"
+    for choice in poll["options"]:
+        output+=choice["name"]+"\n"+("█"*int(choice["percent"]/pctSplit)) +" "+str(choice["percent"])+"%\n"
     return output
 
-def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
+def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
     qrtType=None
@@ -36,8 +36,10 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     limit = videoDescLimit if type=="Text" or type=="Video" or (qrt!=None and (qrtType=="Text" or qrtType=="Video")) else tweetDescLimit
 
     output = ""
-    if pollDisplay==None:
+    if pollData==None:
         pollDisplay=""
+    else:
+        pollDisplay=genPollDisplay(pollData)
 
     if qrt!=None:
 

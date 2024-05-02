@@ -4,7 +4,8 @@ from flask_cors import CORS
 import re
 import os
 import combineImg
-from io import BytesIO, StringIO
+from io import BytesIO
+import urllib
 import msgs
 import twExtract as twExtract
 from configHandler import config
@@ -54,38 +55,38 @@ def message(text):
 
 def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
     qrt = tweetData['qrt']
-    pollData = None
-    embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
     return render_template("image.html",
                     tweet=tweetData,
                     pic=[image],
                     host=config['config']['url'],
                     desc=embedDesc,
+                    urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=config['config']['appname']+appnameSuffix,
                     )
 
 def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
     qrt = tweetData['qrt']
-    pollData = None
-    embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
     return render_template("video.html",
                     tweet=tweetData,
                     media=mediaInfo,
                     host=config['config']['url'],
                     desc=embedDesc,
+                    urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=config['config']['appname']+appnameSuffix,
                     )
 
 def renderTextTweetEmbed(tweetData,appnameSuffix=""):
     qrt = tweetData['qrt']
-    pollData = None
-    embedDesc = msgs.formatEmbedDesc("Text",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Text",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
     return render_template("text.html",
                     tweet=tweetData,
                     host=config['config']['url'],
                     desc=embedDesc,
+                    urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=config['config']['appname']+appnameSuffix,
                     )

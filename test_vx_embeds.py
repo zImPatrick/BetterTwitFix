@@ -159,3 +159,14 @@ def test_embed_mixedMedia():
     resp = client.get(testMixedMediaTweet.replace("https://twitter.com","")+"/2",headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert img1 not in str(resp.data) and img2 in str(resp.data)
+
+def test_embed_poll():
+    resp = client.get(testPollTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert "Mean one thing" in str(resp.data)
+    assert "78.82%" in str(resp.data)
+
+def test_embed_stripLastUrl():
+    resp = client.get(testMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert "HgLAbiXw2E" not in str(resp.data)

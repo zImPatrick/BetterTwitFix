@@ -1,6 +1,7 @@
 import html
 from datetime import datetime
 from configHandler import config
+from utils import stripEndTCO
 
 def getApiResponse(tweet,include_txt=False,include_zip=False):
     tweetL = tweet["legacy"]
@@ -89,6 +90,7 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
                 twText = twText.replace(eurl["url"], "")
             else:
                 twText = twText.replace(eurl["url"],eurl["expanded_url"])
+    twText = stripEndTCO(twText)
 
     # check if all extended media are the same type
     sameMedia = False
@@ -102,7 +104,7 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
         sameMedia = True
 
     combinedMediaUrl = None
-    if sameMedia and media_extended[0]["type"] == "image" and len(media) > 1:
+    if len(media_extended) > 0 and sameMedia and media_extended[0]["type"] == "image" and len(media) > 1:
         host=config['config']['url']
         combinedMediaUrl = f'{host}/rendercombined.jpg?imgs='
         for i in media:
