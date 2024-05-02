@@ -98,9 +98,11 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
             if i["type"] != media_extended[0]["type"]:
                 sameMedia = False
                 break
+    else:
+        sameMedia = True
 
     combinedMediaUrl = None
-    if sameMedia and media_extended[0]["type"] == "image":
+    if sameMedia and media_extended[0]["type"] == "image" and len(media) > 1:
         host=config['config']['url']
         combinedMediaUrl = f'{host}/rendercombined.jpg?imgs='
         for i in media:

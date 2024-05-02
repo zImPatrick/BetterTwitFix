@@ -9,7 +9,8 @@ tests = {
     "testQrtCeptionTweet":"https://twitter.com/CatherineShu/status/585253766271672320",
     "testQrtVideoTweet":"https://twitter.com/pdxdylan/status/1674561759422578690",
     "testNSFWTweet":"https://twitter.com/kuyacoy/status/1581185279376838657",
-    "testPollTweet": "https://twitter.com/norm/status/651169346518056960"
+    "testPollTweet": "https://twitter.com/norm/status/651169346518056960",
+    "testMixedMediaTweet":"https://twitter.com/bigbeerfest/status/1760638922084741177",
 }
 
 def getVNFFromLink(link):

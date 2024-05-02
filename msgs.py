@@ -30,9 +30,8 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
     qrtType=None
-    #if qrt!=None:
-    #    qrtType=qrt["type"]
-    qrtType="Text"
+    if qrt!=None:
+        qrtType="Text"
 
     limit = videoDescLimit if type=="Text" or type=="Video" or (qrt!=None and (qrtType=="Text" or qrtType=="Video")) else tweetDescLimit
 

@@ -156,16 +156,28 @@ def twitfix(sub_path):
     if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
         qrt = getTweetData(tweetData['qrtURL'])
     tweetData['qrt'] = qrt
-    ###return tweetData
+
+    if '?' in request.url:
+        requestUrlWithoutQuery = request.url.split("?")[0]
+    else:
+        requestUrlWithoutQuery = request.url
+
+    directEmbed=False
+    if requestUrlWithoutQuery.startswith("https://d.vx") or requestUrlWithoutQuery.endswith(".mp4") or requestUrlWithoutQuery.endswith(".png"):
+        directEmbed = True
+        # remove the .mp4 from the end of the URL
+        if requestUrlWithoutQuery.endswith(".mp4") or requestUrlWithoutQuery.endswith(".png"):
+            sub_path = sub_path[:-4]
 
     embedIndex = -1
     # if url ends with /1, /2, /3, or /4, we'll use that as the index
     if sub_path[-2:] in ["/1","/2","/3","/4"]:
         embedIndex = int(sub_path[-1])-1
         sub_path = sub_path[:-2]
+        
     if request.url.startswith("https://api.vx"): # Directly return the API response if the request is from the API
         return tweetData
-    elif request.url.startswith("https://d.vx"): # direct embed
+    elif directEmbed: # direct embed
         # direct embeds should always prioritize the main tweet, so don't check for qrt
         # determine what type of media we're dealing with
         if not tweetData['hasMedia'] and qrt is None:
@@ -179,8 +191,8 @@ def twitfix(sub_path):
             media = tweetData['media_extended'][embedIndex]
             if media['type'] == "image":
                 return redirect(media['url'], 302)
-            elif media['type'] == "video" or media['type'] == "animated_gif":
-                return redirect(media['url'], 302) # TODO: might not work
+            elif media['type'] == "video" or media['type'] == "gif":
+                return render_template("rawvideo.html",media=media)
     else: # full embed
         embedTweetData = determineEmbedTweet(tweetData)
         if not embedTweetData['hasMedia']:
@@ -192,10 +204,14 @@ def twitfix(sub_path):
             if embedIndex == -1: # if the user didn't specify an index, we'll just use the first one
                 embedIndex = 0
             media = embedTweetData['media_extended'][embedIndex]
+            if len(embedTweetData["media_extended"]) > 1:
+                suffix = f' - Media {embedIndex+1}/{len(embedTweetData["media_extended"])}'
+            else:
+                suffix = ''
             if media['type'] == "image":
-                return renderImageTweetEmbed(tweetData,media['url'] , appnameSuffix=f' - Media {embedIndex+1}/{len(embedTweetData["media_extended"])}')
-            elif media['type'] == "video" or media['type'] == "animated_gif":
-                return renderVideoTweetEmbed(tweetData,media)
+                return renderImageTweetEmbed(tweetData,media['url'] , appnameSuffix=suffix)
+            elif media['type'] == "video" or media['type'] == "gif":
+                return renderVideoTweetEmbed(tweetData,media,appnameSuffix=suffix)
 
     return tweetData
 
