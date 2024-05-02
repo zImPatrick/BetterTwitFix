@@ -152,12 +152,13 @@ def twitfix(sub_path):
 
     tweetData = getTweetData(twitter_url)
     if tweetData is None:
+        log.error("Tweet Data Get failed")
         return message(msgs.failedToScan)
     qrt = None
     if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
         qrt = getTweetData(tweetData['qrtURL'])
     tweetData['qrt'] = qrt
-
+    log.error("Tweet Data Get success")
     if '?' in request.url:
         requestUrlWithoutQuery = request.url.split("?")[0]
     else:
