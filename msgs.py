@@ -10,30 +10,36 @@ videoDescLimit=220
 tweetDescLimit=340
 
 def genLikesDisplay(vnf):
-    if vnf['rts'] > 0:
-        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['rts']))
+    if vnf['retweets'] > 0:
+        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['retweets']))
     else:
         return ("\n\n💖 " + numerize.numerize(vnf['likes']))
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
-    return ("\n\n【QRT of " + qrt['uploader'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['description'] + "'")
+    return ("\n\n【QRT of " + qrt['user_name'] + " (@" + qrt['user_screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['text'] + "'")
 
 def genPollDisplay(poll):
     pctSplit=10
     output="\n\n"
-    for choice in poll["choices"]:
-        output+=choice["text"]+"\n"+("█"*int(choice["percent"]/pctSplit)) +" "+str(choice["percent"])+"%\n"
+    for choice in poll["options"]:
+        output+=choice["name"]+"\n"+("█"*int(choice["percent"]/pctSplit)) +" "+str(choice["percent"])+"%\n"
     return output
 
-def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
+def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
-    limit = videoDescLimit if type=="" or type=="Video" or (qrt!=None and (qrt["type"]=="" or qrt["type"]=="Video")) else tweetDescLimit
+    qrtType=None
+    if qrt!=None:
+        qrtType="Text"
+
+    limit = videoDescLimit if type=="Text" or type=="Video" or (qrt!=None and (qrtType=="Text" or qrtType=="Video")) else tweetDescLimit
 
     output = ""
-    if pollDisplay==None:
+    if pollData==None:
         pollDisplay=""
+    else:
+        pollDisplay=genPollDisplay(pollData)
 
     if qrt!=None:
 
@@ -55,6 +61,6 @@ def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
         diff = len(output)-limit
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
-        return formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay)
+        return formatEmbedDesc(type,body,qrt,pollData,likesDisplay)
     else:
         return output

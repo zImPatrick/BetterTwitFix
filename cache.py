@@ -5,6 +5,7 @@ import json
 import os
 import boto3
 import vxlogging as log
+from utils import getTweetIdFromUrl
 
 link_cache_system = config['config']['link_cache']
 link_cache = {}
@@ -44,8 +45,7 @@ def serializeUnknown(obj):
         return obj.isoformat()
     raise TypeError ("Type %s not serializable" % type(obj))
 
-def addVnfToLinkCache(video_link, vnf):
-    video_link = video_link.lower()
+def addVnfToTweetIdCache(tweet_id, vnf):
     global link_cache
     try:
         if link_cache_system == "db":
@@ -53,20 +53,20 @@ def addVnfToLinkCache(video_link, vnf):
                 log.debug("Link added to DB cache ")
                 return True
         elif link_cache_system == "json":
-            link_cache[video_link] = vnf
+            link_cache[tweet_id] = vnf
             with open("links.json", "w") as outfile: 
                 json.dump(link_cache, outfile, indent=4, sort_keys=True, default=serializeUnknown)
             log.debug("Link added to JSON cache ")
             return True
         elif link_cache_system == "ram": # FOR TESTS ONLY
-            link_cache[video_link] = vnf
+            link_cache[tweet_id] = vnf
             log.debug("Link added to RAM cache ")
         elif link_cache_system == "dynamodb": # pragma: no cover
             vnf["ttl"] = int(vnf["ttl"].strftime('%s'))
             table = client.Table(DYNAMO_CACHE_TBL)
             table.put_item(
                 Item={
-                    'tweet': video_link,
+                    'tweet': tweet_id,
                     'vnf': vnf,
                     'ttl':vnf["ttl"]
                 }
@@ -74,19 +74,21 @@ def addVnfToLinkCache(video_link, vnf):
             log.debug("Link added to dynamodb cache ")
             return True
     except Exception as e:
-        log.error("Failed to add link to DB cache: "+str(e)+" "+video_link)
+        log.error("Failed to add link to DB cache: "+str(e)+" "+tweet_id)
         return False
 
-def getVnfFromLinkCache(video_link):
-    video_link = video_link.lower()
+def addVnfToLinkCache(twitter_url, vnf):
+    return addVnfToTweetIdCache(getTweetIdFromUrl(twitter_url), vnf)
+
+def getVnfFromTweetIdCache(tweet_id):
     global link_cache
     if link_cache_system == "db":
         collection = db.linkCache
-        vnf        = collection.find_one({'tweet': video_link})
+        vnf        = collection.find_one({'tweet': tweet_id})
         if vnf != None: 
             hits   = ( vnf['hits'] + 1 ) 
             log.debug("Link located in DB cache.")
-            query  = { 'tweet': video_link }
+            query  = { 'tweet': tweet_id }
             change = { "$set" : { "hits" : hits } }
             out    = db.linkCache.update_one(query, change)
             return vnf
@@ -94,9 +96,9 @@ def getVnfFromLinkCache(video_link):
             log.debug("Link not in DB cache")
             return None
     elif link_cache_system == "json":
-        if video_link in link_cache:
+        if tweet_id in link_cache:
             log.debug("Link located in json cache")
-            vnf = link_cache[video_link]
+            vnf = link_cache[tweet_id]
             return vnf
         else:
             log.debug("Link not in json cache")
@@ -105,7 +107,7 @@ def getVnfFromLinkCache(video_link):
         table = client.Table(DYNAMO_CACHE_TBL)
         response = table.get_item(
             Key={
-                'tweet': video_link
+                'tweet': tweet_id
             }
         )
         if 'Item' in response:
@@ -116,15 +118,18 @@ def getVnfFromLinkCache(video_link):
             log.debug("Link not in dynamodb cache")
             return None
     elif link_cache_system == "ram": # FOR TESTS ONLY
-        if video_link in link_cache:
+        if tweet_id in link_cache:
             log.debug("Link located in json cache")
-            vnf = link_cache[video_link]
+            vnf = link_cache[tweet_id]
             return vnf
         else:
             log.debug("Link not in cache")
             return None
     elif link_cache_system == "none":
         return None
+
+def getVnfFromLinkCache(twitter_url):
+    return getVnfFromTweetIdCache(getTweetIdFromUrl(twitter_url))
 
 def clearCache():
     global link_cache
