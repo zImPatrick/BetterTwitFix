@@ -107,6 +107,32 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
             combinedMediaUrl += i + ","
         combinedMediaUrl = combinedMediaUrl[:-1]
 
+    pollData = None
+    if 'card' in tweet and 'legacy' in tweet['card'] and tweet['card']['legacy']['name'].startswith("poll"):
+        cardName = tweet['card']['legacy']['name']
+        pollData={} # format: {"options":["name":"Option 1 Name","votes":5,"percent":50]}
+        pollData["options"] = []
+        totalVotes = 0
+        bindingValues = tweet['card']['legacy']['binding_values']
+        pollValues = {}
+        for i in bindingValues:
+            key = i["key"]
+            value = i["value"]
+            etype = value["type"]
+            if etype == "STRING":
+                pollValues[key] = value["string_value"]
+            elif etype == "BOOLEAN":
+                pollValues[key] = value["boolean_value"]
+        for i in range(1,5):
+            if f"choice{i}_label" in pollValues:
+                option = {}
+                option["name"] = pollValues[f"choice{i}_label"]
+                option["votes"] = int(pollValues[f"choice{i}_count"])
+                totalVotes += option["votes"]
+                pollData["options"].append(option)
+        for i in pollData["options"]:
+            i["percent"] = round((i["votes"]/totalVotes)*100,2)
+        
 
     apiObject = {
         "text": twText,
@@ -128,7 +154,8 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
         "communityNote": communityNote,
         "allSameType": sameMedia,
         "hasMedia": len(media) > 0,
-        "combinedMediaUrl": combinedMediaUrl
+        "combinedMediaUrl": combinedMediaUrl,
+        "pollData": pollData,
     }
     try:
         apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
