@@ -11,13 +11,13 @@ from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
 from yt_dlp.utils import ExtractorError
 import vxlogging as log
-
+from utils import getTweetIdFromUrl, pathregex
 from vxApi import getApiResponse
 from urllib.parse import urlparse 
 app = Flask(__name__)
 CORS(app)
 user_agent=""
-pathregex = re.compile("\\w{1,15}\\/(status|statuses)\\/(\\d{2,20})")
+
 generate_embed_user_agents = [
     "facebookexternalhit/1.1",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36",
@@ -43,15 +43,17 @@ def isValidUserAgent(user_agent):
         return True
     return False
 
-def getTweetIdFromUrl(url):
-    match = pathregex.search(url)
-    if match is not None:
-        return match.group(2)
-    else:
-        return None
+def message(text):
+    return render_template(
+        'default.html', 
+        message = text, 
+        color   = config['config']['color'], 
+        appname = config['config']['appname'], 
+        repo    = config['config']['repo'], 
+        url     = config['config']['url'] )
 
 def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
-    qrt = None
+    qrt = tweetData['qrt']
     pollData = None
     embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
     return render_template("image.html",
@@ -63,13 +65,30 @@ def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
                     appname=config['config']['appname']+appnameSuffix,
                     )
 
-def renderVideoTweetEmbed(tweetData,video,appnameSuffix=""):
-    # TODO: render video tweet embed template
-    return "Video tweet embed"
+def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
+    qrt = tweetData['qrt']
+    pollData = None
+    embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
+    return render_template("video.html",
+                    tweet=tweetData,
+                    media=mediaInfo,
+                    host=config['config']['url'],
+                    desc=embedDesc,
+                    tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
+                    appname=config['config']['appname']+appnameSuffix,
+                    )
 
 def renderTextTweetEmbed(tweetData,appnameSuffix=""):
-    # TODO: render text tweet embed template
-    return "Text tweet embed"
+    qrt = tweetData['qrt']
+    pollData = None
+    embedDesc = msgs.formatEmbedDesc("Text",tweetData['text'],qrt,pollData,msgs.genLikesDisplay(tweetData))
+    return render_template("text.html",
+                    tweet=tweetData,
+                    host=config['config']['url'],
+                    desc=embedDesc,
+                    tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
+                    appname=config['config']['appname']+appnameSuffix,
+                    )
 
 @app.route('/robots.txt')
 def robots():
@@ -89,6 +108,10 @@ def oembedend():
     return  oEmbedGen(desc, user, link, ttype,providerName=provName)
 
 def getTweetData(twitter_url):
+    cachedVNF = getVnfFromLinkCache(twitter_url)
+    if cachedVNF is not None:
+        return cachedVNF
+    
     try:
         rawTweetData = twExtract.extractStatusV2Anon(twitter_url)
     except:
@@ -101,6 +124,22 @@ def getTweetData(twitter_url):
     if rawTweetData is None:
         return None
     tweetData = getApiResponse(rawTweetData)
+    if tweetData is None:
+        return None
+    addVnfToLinkCache(twitter_url,tweetData)
+    return tweetData
+
+def determineEmbedTweet(tweetData):
+    # Determine which tweet, i.e main or QRT, to embed the media from.
+    # if there is no QRT, return the main tweet => default behavior
+    # if both don't have media, return the main tweet => embedding qrt text will be handled in the embed description
+    # if both have media, return the main tweet => priority is given to the main tweet's media
+    # if only the QRT has media, return the QRT => show the QRT's media, not the main tweet's
+    # if only the main tweet has media, return the main tweet => show the main tweet's media, embedding QRT text will be handled in the embed description
+    if tweetData['qrt'] is None:
+        return tweetData
+    if tweetData['qrt']['hasMedia'] and not tweetData['hasMedia']:
+        return tweetData['qrt']
     return tweetData
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
@@ -112,11 +151,11 @@ def twitfix(sub_path):
 
     tweetData = getTweetData(twitter_url)
     if tweetData is None:
-        abort(404)
+        return message(msgs.failedToScan)
     qrt = None
-    if 'qrtURL' in tweetData:
+    if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
         qrt = getTweetData(tweetData['qrtURL'])
-
+    tweetData['qrt'] = qrt
     ###return tweetData
 
     embedIndex = -1
@@ -127,6 +166,7 @@ def twitfix(sub_path):
     if request.url.startswith("https://api.vx"): # Directly return the API response if the request is from the API
         return tweetData
     elif request.url.startswith("https://d.vx"): # direct embed
+        # direct embeds should always prioritize the main tweet, so don't check for qrt
         # determine what type of media we're dealing with
         if not tweetData['hasMedia'] and qrt is None:
             return renderTextTweetEmbed(tweetData)
@@ -142,19 +182,20 @@ def twitfix(sub_path):
             elif media['type'] == "video" or media['type'] == "animated_gif":
                 return redirect(media['url'], 302) # TODO: might not work
     else: # full embed
-        if not tweetData['hasMedia']:
+        embedTweetData = determineEmbedTweet(tweetData)
+        if not embedTweetData['hasMedia']:
             return renderTextTweetEmbed(tweetData)
-        elif tweetData['allSameType'] and tweetData['media_extended'][0]['type'] == "image" and embedIndex == -1 and tweetData['combinedMediaUrl'] != None:
-            return renderImageTweetEmbed(tweetData,tweetData['combinedMediaUrl'],appnameSuffix=" - See original tweet for full quality")
+        elif embedTweetData['allSameType'] and embedTweetData['media_extended'][0]['type'] == "image" and embedIndex == -1 and embedTweetData['combinedMediaUrl'] != None:
+            return renderImageTweetEmbed(tweetData,embedTweetData['combinedMediaUrl'],appnameSuffix=" - See original tweet for full quality")
         else:
             # this means we have mixed media or video, and we're only going to embed one
             if embedIndex == -1: # if the user didn't specify an index, we'll just use the first one
                 embedIndex = 0
-            media = tweetData['media_extended'][embedIndex]
+            media = embedTweetData['media_extended'][embedIndex]
             if media['type'] == "image":
-                return renderImageTweetEmbed(tweetData,media['url'] , appnameSuffix=f' - Media {embedIndex+1}/{len(tweetData["media_extended"])}')
+                return renderImageTweetEmbed(tweetData,media['url'] , appnameSuffix=f' - Media {embedIndex+1}/{len(embedTweetData["media_extended"])}')
             elif media['type'] == "video" or media['type'] == "animated_gif":
-                return renderVideoTweetEmbed(tweetData,media['url'])
+                return renderVideoTweetEmbed(tweetData,media)
 
     return tweetData
 

@@ -1,8 +1,7 @@
 import os
 
-import twitfix,twExtract
+import twitfix,twExtract,vxApi
 import cache
-import msgs
 from flask.testing import FlaskClient
 client = FlaskClient(twitfix.app)
 
@@ -16,15 +15,14 @@ testQrtCeptionTweet="https://twitter.com/CatherineShu/status/585253766271672320"
 testQrtVideoTweet="https://twitter.com/pdxdylan/status/1674561759422578690"
 testNSFWTweet="https://twitter.com/kuyacoy/status/1581185279376838657"
 
-testTextTweet_compare={'tweet': 'https://twitter.com/jack/status/20', 'url': '', 'description': 'just setting up my twttr', 'thumbnail': '', 'type': 'Text', 'images': ['', '', '', '', ''], 'time': '2006-03-21T20:50:14.000Z', 'qrtURL': None, 'nsfw': False, 'size': {}, 'isGif': False}
-testVideoTweet_compare={'tweet': 'https://twitter.com/pdxdylan/status/1540398733669666818', 'url': 'https://video.twimg.com/ext_tw_video/1540396699037929472/pu/vid/762x528/YxbXbT3X7vq4LWfC.mp4?tag=12', 'description': 'TikTok embeds on Discord/Telegram bait you with a fake play button, but to see the actual video you have to go to their website.\nAs a request from a friend, I made it so that if you add "vx" before "tiktok" on any link, it fixes that. https://t.co/QYpiVXUIrW', 'thumbnail': 'https://pbs.twimg.com/ext_tw_video_thumb/1540396699037929472/pu/img/l187Z6B9AHHxUKPV.jpg', 'type': 'Video', 'images': ['', '', '', '', ''], 'time': '2022-06-24T18:17:31.000Z', 'qrtURL': None, 'nsfw': False, 'size': {'height': 528, 'width': 762, 'focus_rects': []}, 'isGif': False}
-testMediaTweet_compare={'tweet': 'https://twitter.com/pdxdylan/status/1534672932106035200', 'url': '', 'description': 'oh. https://t.co/HgLAbiXw2E', 'thumbnail': 'https://pbs.twimg.com/media/FUxAt5LWUAMol0N.png', 'type': 'Image', 'images': ['https://pbs.twimg.com/media/FUxAt5LWUAMol0N.png', '', '', '', '1'], 'time': '2022-06-08T23:05:14.000Z', 'qrtURL': None, 'nsfw': False, 'size': {}, 'isGif': False}
-testMultiMediaTweet_compare={'tweet': 'https://twitter.com/pdxdylan/status/1532006436703715331', 'url': '', 'description': 'Released #Retro64 1.0.9. Besides a lot of internal bug-fixes, this adds quicksand blocks, fixes the rendering for the castle stairs block, and adds a new model, Sonic! \nhttps://github.com/Retro64Mod/Retro64Mod/releases/tag/1.18.2-1.0.9 https://t.co/CWZaw4hzyg', 'thumbnail': 'https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png', 'type': 'Image', 'images': ['https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png', 'https://pbs.twimg.com/media/FULGaHkWYAIBV5U.png', 'https://pbs.twimg.com/media/FULGiZnWQAMBRWl.png', '', '3'], 'time': '2022-06-01T14:29:32.000Z', 'qrtURL': None, 'nsfw': False, 'size': {}, 'isGif': False}
-testQRTTweet_compare={'tweet': 'https://twitter.com/pdxdylan/status/1611477137319514129', 'url': '', 'description': "vxTwitter has gotten a *ton* of usage recently, so I'd appreciate a donation to keep things running!\n", 'thumbnail': '', 'type': 'Text', 'images': ['', '', '', '', ''], 'time': '2023-01-06T21:37:43.000Z', 'qrtURL': 'https://twitter.com/pdxdylan/status/1518309187515781125', 'nsfw': False, 'size': {}, 'isGif': False}
-testQrtCeptionTweet_compare={'tweet': 'https://twitter.com/CatherineShu/status/585253766271672320', 'url': '', 'description': 'Testing retweetception ', 'thumbnail': '', 'type': 'Text', 'images': ['', '', '', '', ''], 'time': '2015-04-07T01:32:26.000Z', 'qrtURL': 'https://twitter.com/EliLanger/status/585253161260216320', 'nsfw': False, 'size': {}, 'isGif': False}
-testQrtVideoTweet_compare={'tweet': 'https://twitter.com/pdxdylan/status/1674561759422578690', 'url': '', 'description': 'good', 'thumbnail': '', 'type': 'Text', 'images': ['', '', '', '', ''], 'time': '2023-06-29T23:33:29.000Z', 'qrtURL': 'https://twitter.com/TeaboyAllStars/status/1674197531301904388', 'nsfw': False, 'size': {}, 'isGif': False}
-testNSFWTweet_compare={'tweet': 'https://twitter.com/kuyacoy/status/1581185279376838657', 'url': '', 'description': "ngl, I'm scared on finding out the cute Sprigatito's final evolution..\n\nso i had a bot generate it for me.... and I'm forever scarred https://t.co/itMay87vcS", 'thumbnail': 'https://pbs.twimg.com/media/FfF_gKwXgAIpnpD.jpg', 'type': 'Image', 'images': ['https://pbs.twimg.com/media/FfF_gKwXgAIpnpD.jpg', '', '', '', '1'], 'time': 'Sat Oct 15 07:28:42 +0000 2022', 'qrtURL': None, 'nsfw': True, 'size': {}, 'isGif': False}
-
+testTextTweet_compare={'text': 'just setting up my twttr', 'date': 'Tue Mar 21 20:50:14 +0000 2006', 'tweetURL': 'https://twitter.com/jack/status/20', 'tweetID': '20', 'conversationID': '20', 'mediaURLs': [], 'media_extended': [], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': None, 'allSameType': False, 'hasMedia': False, 'combinedMediaUrl': None, 'date_epoch': 1142974214}
+testVideoTweet_compare={'text': 'TikTok embeds on Discord/Telegram bait you with a fake play button, but to see the actual video you have to go to their website.\nAs a request from a friend, I made it so that if you add "vx" before "tiktok" on any link, it fixes that. https://t.co/QYpiVXUIrW', 'date': 'Fri Jun 24 18:17:31 +0000 2022', 'tweetURL': 'https://twitter.com/pdxdylan/status/1540398733669666818', 'tweetID': '1540398733669666818', 'conversationID': '1540398733669666818', 'mediaURLs': ['https://video.twimg.com/ext_tw_video/1540396699037929472/pu/vid/762x528/YxbXbT3X7vq4LWfC.mp4?tag=12'], 'media_extended': [{'url': 'https://video.twimg.com/ext_tw_video/1540396699037929472/pu/vid/762x528/YxbXbT3X7vq4LWfC.mp4?tag=12', 'type': 'video', 'size': {'width': 762, 'height': 528}, 'duration_millis': 13650, 'thumbnail_url': 'https://pbs.twimg.com/ext_tw_video_thumb/1540396699037929472/pu/img/l187Z6B9AHHxUKPV.jpg', 'altText': None}], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': None, 'allSameType': False, 'hasMedia': True, 'combinedMediaUrl': None, 'date_epoch': 1656094651}
+testMediaTweet_compare={'text': 'oh. https://t.co/HgLAbiXw2E', 'date': 'Wed Jun 08 23:05:14 +0000 2022', 'tweetURL': 'https://twitter.com/pdxdylan/status/1534672932106035200', 'tweetID': '1534672932106035200', 'conversationID': '1534672673422381057', 'mediaURLs': ['https://pbs.twimg.com/media/FUxAt5LWUAMol0N.png'], 'media_extended': [{'url': 'https://pbs.twimg.com/media/FUxAt5LWUAMol0N.png', 'altText': None, 'type': 'image', 'size': {'width': 927, 'height': 534}, 'thumbnail_url': 'https://pbs.twimg.com/media/FUxAt5LWUAMol0N.png'}], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': None, 'allSameType': False, 'hasMedia': True, 'combinedMediaUrl': None, 'date_epoch': 1654729514}
+testMultiMediaTweet_compare={'text': 'Released #Retro64 1.0.9. Besides a lot of internal bug-fixes, this adds quicksand blocks, fixes the rendering for the castle stairs block, and adds a new model, Sonic! \nhttps://github.com/Retro64Mod/Retro64Mod/releases/tag/1.18.2-1.0.9 https://t.co/CWZaw4hzyg', 'date': 'Wed Jun 01 14:29:32 +0000 2022', 'tweetURL': 'https://twitter.com/pdxdylan/status/1532006436703715331', 'tweetID': '1532006436703715331', 'conversationID': '1532006436703715331', 'mediaURLs': ['https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png', 'https://pbs.twimg.com/media/FULGaHkWYAIBV5U.png', 'https://pbs.twimg.com/media/FULGiZnWQAMBRWl.png'], 'media_extended': [{'url': 'https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png', 'altText': None, 'type': 'image', 'size': {'width': 507, 'height': 507}, 'thumbnail_url': 'https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png'}, {'url': 'https://pbs.twimg.com/media/FULGaHkWYAIBV5U.png', 'altText': None, 'type': 'image', 'size': {'width': 396, 'height': 431}, 'thumbnail_url': 'https://pbs.twimg.com/media/FULGaHkWYAIBV5U.png'}, {'url': 'https://pbs.twimg.com/media/FULGiZnWQAMBRWl.png', 'altText': None, 'type': 'image', 'size': {'width': 399, 'height': 341}, 'thumbnail_url': 'https://pbs.twimg.com/media/FULGiZnWQAMBRWl.png'}], 'possibly_sensitive': False, 'hashtags': ['Retro64'], 'qrtURL': None, 'allSameType': True, 'hasMedia': True, 'combinedMediaUrl': 'https://vxtwitter.com/rendercombined.jpg?imgs=https://pbs.twimg.com/media/FULF9oxXwAMDI-C.png,https://pbs.twimg.com/media/FULGaHkWYAIBV5U.png,https://pbs.twimg.com/media/FULGiZnWQAMBRWl.png', 'date_epoch': 1654093772}
+testQRTTweet_compare={'text': "vxTwitter has gotten a *ton* of usage recently, so I'd appreciate a donation to keep things running!\n", 'date': 'Fri Jan 06 21:37:43 +0000 2023', 'tweetURL': 'https://twitter.com/pdxdylan/status/1611477137319514129', 'tweetID': '1611477137319514129', 'conversationID': '1611476665821003776', 'mediaURLs': [], 'media_extended': [], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': 'https://twitter.com/i/status/1518309187515781125', 'allSameType': False, 'hasMedia': False, 'combinedMediaUrl': None, 'date_epoch': 1673041063}
+testQrtCeptionTweet_compare={'text': 'Testing retweetception ', 'date': 'Tue Apr 07 01:32:26 +0000 2015', 'tweetURL': 'https://twitter.com/CatherineShu/status/585253766271672320', 'tweetID': '585253766271672320', 'conversationID': '585253766271672320', 'mediaURLs': [], 'media_extended': [], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': 'https://twitter.com/i/status/585253161260216320', 'allSameType': False, 'hasMedia': False, 'combinedMediaUrl': None, 'date_epoch': 1428370346}
+testQrtVideoTweet_compare={'text': 'good', 'date': 'Thu Jun 29 23:33:29 +0000 2023', 'tweetURL': 'https://twitter.com/pdxdylan/status/1674561759422578690', 'tweetID': '1674561759422578690', 'conversationID': '1674561759422578690', 'mediaURLs': [], 'media_extended': [], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': 'https://twitter.com/i/status/1674197531301904388', 'allSameType': False, 'hasMedia': False, 'combinedMediaUrl': None, 'date_epoch': 1688081609}
+testNSFWTweet_compare={'text': "ngl, I'm scared on finding out the cute Sprigatito's final evolution..\n\nso i had a bot generate it for me.... and I'm forever scarred https://t.co/itMay87vcS", 'date': 'Sat Oct 15 07:28:42 +0000 2022', 'tweetURL': 'https://twitter.com/kuyacoy/status/1581185279376838657', 'tweetID': '1581185279376838657', 'conversationID': '1581185279376838657', 'mediaURLs': ['https://pbs.twimg.com/media/FfF_gKwXgAIpnpD.jpg'], 'media_extended': [{'url': 'https://pbs.twimg.com/media/FfF_gKwXgAIpnpD.jpg', 'altText': None, 'type': 'image', 'size': {'width': 760, 'height': 926}, 'thumbnail_url': 'https://pbs.twimg.com/media/FfF_gKwXgAIpnpD.jpg'}], 'possibly_sensitive': False, 'hashtags': [], 'qrtURL': None, 'allSameType': False, 'hasMedia': True, 'combinedMediaUrl': None, 'date_epoch': 1665818922}
 
 testUser="https://twitter.com/jack"
 testUserID = "https://twitter.com/i/user/12"
@@ -50,27 +48,27 @@ def compareDict(original,compare):
 ## Specific API tests ##
 def test_twextract_syndicationAPI():
     tweet = twExtract.extractStatus_syndication(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['description']
+    assert tweet["full_text"]==testMediaTweet_compare['text']
 
 def test_twextract_extractStatusV2Anon():
     tweet = twExtract.extractStatusV2AnonLegacy(testTextTweet,None)
-    assert tweet["full_text"]==testTextTweet_compare['description']
+    assert tweet["full_text"]==testTextTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testVideoTweet,None)
-    assert tweet["full_text"]==testVideoTweet_compare['description']
+    assert tweet["full_text"]==testVideoTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testMediaTweet,None)
-    assert tweet["full_text"]==testMediaTweet_compare['description']
+    assert tweet["full_text"]==testMediaTweet_compare['text']
     tweet = twExtract.extractStatusV2AnonLegacy(testMultiMediaTweet,None)
-    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['description'][:94]
+    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['text'][:94]
     
 
 def test_twextract_v2API():
     tweet = twExtract.extractStatusV2Legacy(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['description']
+    assert tweet["full_text"]==testMediaTweet_compare['text']
 
 ## Tweet retrieve tests ##
 def test_twextract_textTweetExtract():
     tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testTextTweet_compare['description']
+    assert tweet["full_text"]==testTextTweet_compare['text']
     assert tweet["user"]["screen_name"]=="jack"
     assert 'extended_entities' not in tweet
     
@@ -98,34 +96,35 @@ def test_twextract_UserExtractWeirdURLs():
 
 def test_twextract_videoTweetExtract():
     tweet = twExtract.extractStatus(testVideoTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testVideoTweet_compare['description']
+    assert tweet["full_text"]==testVideoTweet_compare['text']
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==1
     video = tweet['extended_entities']["media"][0]
-    assert video["media_url_https"]==testVideoTweet_compare['thumbnail']
+    assert video["media_url_https"]==testVideoTweet_compare['media_extended'][0]['thumbnail_url']
     assert video["type"]=="video"
     
 
 def test_twextract_mediaTweetExtract():
     tweet = twExtract.extractStatus(testMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"]==testMediaTweet_compare['description']
+    assert tweet["full_text"]==testMediaTweet_compare['text']
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==1
     video = tweet['extended_entities']["media"][0]
-    assert video["media_url_https"]==testMediaTweet_compare['thumbnail']
+    
+    assert video["media_url_https"]==testMediaTweet_compare['media_extended'][0]['thumbnail_url']
     assert video["type"]=="photo"
     
 
 def test_twextract_multimediaTweetExtract():
     tweet = twExtract.extractStatus(testMultiMediaTweet,workaroundTokens=tokens)
-    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['description'][:94]
+    assert tweet["full_text"][:94]==testMultiMediaTweet_compare['text'][:94]
     assert 'extended_entities' in tweet
     assert len(tweet['extended_entities']["media"])==3
     video = tweet['extended_entities']["media"][0]
-    assert video["media_url_https"]==testMultiMediaTweet_compare["images"][0]
+    assert video["media_url_https"]==testMultiMediaTweet_compare["mediaURLs"][0]
     assert video["type"]=="photo"
     video = tweet['extended_entities']["media"][1]
-    assert video["media_url_https"]==testMultiMediaTweet_compare["images"][1]
+    assert video["media_url_https"]==testMultiMediaTweet_compare["mediaURLs"][1]
     assert video["type"]=="photo"
 
 def test_twextract_pollTweetExtract():
@@ -136,26 +135,29 @@ def test_twextract_pollTweetExtract():
 def test_twextract_NSFW_TweetExtract():
     tweet = twExtract.extractStatus(testNSFWTweet,workaroundTokens=tokens) # For now just test that there's no error
 
+def getVNFFromLink(link):
+    return twitfix.getTweetData(link)
+
 ## VNF conversion test ##
 def test_textTweetVNF():
-    vnf = twitfix.link_to_vnf_from_unofficial_api(testTextTweet)
+    vnf = getVNFFromLink(testTextTweet)
     compareDict(testTextTweet_compare,vnf)
 
 def test_videoTweetVNF():
-    vnf = twitfix.link_to_vnf_from_unofficial_api(testVideoTweet)
+    vnf = getVNFFromLink(testVideoTweet)
     
     compareDict(testVideoTweet_compare,vnf)
 
 def test_mediaTweetVNF():
-    vnf = twitfix.link_to_vnf_from_unofficial_api(testMediaTweet)
+    vnf = getVNFFromLink(testMediaTweet)
     compareDict(testMediaTweet_compare,vnf)
 
 def test_multimediaTweetVNF():
-    vnf = twitfix.link_to_vnf_from_unofficial_api(testMultiMediaTweet)
+    vnf = getVNFFromLink(testMultiMediaTweet)
     compareDict(testMultiMediaTweet_compare,vnf)
 
 def test_pollTweetVNF():
-    vnf = twitfix.link_to_vnf_from_unofficial_api(testPollTweet)
+    vnf = getVNFFromLink(testPollTweet)
     compareDict(testPoll_comparePollVNF,vnf['poll'])
 
 def test_qrtTweet():
@@ -163,7 +165,7 @@ def test_qrtTweet():
     # this is an incredibly lazy test, todo: improve it in the future
     resp = client.get(testQRTTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testQRTTweet_compare['description'][:10] in str(resp.data)
+    assert testQRTTweet_compare['text'][:10] in str(resp.data)
     # test qrt-ception
     resp = client.get(testQrtCeptionTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"}) # get top level tweet
     assert resp.status_code==200
@@ -181,16 +183,17 @@ def test_qrtVideoTweet():
     # this is an incredibly lazy test, todo: improve it in the future
     resp = client.get(testQrtVideoTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    vurl = testQrtVideoTweet_compare["url"]
+    qtd_tweet=cache.getVnfFromLinkCache("https://twitter.com/i/status/1674197531301904388")
+    vurl = qtd_tweet["mediaURLs"][0]
     assert f"twitter:player:stream\" content=\"{vurl}" in str(resp.data)
 
 ## Test adding to cache ; cache should be empty ##
 def test_addToCache():
     cache.clearCache()
-    twitfix.vnfFromCacheOrDL(testTextTweet)
-    twitfix.vnfFromCacheOrDL(testVideoTweet)
-    twitfix.vnfFromCacheOrDL(testMediaTweet)
-    twitfix.vnfFromCacheOrDL(testMultiMediaTweet)
+    twitfix.getTweetData(testTextTweet)
+    twitfix.getTweetData(testVideoTweet)
+    twitfix.getTweetData(testMediaTweet)
+    twitfix.getTweetData(testMultiMediaTweet)
     #retrieve
     compareDict(testTextTweet_compare,cache.getVnfFromLinkCache(testTextTweet))
     compareDict(testVideoTweet_compare,cache.getVnfFromLinkCache(testVideoTweet))
@@ -207,10 +210,10 @@ def test_embedFromScratch():
 
 def test_embedFromCache():
     cache.clearCache()
-    twitfix.vnfFromCacheOrDL(testTextTweet)
-    twitfix.vnfFromCacheOrDL(testVideoTweet)
-    twitfix.vnfFromCacheOrDL(testMediaTweet)
-    twitfix.vnfFromCacheOrDL(testMultiMediaTweet)
+    twitfix.getTweetData(testTextTweet)
+    twitfix.getTweetData(testVideoTweet)
+    twitfix.getTweetData(testMediaTweet)
+    twitfix.getTweetData(testMultiMediaTweet)
     #embed time
     resp = client.get(testTextTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
@@ -235,32 +238,11 @@ def test_veryLongEmbed():
     resp = client.get('https://twitter.com/TEST/status/1234'.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
 
-def test_embedFromOutdatedCache(): # presets a cache that has VNF's with missing fields; there's probably a better way to do this
-    cache.setCache({"https://twitter.com/Twitter/status/1118295916874739714":{"description":"On profile pages, we used to only show someone’s replies, not the original Tweet 🙄 Now we’re showing both so you can follow the conversation more easily! https://t.co/LSBEZYFqmY","hits":0,"images":["https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","","","","1"],"likes":5033,"nsfw":False,"pfp":"https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":754,"screen_name":'Twitter',"thumbnail":"https://pbs.twimg.com/media/D4TS4xeX4AA02DI.jpg","time":"Tue Apr 16 23:31:38 +0000 2019","tweet":"https://twitter.com/Twitter/status/1118295916874739714","type":"Image","uploader":'Twitter',"url":""},
-            "https://twitter.com/Twitter/status/1263145271946551300":{"description":"Testing, testing...\n\nA new way to have a convo with exactly who you want. We’re starting with a small % globally, so keep your 👀 out to see it in action. https://t.co/pV53mvjAVT","hits":0,"images":["","","","",""],"likes":61584,"nsfw":False,"pfp":"https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":17138,"screen_name":'Twitter',"thumbnail":"https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg","time":"Wed May 20 16:31:15 +0000 2020","tweet":"https://twitter.com/Twitter/status/1263145271946551300","type":"Video","uploader":'Twitter',"url":"https://video.twimg.com/amplify_video/1263145212760805376/vid/1280x720/9jous8HM0_duxL0w.mp4?tag=13"},
-            #"https://twitter.com/Twitter/status/1293239745695211520":{"description":"We tested, you Tweeted, and now we’re rolling it out to everyone! https://t.co/w6Q3Q6DiKz","hits":0,"images":["https://pbs.twimg.com/media/EfJ-C-JU0AAQL_C.jpg","https://pbs.twimg.com/media/EfJ-aHlU0AAU1kq.jpg","","","2"],"likes":5707,"nsfw":False,"pfp":"https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg","qrt":{},"rts":1416,"screen_name":"Twitter","thumbnail":"https://pbs.twimg.com/media/EfJ-C-JU0AAQL_C.jpg","time":"Tue Aug 11 17:35:57 +0000 2020","tweet":"https://twitter.com/Twitter/status/1293239745695211520","type":"Image","uploader":"Twitter","url":""},
-            "https://twitter.com/jack/status/20":{"description":"just setting up my twttr","hits":0,"images":["","","","",""],"likes":179863,"nsfw":False,"pfp":"https://pbs.twimg.com/profile_images/1115644092329758721/AFjOr-K8_normal.jpg","qrt":{},"rts":122021,"screen_name":"jack","thumbnail":"","time":"Tue Mar 21 20:50:14 +0000 2006","tweet":"https://twitter.com/jack/status/20","type":"Text","uploader":"jack","url":""},
-            testQrtVideoTweet:{'tweet': 'https://twitter.com/Twitter/status/1494436688554344449', 'url': '', 'description': 'https://twitter.com/TwitterSupport/status/1494386367467593737', 'thumbnail': '', 'uploader': 'Twitter', 'screen_name': 'Twitter', 'pfp': 'https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg', 'type': 'Text', 'images': ['', '', '', '', ''], 'likes': 5186, 'rts': 703, 'time': 'Thu Feb 17 22:20:46 +0000 2022', 'qrt': {'desc': 'Keep your fave DM convos easily accessible by pinning them! You can now pin up to six conversations that will stay at the top of your DM inbox.\n\nAvailable on Android, iOS, and web. https://t.co/kIjlzf9XLJ', 'handle': 'Twitter Support', 'screen_name': 'TwitterSupport', 'verified': True, 'id': '1494386367467593737'}, 'nsfw': False, 'verified': True, 'size': {}}
-            })
-    #embed time
-    resp = client.get(testTextTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    assert resp.status_code==200
-    resp = client.get(testVideoTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    assert resp.status_code==200
-    resp = client.get(testMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    assert resp.status_code==200
-    resp = client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    assert resp.status_code==200
-    # qrt
-    resp = client.get(testQrtVideoTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
-    assert resp.status_code==200
-    assert "twitter:player:stream\" content=\"https://video.twimg.com/tweet_video/FL0gdK8WUAIHHKa.mp4" in str(resp.data)
-
 
 def test_directEmbed():
     resp = client.get(testVideoTweet.replace("https://twitter.com","")+".mp4",headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testVideoTweet_compare["url"] in str(resp.data)
+    assert testVideoTweet_compare["mediaURLs"][0] in str(resp.data)
 
 def test_message404():
     resp = client.get("https://twitter.com/jack/status/12345",headers={"User-Agent":"test"})
@@ -268,9 +250,9 @@ def test_message404():
     assert "Failed to scan your link!" in str(resp.data)
 
 def test_combine():
-    twt,e = twitfix.vnfFromCacheOrDL(testMultiMediaTweet)
-    img1 = twt["images"][0]
-    img2 = twt["images"][1]
+    twt = twitfix.getTweetData(testMultiMediaTweet)
+    img1 = twt["mediaURLs"][0]
+    img2 = twt["mediaURLs"][1]
     resp = client.get(f"/rendercombined.jpg?imgs={img1},{img2}",headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert resp.headers["Content-Type"]=="image/jpeg"

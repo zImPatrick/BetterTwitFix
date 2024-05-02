@@ -17,7 +17,7 @@ def genLikesDisplay(vnf):
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
-    return ("\n\n【QRT of " + qrt['uploader'] + " (@" + qrt['screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['description'] + "'")
+    return ("\n\n【QRT of " + qrt['user_name'] + " (@" + qrt['user_screen_name'] + ")"+ verifiedCheck+":】\n'" + qrt['text'] + "'")
 
 def genPollDisplay(poll):
     pctSplit=10
@@ -29,7 +29,12 @@ def genPollDisplay(poll):
 def formatEmbedDesc(type,body,qrt,pollDisplay,likesDisplay):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
-    limit = videoDescLimit if type=="" or type=="Video" or (qrt!=None and (qrt["type"]=="" or qrt["type"]=="Video")) else tweetDescLimit
+    qrtType=None
+    #if qrt!=None:
+    #    qrtType=qrt["type"]
+    qrtType="Text"
+
+    limit = videoDescLimit if type=="Text" or type=="Video" or (qrt!=None and (qrtType=="Text" or qrtType=="Video")) else tweetDescLimit
 
     output = ""
     if pollDisplay==None:

@@ -4,10 +4,10 @@
 
 <meta name="twitter:card" content="tweet" />
 {% include 'tweetCommon.html' %}
-<meta name="twitter:image" content="{{ pic[0] }}" />
+<meta name="twitter:image" content="{{ tweet['user_profile_image_url'] }}" />
 <meta name="twitter:creator" content="@{{ user }}" />
 
 <meta property="og:description" content="{{ desc }}" />
 
-<link rel="alternate" href="{{ url }}/oembed.json?desc={{ urlUser }}&user=Twitter&link={{ tweetLink }}&ttype=link&provider={{ appname }}" type="application/json+oembed" title="{{ user }}">
+<link rel="alternate" href="{{ host }}/oembed.json?desc={{ urlUser }}&user=Twitter&link={{ tweetLink }}&ttype=link&provider={{ appname }}" type="application/json+oembed" title="{{ tweet['user_name'] }}">
 <meta http-equiv="refresh" content="0; url = {{ tweetLink }}" /> {% endblock %} {% block body %} Redirecting you to the tweet in a moment. <a href="{{ tweetLink }}">Or click here.</a> {% endblock %}
