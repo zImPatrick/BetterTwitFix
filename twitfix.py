@@ -214,7 +214,7 @@ def twitfix(sub_path):
             elif media['type'] == "video" or media['type'] == "gif":
                 return renderVideoTweetEmbed(tweetData,media,appnameSuffix=suffix)
 
-    return tweetData
+    return message(msgs.failedToScan)
 
 @app.route('/favicon.ico')
 def favicon(): # pragma: no cover
