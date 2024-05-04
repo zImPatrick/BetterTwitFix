@@ -170,3 +170,7 @@ def test_embed_stripLastUrl():
     resp = client.get(testMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
     assert "HgLAbiXw2E" not in str(resp.data)
+
+def test_embed_no_username():
+    resp = client.get(testMediaTweet.replace("/pdxdylan",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200

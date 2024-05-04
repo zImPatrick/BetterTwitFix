@@ -145,6 +145,8 @@ def determineEmbedTweet(tweetData):
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
 def twitfix(sub_path):
+    if sub_path.startswith("status/"): # support for /status/1234567890 URLs
+        sub_path = "i/" + sub_path
     match = pathregex.search(sub_path)
     if match is None:
         abort(404)
