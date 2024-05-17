@@ -157,7 +157,7 @@ def twitfix(sub_path):
 
     tweetData = getTweetData(twitter_url)
     if tweetData is None:
-        log.error("Tweet Data Get failed")
+        log.error("Tweet Data Get failed for "+twitter_url)
         return message(msgs.failedToScan)
     qrt = None
     if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
