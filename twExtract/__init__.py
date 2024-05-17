@@ -17,8 +17,8 @@ userIDregex = r"\/i\/user\/(\d+)"
 v2Features='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"super_follow_tweet_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"creator_subscriptions_subscription_count_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
 v2graphql_api="2OOZWmw8nAtUHVnXXQhgaA"
 
-v2AnonFeatures='{"creator_subscriptions_tweet_preview_api_enabled":true,"c9s_tweet_anatomy_moderator_badge_enabled":true,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":false,"tweet_awards_web_tipping_enabled":false,"responsive_web_home_pinned_timelines_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"responsive_web_media_download_video_enabled":false,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_enhance_cards_enabled":false}'
-v2AnonGraphql_api="5GOHgZe-8U2j5sVHQzEm9A"
+v2AnonFeatures='{"creator_subscriptions_tweet_preview_api_enabled":true,"communities_web_enable_tweet_community_results_fetch":true,"c9s_tweet_anatomy_moderator_badge_enabled":true,"articles_preview_enabled":true,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":true,"tweet_awards_web_tipping_enabled":false,"creator_subscriptions_quote_tweet_preview_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"tweet_with_visibility_results_prefer_gql_media_interstitial_enabled":true,"rweb_video_timestamps_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"rweb_tipjar_consumption_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_enhance_cards_enabled":false}'
+v2AnonGraphql_api="7xflPyRiUxGVbJd4uWmbfg"
 gt_pattern = r'document\.cookie="gt=([^;]+);'
 
 twitterUrl = "x.com" # doubt this will change but just in case
@@ -176,7 +176,7 @@ def extractStatusV2(url,workaroundTokens):
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
-        raise TwExtractError(400, "Extract error")
+        raise TwExtractError(400, "Extract error (url not valid)")
     twid = m.group(2)
     if workaroundTokens == None:
         raise TwExtractError(400, "Extract error (no tokens defined)")
@@ -195,17 +195,20 @@ def extractStatusV2(url,workaroundTokens):
             except: # for some reason the header is not always present
                 pass
             if tweet.status_code == 429:
+                print("Rate limit reached for token")
                 # try another token
                 continue
             output = tweet.json()
             
             if "errors" in output:
+                print(f"Error in output: {json.dumps(output['errors'])}")
                 # try another token
                 continue
             entries=output['data']['tweet_results']
             tweetEntry=None
             for entry in entries:
                 if 'result' not in entry:
+                    print("Tweet result not found in entry")
                     continue
                 result = entry['result']
                 if '__typename' in result and result['__typename'] == 'TweetWithVisibilityResults':
@@ -219,8 +222,10 @@ def extractStatusV2(url,workaroundTokens):
                     break
             tweet=tweetEntry
             if tweet is None:
+                print("Tweet 404")
                 return {'error':'Tweet not found (404); May be due to invalid tweet, changes in Twitter\'s API, or a protected account.'}
         except Exception as e:
+            print(f"Exception in extractStatusV2: {str(e)}")
             continue
         return tweet
     raise TwExtractError(400, "Extract error")
