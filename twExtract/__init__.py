@@ -38,7 +38,7 @@ def getGuestToken():
     global guestToken
     global guestTokenUses
     if guestToken is None:
-        r = requests.get(f"https://{twitterUrl}",headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+        r = requests.get(f"https://{twitterUrl}",headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0","Cookie":"night_mode=2"},allow_redirects=False)
         m = re.search(gt_pattern, r.text)
         if m is None:
             r = requests.post(f"https://api.{twitterUrl}/1.1/guest/activate.json", headers={"Authorization":v2Bearer})
