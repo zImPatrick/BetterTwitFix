@@ -291,7 +291,7 @@ def extractStatusV2Android(url,workaroundTokens):
         return tweet
     raise TwExtractError(400, "Extract error")
 
-def extractStatusV2Anon(url):
+def extractStatusV2Anon(url,x):
     # get tweet ID
     m = re.search(pathregex, url)
     if m is None:
@@ -328,69 +328,13 @@ def extractStatusV2Anon(url):
         raise TwExtractError(400, "Extract error")
     return tweet
 
-def extractStatusV2Legacy(url,workaroundTokens):
-    tweet = extractStatusV2(url,workaroundTokens)
-    if 'errors' in tweet or 'legacy' not in tweet:
-        if 'errors' in tweet:
-            raise TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
-        else:
-            raise TwExtractError(400, "Extract error (no legacy data)")
-    tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
-    tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
-    if 'card' in tweet:
-        tweet['legacy']['card'] = tweet['card']['legacy']
-    if 'extended_entities' in tweet['legacy']:
-        tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
-        for media in tweet['legacy']['extended_entities']['media']:
-            media['media_url'] = media['media_url_https']
-    if 'tweet_card' in tweet:
-        tweet['legacy']['card'] = tweet['tweet_card']['legacy']
-    return tweet['legacy']
-
-def extractStatusV2AndroidLegacy(url,workaroundTokens):
-    tweet = extractStatusV2Android(url,workaroundTokens)
-    if 'errors' in tweet or 'legacy' not in tweet:
-        if 'errors' in tweet:
-            raise TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
-        else:
-            raise TwExtractError(400, "Extract error (no legacy data)")
-    tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
-    tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
-    if 'card' in tweet:
-        tweet['legacy']['card'] = tweet['card']['legacy']
-    if 'extended_entities' in tweet['legacy']:
-        tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
-        for media in tweet['legacy']['extended_entities']['media']:
-            media['media_url'] = media['media_url_https']
-    if 'tweet_card' in tweet:
-        tweet['legacy']['card'] = tweet['tweet_card']['legacy']
-    return tweet['legacy']
-
-def extractStatusV2AnonLegacy(url,workaroundTokens):
-    tweet = extractStatusV2Anon(url)
-    if 'errors' in tweet or 'legacy' not in tweet:
-        if 'errors' in tweet:
-            raise TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
-        else:
-            raise TwExtractError(400, "Extract error (no legacy data)")
-    tweet['legacy']['user'] = tweet["core"]["user_results"]["result"]["legacy"]
-    tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
-    if 'card' in tweet:
-        tweet['legacy']['card'] = tweet['card']['legacy']
-    if 'extended_entities' in tweet['legacy']:
-        tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
-        for media in tweet['legacy']['extended_entities']['media']:
-            media['media_url'] = media['media_url_https']
-    if 'tweet_card' in tweet:
-        tweet['legacy']['card'] = tweet['tweet_card']['legacy']
-    return tweet['legacy']
-
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2Anon,extractStatusV2Android,extractStatusV2]
+    methods=[extractStatus_syndication,extractStatusV2Anon,extractStatusV2,extractStatusV2Android]
     for method in methods:
         try:
             result = method(url,workaroundTokens)
-            if 'errors' in result:
+            if 'legacy' not in result:
+                print(f"{method.__name__} method failed: Legacy not found for {url}")
                 # try another method
                 continue
             return result
