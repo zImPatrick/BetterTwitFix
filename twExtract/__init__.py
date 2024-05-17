@@ -188,7 +188,7 @@ def extractStatusV2(url,workaroundTokens):
             csrfToken=str(uuid.uuid4()).replace('-', '')
             vars = json.loads('{"includeTweetImpression":true,"includeHasBirdwatchNotes":false,"includeEditPerspective":false,"rest_ids":["x"],"includeEditControl":true,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
             vars['rest_ids'][0] = str(twid)
-            tweet = requests.get(f"https://{twitterUrl}/i/api/graphql/{v2graphql_api}/TweetResultsByIdsQuery?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            tweet = requests.get(f"https://x.com/i/api/graphql/{v2graphql_api}/TweetResultsByIdsQuery?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
                 print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
@@ -243,7 +243,7 @@ def extractStatusV2Anon(url):
     try:
         vars = json.loads('{"tweetId":"0","withCommunity":false,"includePromotedContent":false,"withVoice":false}')
         vars['tweetId'] = str(twid)
-        tweet = requests.get(f"https://api.{twitterUrl}/graphql/{v2AnonGraphql_api}/TweetResultByRestId?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2AnonFeatures)}", headers={"Authorization":v2Bearer,"x-twitter-active-user":"yes","x-guest-token":guestToken,"x-twitter-client-language":"en","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+        tweet = requests.get(f"https://x.com/i/api/graphql/{v2AnonGraphql_api}/TweetResultByRestId?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2AnonFeatures)}", headers={"Authorization":v2Bearer,"x-twitter-active-user":"yes","x-guest-token":guestToken,"x-twitter-client-language":"en","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
         try:
             rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
             print(f"Twitter Anon Token Rate limit remaining: {rateLimitRemaining}")
