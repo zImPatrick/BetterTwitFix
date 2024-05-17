@@ -389,7 +389,11 @@ def extractStatus(url,workaroundTokens=None):
     methods=[extractStatus_syndication,extractStatusV2AnonLegacy,extractStatusV2AndroidLegacy,extractStatusV2Legacy]
     for method in methods:
         try:
-            return method(url,workaroundTokens)
+            result = method(url,workaroundTokens)
+            if 'errors' in result:
+                # try another method
+                continue
+            return result
         except Exception as e:
             print(f"{method.__name__} method failed: {str(e)} for {url}")
             continue
