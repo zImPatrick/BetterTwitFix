@@ -253,11 +253,11 @@ def extractStatusV2Android(url,workaroundTokens):
             tweet = requests.get(f"https://x.com/i/api/graphql/{androidGraphql_api}/ConversationTimelineV2?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(androidGraphqlFeatures)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
-                print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
+                print(f"Twitter Android Token Rate limit remaining: {rateLimitRemaining}")
             except: # for some reason the header is not always present
                 pass
             if tweet.status_code == 429:
-                print("Rate limit reached for token")
+                print("Rate limit reached for android token")
                 # try another token
                 continue
             output = tweet.json()
@@ -386,7 +386,7 @@ def extractStatusV2AnonLegacy(url,workaroundTokens):
     return tweet['legacy']
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2AnonLegacy,extractStatusV2Legacy,extractStatusV2AndroidLegacy]
+    methods=[extractStatus_syndication,extractStatusV2AnonLegacy,extractStatusV2AndroidLegacy,extractStatusV2Legacy]
     for method in methods:
         try:
             return method(url,workaroundTokens)
