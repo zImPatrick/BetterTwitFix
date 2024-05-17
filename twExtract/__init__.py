@@ -21,6 +21,10 @@ v2AnonFeatures='{"creator_subscriptions_tweet_preview_api_enabled":true,"communi
 v2AnonGraphql_api="7xflPyRiUxGVbJd4uWmbfg"
 gt_pattern = r'document\.cookie="gt=([^;]+);'
 
+androidGraphqlFeatures='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"unified_cards_ad_metadata_container_dynamic_card_content_query_enabled":true,"super_follow_tweet_api_enabled":true,"articles_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"immersive_video_status_linkable_timestamps":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
+androidGraphql_api="llQH5PFIRlenVrlKJU8jNA"
+
+
 twitterUrl = "x.com" # doubt this will change but just in case
 class TwExtractError(Exception):
     def __init__(self, code, message):
@@ -230,6 +234,63 @@ def extractStatusV2(url,workaroundTokens):
         return tweet
     raise TwExtractError(400, "Extract error")
 
+def extractStatusV2Android(url,workaroundTokens):
+    # get tweet ID
+    m = re.search(pathregex, url)
+    if m is None:
+        raise TwExtractError(400, "Extract error (url not valid)")
+    twid = m.group(2)
+    if workaroundTokens == None:
+        raise TwExtractError(400, "Extract error (no tokens defined)")
+    # get tweet
+    tokens = workaroundTokens
+    random.shuffle(tokens)
+    for authToken in tokens:
+        try:
+            csrfToken=str(uuid.uuid4()).replace('-', '')
+            vars = json.loads('{"referrer":"home","includeTweetImpression":true,"includeHasBirdwatchNotes":false,"isReaderMode":false,"includeEditPerspective":false,"includeEditControl":true,"focalTweetId":0,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
+            vars['focalTweetId'] = int(twid)
+            tweet = requests.get(f"https://x.com/i/api/graphql/{androidGraphql_api}/ConversationTimelineV2?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(androidGraphqlFeatures)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            try:
+                rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
+                print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
+            except: # for some reason the header is not always present
+                pass
+            if tweet.status_code == 429:
+                print("Rate limit reached for token")
+                # try another token
+                continue
+            output = tweet.json()
+            
+            if "errors" in output:
+                print(f"Error in output: {json.dumps(output['errors'])}")
+                # try another token
+                continue
+            entries=output['data']['timeline_response']['instructions'][0]['entries']
+            tweetEntry=None
+            for entry in entries:
+                if 'content' not in entry:
+                    print("Tweet content not found in entry")
+                    continue
+                if '__typename' not in entry['content'] or entry['content']['__typename'] != 'TimelineTimelineItem' or entry['content']['content']['__typename'] != 'TimelineTweet':
+                    continue
+                result = entry['content']['content']['tweetResult']['result']
+                if '__typename' not in result or result['__typename'] != 'Tweet':
+                    continue
+                if 'rest_id' in result and result['rest_id'] == twid:
+                    tweetEntry=result
+                    break
+            tweet=tweetEntry
+            if tweet is None:
+                print("Tweet 404")
+                return {'error':'Tweet not found (404); May be due to invalid tweet, changes in Twitter\'s API, or a protected account.'}
+        except Exception as e:
+            print(f"Exception in extractStatusV2: {str(e)}")
+            continue
+
+        return tweet
+    raise TwExtractError(400, "Extract error")
+
 def extractStatusV2Anon(url):
     # get tweet ID
     m = re.search(pathregex, url)
@@ -286,6 +347,25 @@ def extractStatusV2Legacy(url,workaroundTokens):
         tweet['legacy']['card'] = tweet['tweet_card']['legacy']
     return tweet['legacy']
 
+def extractStatusV2AndroidLegacy(url,workaroundTokens):
+    tweet = extractStatusV2Android(url,workaroundTokens)
+    if 'errors' in tweet or 'legacy' not in tweet:
+        if 'errors' in tweet:
+            raise TwExtractError(400, "Extract error: "+json.dumps(tweet['errors']))
+        else:
+            raise TwExtractError(400, "Extract error (no legacy data)")
+    tweet['legacy']['user'] = tweet["core"]["user_result"]["result"]["legacy"]
+    tweet['legacy']['user']['profile_image_url'] = tweet['legacy']['user']['profile_image_url_https']
+    if 'card' in tweet:
+        tweet['legacy']['card'] = tweet['card']['legacy']
+    if 'extended_entities' in tweet['legacy']:
+        tweet['legacy']['extended_entities'] = {'media':tweet['legacy']['extended_entities']['media']}
+        for media in tweet['legacy']['extended_entities']['media']:
+            media['media_url'] = media['media_url_https']
+    if 'tweet_card' in tweet:
+        tweet['legacy']['card'] = tweet['tweet_card']['legacy']
+    return tweet['legacy']
+
 def extractStatusV2AnonLegacy(url,workaroundTokens):
     tweet = extractStatusV2Anon(url)
     if 'errors' in tweet or 'legacy' not in tweet:
@@ -306,7 +386,7 @@ def extractStatusV2AnonLegacy(url,workaroundTokens):
     return tweet['legacy']
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2AnonLegacy,extractStatusV2Legacy,extractStatus_twExtractProxy]
+    methods=[extractStatus_syndication,extractStatusV2AnonLegacy,extractStatusV2Legacy,extractStatusV2AndroidLegacy]
     for method in methods:
         try:
             return method(url,workaroundTokens)
