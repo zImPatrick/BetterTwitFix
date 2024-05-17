@@ -329,7 +329,7 @@ def extractStatusV2Anon(url,x):
     return tweet
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatus_syndication,extractStatusV2Anon,extractStatusV2,extractStatusV2Android]
+    methods=[extractStatusV2Anon,extractStatusV2,extractStatusV2Android]
     for method in methods:
         try:
             result = method(url,workaroundTokens)
