@@ -179,7 +179,7 @@ def twitfix(sub_path):
         embedIndex = int(sub_path[-1])-1
         sub_path = sub_path[:-2]
         
-    if request.url.startswith("https://api.vx"): # Directly return the API response if the request is from the API
+    if request.url.startswith("https://api.vx") or request.url.startswith("http://api.vx"): # Directly return the API response if the request is from the API
         return tweetData
     elif directEmbed: # direct embed
         # direct embeds should always prioritize the main tweet, so don't check for qrt
@@ -194,7 +194,7 @@ def twitfix(sub_path):
                 embedIndex = 0
             media = tweetData['media_extended'][embedIndex]
             if media['type'] == "image":
-                return redirect(media['url'], 302)
+                return render_template("rawimage.html",media=media)
             elif media['type'] == "video" or media['type'] == "gif":
                 return render_template("rawvideo.html",media=media)
     else: # full embed
