@@ -118,8 +118,11 @@ def getTweetData(twitter_url):
     except:
         rawTweetData = None
     if rawTweetData is None:
-        rawTweetData = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
-    if 'error' in rawTweetData:
+        try:
+            rawTweetData = twExtract.extractStatusV2(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
+        except:
+            rawTweetData = None
+    if rawTweetData == None or 'error' in rawTweetData:
         return None
 
     if rawTweetData is None:
@@ -160,7 +163,7 @@ def twitfix(sub_path):
     if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
         qrt = getTweetData(tweetData['qrtURL'])
     tweetData['qrt'] = qrt
-    log.error("Tweet Data Get success")
+    log.success("Tweet Data Get success")
     if '?' in request.url:
         requestUrlWithoutQuery = request.url.split("?")[0]
     else:
