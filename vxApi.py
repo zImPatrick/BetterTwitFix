@@ -112,12 +112,18 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
         combinedMediaUrl = combinedMediaUrl[:-1]
 
     pollData = None
+    card = None
     if 'card' in tweet and 'legacy' in tweet['card'] and tweet['card']['legacy']['name'].startswith("poll"):
-        cardName = tweet['card']['legacy']['name']
+        card = tweet['card']['legacy']
+    elif 'card' in tweet and 'binding_values' in tweet['card']:
+        card = tweet['card']
+
+    if card != None:
+        cardName = card['name']
         pollData={} # format: {"options":["name":"Option 1 Name","votes":5,"percent":50]}
         pollData["options"] = []
         totalVotes = 0
-        bindingValues = tweet['card']['legacy']['binding_values']
+        bindingValues = card['binding_values']
         pollValues = {}
         for i in bindingValues:
             key = i["key"]

@@ -321,11 +321,33 @@ def extractStatusV2Anon(url,x):
         result = entry['result']
         if '__typename' in result and result['__typename'] == 'TweetWithVisibilityResults':
             result=result['tweet']
+        elif '__typename' in result and result['__typename'] == 'TweetUnavailable':
+            if 'reason' in result:
+                raise TwExtractError(400, "Extract error: "+result['reason'])
+            raise TwExtractError(400, "Extract error")
         if 'rest_id' in result and result['rest_id'] == twid:
             tweetEntry=result
         tweet=tweetEntry
     except Exception as e:
         raise TwExtractError(400, "Extract error")
+    if 'card' in tweet and 'legacy' in tweet['card']:
+        tweet['card'] = tweet['card']['legacy']
+    return tweet
+
+def fixTweetData(tweet):
+    try:
+        if 'user' not in tweet:
+            tweet['user'] = tweet['core']['user_results']['result']['legacy']
+    except:
+        print("fixTweetData error: No user")
+        pass
+
+    try:
+        if 'extended_entities' not in tweet and 'extended_entities' in tweet['legacy']:
+            tweet['extended_entities'] = tweet['legacy']['extended_entities']
+    except:
+        print("fixTweetData error: extended_entities")
+        pass
     return tweet
 
 def extractStatus(url,workaroundTokens=None):
@@ -337,7 +359,7 @@ def extractStatus(url,workaroundTokens=None):
                 print(f"{method.__name__} method failed: Legacy not found for {url}")
                 # try another method
                 continue
-            return result
+            return fixTweetData(result)
         except Exception as e:
             print(f"{method.__name__} method failed: {str(e)} for {url}")
             continue
