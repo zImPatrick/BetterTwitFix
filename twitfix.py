@@ -187,7 +187,7 @@ def twitfix(sub_path):
         if not tweetData['hasMedia'] and qrt is None:
             return renderTextTweetEmbed(tweetData)
         elif tweetData['allSameType'] and tweetData['media_extended'][0]['type'] == "image" and embedIndex == -1 and tweetData['combinedMediaUrl'] != None:
-            return redirect(tweetData['combinedMediaUrl'], 302)
+            return render_template("rawimage.html",media={"url":tweetData['combinedMediaUrl']})
         else:
             # this means we have mixed media or video, and we're only going to embed one
             if embedIndex == -1: # if the user didn't specify an index, we'll just use the first one

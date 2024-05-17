@@ -74,39 +74,39 @@ def test_embed_video_direct_subdomain():
 
 def test_embed_img_direct():
     resp = client.get(testMediaTweet.replace("https://twitter.com","")+".png",headers={"User-Agent":"test"})
-    assert resp.status_code==302
+    assert resp.status_code==200
     assert testMediaTweet_compare["mediaURLs"][0] in str(resp.data)
 
 def test_embed_img_direct_subdomain():
     resp = client.get(testMediaTweet.replace("https://twitter.com","https://d.vxtwitter.com"),headers={"User-Agent":"test"})
-    assert resp.status_code==302
+    assert resp.status_code==200
     assert testMediaTweet_compare["mediaURLs"][0] in str(resp.data)
 
 def test_embed_multi_direct():
     # embed first item
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com","")+"/1.png",headers={"User-Agent":"test"})
-    assert resp.status_code==302 # images should redirect
+    assert resp.status_code==200
     assert testMultiMediaTweet_compare["mediaURLs"][0] in str(resp.data)
 
     # embed second item
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com","")+"/2.mp4",headers={"User-Agent":"test"})
-    assert resp.status_code==302 # images should redirect
+    assert resp.status_code==200
     assert testMultiMediaTweet_compare["mediaURLs"][1] in str(resp.data)
 
 def test_embed_multi_direct_subdomain():
     # generic embed
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com","https://d.vxtwitter.com"),headers={"User-Agent":"test"})
-    assert resp.status_code==302 # images should redirect
+    assert resp.status_code==200
     assert testMultiMediaTweet_compare["mediaURLs"][0] in str(resp.data)
 
     # embed first item
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com","https://d.vxtwitter.com")+"/1",headers={"User-Agent":"test"})
-    assert resp.status_code==302 # images should redirect
+    assert resp.status_code==200
     assert testMultiMediaTweet_compare["mediaURLs"][0] in str(resp.data)
 
     # embed second item
     resp = client.get(testMultiMediaTweet.replace("https://twitter.com","https://d.vxtwitter.com")+"/2",headers={"User-Agent":"test"})
-    assert resp.status_code==302 # images should redirect
+    assert resp.status_code==200
     assert testMultiMediaTweet_compare["mediaURLs"][1] in str(resp.data)
 
 def test_embed_message404():
