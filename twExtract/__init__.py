@@ -24,6 +24,8 @@ gt_pattern = r'document\.cookie="gt=([^;]+);'
 androidGraphqlFeatures='{"longform_notetweets_inline_media_enabled":true,"super_follow_badge_privacy_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"super_follow_user_api_enabled":true,"unified_cards_ad_metadata_container_dynamic_card_content_query_enabled":true,"super_follow_tweet_api_enabled":true,"articles_api_enabled":true,"android_graphql_skip_api_media_color_palette":true,"creator_subscriptions_tweet_preview_api_enabled":true,"freedom_of_speech_not_reach_fetch_enabled":true,"tweetypie_unmention_optimization_enabled":true,"longform_notetweets_consumption_enabled":true,"subscriptions_verification_info_enabled":true,"blue_business_profile_image_shape_enabled":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"immersive_video_status_linkable_timestamps":true,"super_follow_exclusive_tweet_notifications_enabled":true}'
 androidGraphql_api="llQH5PFIRlenVrlKJU8jNA"
 
+tweetDetailGraphqlFeatures='{"rweb_tipjar_consumption_enabled":true,"responsive_web_graphql_exclude_directive_enabled":true,"verified_phone_label_enabled":false,"creator_subscriptions_tweet_preview_api_enabled":true,"responsive_web_graphql_timeline_navigation_enabled":true,"responsive_web_graphql_skip_user_profile_image_extensions_enabled":false,"communities_web_enable_tweet_community_results_fetch":true,"c9s_tweet_anatomy_moderator_badge_enabled":true,"articles_preview_enabled":true,"tweetypie_unmention_optimization_enabled":true,"responsive_web_edit_tweet_api_enabled":true,"graphql_is_translatable_rweb_tweet_is_translatable_enabled":true,"view_counts_everywhere_api_enabled":true,"longform_notetweets_consumption_enabled":true,"responsive_web_twitter_article_tweet_consumption_enabled":true,"tweet_awards_web_tipping_enabled":false,"creator_subscriptions_quote_tweet_preview_enabled":false,"freedom_of_speech_not_reach_fetch_enabled":true,"standardized_nudges_misinfo":true,"tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled":true,"rweb_video_timestamps_enabled":true,"longform_notetweets_rich_text_read_enabled":true,"longform_notetweets_inline_media_enabled":true,"responsive_web_enhance_cards_enabled":false}'
+tweetDetailGraphql_api="e7RKseIxLu7HgkWNKZ6qnw"
 
 twitterUrl = "x.com" # doubt this will change but just in case
 class TwExtractError(Exception):
@@ -199,7 +201,7 @@ def extractStatusV2(url,workaroundTokens):
             except: # for some reason the header is not always present
                 pass
             if tweet.status_code == 429:
-                print("Rate limit reached for token")
+                print("Rate limit reached for token (429)")
                 # try another token
                 continue
             output = tweet.json()
@@ -291,6 +293,63 @@ def extractStatusV2Android(url,workaroundTokens):
         return tweet
     raise TwExtractError(400, "Extract error")
 
+def extractStatusV2TweetDetail(url,workaroundTokens):
+    # get tweet ID
+    m = re.search(pathregex, url)
+    if m is None:
+        raise TwExtractError(400, "Extract error (url not valid)")
+    twid = m.group(2)
+    if workaroundTokens == None:
+        raise TwExtractError(400, "Extract error (no tokens defined)")
+    # get tweet
+    tokens = workaroundTokens
+    random.shuffle(tokens)
+    for authToken in tokens:
+        try:
+            csrfToken=str(uuid.uuid4()).replace('-', '')
+            vars = json.loads('{"focalTweetId":"0","with_rux_injections":false,"includePromotedContent":true,"withCommunity":true,"withQuickPromoteEligibilityTweetFields":true,"withBirdwatchNotes":true,"withVoice":true,"withV2Timeline":true}')
+            vars['focalTweetId'] = str(twid)
+            tweet = requests.get(f"https://x.com/i/api/graphql/{tweetDetailGraphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(tweetDetailGraphqlFeatures)}", headers={"Authorization":v2Bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            try:
+                rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
+                print(f"Twitter Android Token Rate limit remaining: {rateLimitRemaining}")
+            except: # for some reason the header is not always present
+                pass
+            if tweet.status_code == 429:
+                print("Rate limit reached for android token")
+                # try another token
+                continue
+            output = tweet.json()
+            
+            if "errors" in output:
+                print(f"Error in output: {json.dumps(output['errors'])}")
+                # try another token
+                continue
+            entries=output['data']['threaded_conversation_with_injections_v2']['instructions'][0]['entries']
+            tweetEntry=None
+            for entry in entries:
+                if 'content' not in entry:
+                    print("Tweet content not found in entry")
+                    continue
+                if '__typename' not in entry['content'] or entry['content']['__typename'] != 'TimelineTimelineItem' or entry['content']['itemContent']['__typename'] != 'TimelineTweet':
+                    continue
+                result = entry['content']['itemContent']['tweet_results']['result']
+                if '__typename' not in result or result['__typename'] != 'Tweet':
+                    continue
+                if 'rest_id' in result and result['rest_id'] == twid:
+                    tweetEntry=result
+                    break
+            tweet=tweetEntry
+            if tweet is None:
+                print("Tweet 404")
+                return {'error':'Tweet not found (404); May be due to invalid tweet, changes in Twitter\'s API, or a protected account.'}
+        except Exception as e:
+            print(f"Exception in extractStatusV2: {str(e)}")
+            continue
+
+        return tweet
+    raise TwExtractError(400, "Extract error")
+
 def extractStatusV2Anon(url,x):
     # get tweet ID
     m = re.search(pathregex, url)
@@ -351,7 +410,7 @@ def fixTweetData(tweet):
     return tweet
 
 def extractStatus(url,workaroundTokens=None):
-    methods=[extractStatusV2Anon,extractStatusV2Android,extractStatusV2]
+    methods=[extractStatusV2Anon,extractStatusV2TweetDetail,extractStatusV2Android,extractStatusV2]
     for method in methods:
         try:
             result = method(url,workaroundTokens)

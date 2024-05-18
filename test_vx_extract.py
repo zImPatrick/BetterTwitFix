@@ -27,6 +27,10 @@ def test_twextract_v2AndroidAPI():
     tweet = twExtract.extractStatusV2Android(testMediaTweet,workaroundTokens=tokens)['legacy']
     assert utils.stripEndTCO(tweet["full_text"])==testMediaTweet_compare['text']
 
+def test_twextract_extractStatusV2TweetDetails():
+    tweet = twExtract.extractStatusV2TweetDetail(testMediaTweet,workaroundTokens=tokens)['legacy']
+    assert utils.stripEndTCO(tweet["full_text"])==testMediaTweet_compare['text']
+
 ## Tweet retrieve tests ##
 def test_twextract_textTweetExtract():
     tweet = twExtract.extractStatus(testTextTweet,workaroundTokens=tokens)
