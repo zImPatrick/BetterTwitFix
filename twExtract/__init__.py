@@ -57,6 +57,11 @@ def cycleBearerTokenGet(url,headers):
                 # try another bearer token
                 print(f"Error 429 but {rateLimitRemaining} remaining")
                 continue
+            else:
+                # move successful token to the front if it's not already there
+                if token != bearerTokens[0]:
+                    bearerTokens.insert(0,bearerTokens.pop(bearerTokens.index(token)))
+                return tweet
         except Exception as e:
             pass
         return tweet
