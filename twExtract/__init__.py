@@ -6,6 +6,7 @@ import os
 import random
 import urllib.parse
 import math
+from oauthlib import oauth1
 bearer="Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 v2bearer="Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 androidBearer="Bearer AAAAAAAAAAAAAAAAAAAAAFXzAwAAAAAAMHCxpeSDG1gLNLghVe8d74hl6k4%3DRUMF4xAQLsbeBhTSRrCiQpJtxoGWeyHrDb5te2jpGskWDFW82F"
@@ -61,6 +62,43 @@ def cycleBearerTokenGet(url,headers):
         return tweet
     raise TwExtractError(400, "Extract error")
 
+def twitterApiGet(url,btoken=None,authToken=None,guestToken=None):
+
+    if authToken.startswith("oa|"):
+        url = url.replace("https://x.com/i/api/graphql/","https://api.twitter.com/graphql/")
+        authToken = authToken[3:]
+        key = authToken.split("|")[0]
+        secret = authToken.split("|")[1]
+
+        twt = oauth1.Client(client_key='3nVuSoBZnx6U4vzUxf5w',client_secret='Bcs59EFbbsdF6Sl9Ng71smgStWEGwXXKSjYvPVt7qys',resource_owner_key=key,resource_owner_secret=secret)
+        hdr = getAuthHeaders(androidBearer)
+        del hdr["Authorization"]
+        hdr["X-Twitter-Client"] = "TwitterAndroid"
+
+        uri, headers, body = twt.sign(url, headers=hdr,realm="http://api.twitter.com/")
+
+        response = requests.get(url,headers=headers)
+    else:
+        if btoken is None:
+            return cycleBearerTokenGet(url,getAuthHeaders(bearer,authToken=authToken,guestToken=guestToken))
+        headers = getAuthHeaders(btoken,authToken=authToken,guestToken=guestToken)
+        response = requests.get(url, headers=headers)
+
+    return response
+
+def getAuthHeaders(btoken,authToken=None,guestToken=None):
+    csrfToken=str(uuid.uuid4()).replace('-', '')
+    headers = {"x-twitter-active-user":"yes","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"}
+    headers['Authorization'] = btoken
+
+    if authToken is not None:
+        headers["Cookie"] = f"auth_token={authToken}; ct0={csrfToken}; "
+        headers["x-twitter-auth-type"] = "OAuth2Session"
+    if guestToken is not None:
+        headers["x-guest-token"] = guestToken
+
+    return headers
+
 def getGuestToken():
     global guestToken
     global guestTokenUses
@@ -95,8 +133,8 @@ def extractStatus_token(url,workaroundTokens):
     random.shuffle(tokens)
     for authToken in tokens:
         try:
-            csrfToken=str(uuid.uuid4()).replace('-', '')
-            tweet = requests.get(f"https://api.{twitterUrl}/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            
+            tweet = requests.get(f"https://api.{twitterUrl}/1.1/statuses/show/" + twid + ".json?tweet_mode=extended&cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0", headers=getAuthHeaders(bearer,authToken=authToken))
             output = tweet.json()
             if "errors" in output:
                 # try another token
@@ -216,10 +254,9 @@ def extractStatusV2(url,workaroundTokens):
     random.shuffle(tokens)
     for authToken in tokens:
         try:
-            csrfToken=str(uuid.uuid4()).replace('-', '')
             vars = json.loads('{"includeTweetImpression":true,"includeHasBirdwatchNotes":false,"includeEditPerspective":false,"rest_ids":["x"],"includeEditControl":true,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
             vars['rest_ids'][0] = str(twid)
-            tweet = cycleBearerTokenGet(f"https://x.com/i/api/graphql/{v2graphql_api}/TweetResultsByIdsQuery?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            tweet = twitterApiGet(f"https://x.com/i/api/graphql/{v2graphql_api}/TweetResultsByIdsQuery?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2Features)}",authToken=authToken)
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
                 print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
@@ -274,10 +311,10 @@ def extractStatusV2Android(url,workaroundTokens):
     random.shuffle(tokens)
     for authToken in tokens:
         try:
-            csrfToken=str(uuid.uuid4()).replace('-', '')
+            
             vars = json.loads('{"referrer":"home","includeTweetImpression":true,"includeHasBirdwatchNotes":false,"isReaderMode":false,"includeEditPerspective":false,"includeEditControl":true,"focalTweetId":0,"includeCommunityTweetRelationship":true,"includeTweetVisibilityNudge":true}')
             vars['focalTweetId'] = int(twid)
-            tweet = cycleBearerTokenGet(f"https://x.com/i/api/graphql/{androidGraphql_api}/ConversationTimelineV2?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(androidGraphqlFeatures)}", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            tweet = twitterApiGet(f"https://x.com/i/api/graphql/{androidGraphql_api}/ConversationTimelineV2?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(androidGraphqlFeatures)}", authToken=authToken)
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
                 print(f"Twitter Android Token Rate limit remaining: {rateLimitRemaining}")
@@ -331,10 +368,10 @@ def extractStatusV2TweetDetail(url,workaroundTokens):
     random.shuffle(tokens)
     for authToken in tokens:
         try:
-            csrfToken=str(uuid.uuid4()).replace('-', '')
+            
             vars = json.loads('{"focalTweetId":"0","with_rux_injections":false,"includePromotedContent":true,"withCommunity":true,"withQuickPromoteEligibilityTweetFields":true,"withBirdwatchNotes":true,"withVoice":true,"withV2Timeline":true}')
             vars['focalTweetId'] = str(twid)
-            tweet = cycleBearerTokenGet(f"https://x.com/i/api/graphql/{tweetDetailGraphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(tweetDetailGraphqlFeatures)}", headers={"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken};guest_id=v1:171580915998156785","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+            tweet = twitterApiGet(f"https://x.com/i/api/graphql/{tweetDetailGraphql_api}/TweetDetail?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(tweetDetailGraphqlFeatures)}", authToken=authToken)
             try:
                 rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
                 print(f"Twitter Token Rate limit remaining: {rateLimitRemaining}")
@@ -388,7 +425,7 @@ def extractStatusV2Anon(url,x):
     try:
         vars = json.loads('{"tweetId":"0","withCommunity":false,"includePromotedContent":false,"withVoice":false}')
         vars['tweetId'] = str(twid)
-        tweet = requests.get(f"https://x.com/i/api/graphql/{v2AnonGraphql_api}/TweetResultByRestId?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2AnonFeatures)}", headers={"Authorization":v2bearer,"x-twitter-active-user":"yes","x-guest-token":guestToken,"x-twitter-client-language":"en","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"})
+        tweet = requests.get(f"https://x.com/i/api/graphql/{v2AnonGraphql_api}/TweetResultByRestId?variables={urllib.parse.quote(json.dumps(vars))}&features={urllib.parse.quote(v2AnonFeatures)}", headers=getAuthHeaders(v2bearer,guestToken=guestToken))
         try:
             rateLimitRemaining = tweet.headers.get("x-rate-limit-remaining")
             print(f"Twitter Anon Token Rate limit remaining: {rateLimitRemaining}")
@@ -463,9 +500,11 @@ def extractUser(url,workaroundTokens):
     tokens = workaroundTokens
     random.shuffle(tokens)
     for authToken in tokens:
+        if authToken.startswith("oa|"): # oauth token not supported atm
+            continue
         try:
-            csrfToken=str(uuid.uuid4()).replace('-', '')
-            reqHeaders = {"Authorization":bearer,"Cookie":f"auth_token={authToken}; ct0={csrfToken}; ","x-twitter-active-user":"yes","x-twitter-auth-type":"OAuth2Session","x-twitter-client-language":"en","x-csrf-token":csrfToken,"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"}
+            
+            reqHeaders = getAuthHeaders(bearer,authToken=authToken)
             if not useId:
                 user = requests.get(f"https://api.{twitterUrl}/1.1/users/show.json?screen_name={screen_name}",headers=reqHeaders)
             else:
