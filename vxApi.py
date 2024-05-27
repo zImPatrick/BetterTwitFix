@@ -31,6 +31,8 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
                         if j['content_type'] == "video/mp4" and '/hevc/' not in j["url"] and j['bitrate'] > best_bitrate:
                             besturl = j['url']
                             best_bitrate = j['bitrate']
+                    if "?tag=" in besturl:
+                        besturl = besturl[:besturl.index("?tag=")]
                     media.append(besturl)
                     extendedInfo["url"] = besturl
                     extendedInfo["type"] = "video"
