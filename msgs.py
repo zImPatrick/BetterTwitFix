@@ -33,7 +33,7 @@ def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
     if qrt!=None:
         qrtType="Text"
 
-    limit = videoDescLimit if type=="Text" or type=="Video" or (qrt!=None and (qrtType=="Text" or qrtType=="Video")) else tweetDescLimit
+    limit = videoDescLimit if type=="Video" or (qrt!=None and (qrtType=="Video")) else tweetDescLimit
 
     output = ""
     if pollData==None:
