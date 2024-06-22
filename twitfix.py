@@ -114,7 +114,7 @@ def oembedend():
 
 def getTweetData(twitter_url,include_txt="false",include_rtf="false"):
     cachedVNF = getVnfFromLinkCache(twitter_url)
-    if cachedVNF is not None:
+    if cachedVNF is not None and include_txt == "false" and include_rtf == "false":
         return cachedVNF
 
     try:
@@ -134,7 +134,8 @@ def getTweetData(twitter_url,include_txt="false",include_rtf="false"):
     tweetData = getApiResponse(rawTweetData,include_txt,include_rtf)
     if tweetData is None:
         return None
-    addVnfToLinkCache(twitter_url,tweetData)
+    if include_txt == "false" and include_rtf == "false":
+        addVnfToLinkCache(twitter_url,tweetData)
     return tweetData
 
 def determineEmbedTweet(tweetData):
