@@ -46,5 +46,6 @@ The following fields are returned:
 }
 ```
 
-Additionally, you can add the `include_txt` parameter. Setting it to 'true' will include an additional media URL, a link to a .txt containing basic tweet information.
-`include_txt` can also be set to `ifnomedia`, which will only add a link to the .txt if there is no media URLs in the tweet.
+Additionally, you can add the `include_rtf` or `include_txt` parameters. Setting any to 'true' will include an additional media URL, a link to a .txt or .rtf containing basic tweet information.
+Instead of "true", they can also be set to `ifnomedia`, which will only add a link if there is no media URLs in the tweet.
+These features are added for archival of text tweets in certain software.

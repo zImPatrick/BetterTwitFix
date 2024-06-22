@@ -174,3 +174,13 @@ def test_embed_stripLastUrl():
 def test_embed_no_username():
     resp = client.get(testMediaTweet.replace("/pdxdylan",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
+
+def test_embed_txt():
+    resp = client.get(testTextTweet.replace("https://twitter.com","")+".txt",headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert testTextTweet_compare["text"] in str(resp.data)
+
+def test_embed_rtf():
+    resp = client.get(testTextTweet.replace("https://twitter.com","")+".rtf",headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert testTextTweet_compare["text"] in str(resp.data)

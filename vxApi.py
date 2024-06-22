@@ -3,7 +3,7 @@ from datetime import datetime
 from configHandler import config
 from utils import stripEndTCO
 
-def getApiResponse(tweet,include_txt=False,include_zip=False):
+def getApiResponse(tweet,include_txt=False,include_rtf=False):
     tweetL = tweet["legacy"]
     if "user_result" in tweet["core"]:
         userL = tweet["core"]["user_result"]["result"]["legacy"]
@@ -66,16 +66,16 @@ def getApiResponse(tweet,include_txt=False,include_zip=False):
                 hashtags.append(i["text"])
 
     #include_txt = request.args.get("include_txt", "false")
-    #include_zip = request.args.get("include_zip", "false") # for certain types of archival software (i.e Hydrus)
+    #include_rtf = request.args.get("include_rtf", "false") # for certain types of archival software (i.e Hydrus)
 
-    if include_txt == "true" or (include_txt == "ifnomedia" and len(media)==0):
+    if include_txt == True or include_txt == "true" or (include_txt == "ifnomedia" and len(media)==0):
         txturl = config['config']['url']+"/"+userL["screen_name"]+"/status/"+tweet["rest_id"]+".txt"
         media.append(txturl)
         media_extended.append({"url":txturl,"type":"txt"})
-    if include_zip == "true" or (include_zip == "ifnomedia" and len(media)==0): 
-        zipurl = config['config']['url']+"/"+userL["screen_name"]+"/status/"+tweet["rest_id"]+".zip"
-        media.append(zipurl)
-        media_extended.append({"url":zipurl,"type":"zip"})
+    if include_rtf == True or include_rtf == "true" or (include_rtf == "ifnomedia" and len(media)==0): 
+        rtfurl = config['config']['url']+"/"+userL["screen_name"]+"/status/"+tweet["rest_id"]+".rtf"
+        media.append(rtfurl)
+        media_extended.append({"url":rtfurl,"type":"rtf"})
 
     qrtURL = None
     if 'quoted_status_id_str' in tweetL:

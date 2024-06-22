@@ -4,7 +4,7 @@ from flask_cors import CORS
 import re
 import os
 import combineImg
-from io import BytesIO
+from io import BytesIO, StringIO
 import urllib
 import msgs
 import twExtract as twExtract
@@ -15,6 +15,10 @@ import vxlogging as log
 from utils import getTweetIdFromUrl, pathregex
 from vxApi import getApiResponse
 from urllib.parse import urlparse 
+from PyRTF.Elements import Document
+from PyRTF.document.section import Section
+from PyRTF.document.paragraph import Paragraph
+from utils import BytesIOWrapper
 app = Flask(__name__)
 CORS(app)
 user_agent=""
@@ -108,11 +112,11 @@ def oembedend():
     provName = request.args.get("provider",None)
     return  oEmbedGen(desc, user, link, ttype,providerName=provName)
 
-def getTweetData(twitter_url):
+def getTweetData(twitter_url,include_txt="false",include_rtf="false"):
     cachedVNF = getVnfFromLinkCache(twitter_url)
     if cachedVNF is not None:
         return cachedVNF
-    
+
     try:
         rawTweetData = twExtract.extractStatusV2Anon(twitter_url)
     except:
@@ -127,7 +131,7 @@ def getTweetData(twitter_url):
 
     if rawTweetData is None:
         return None
-    tweetData = getApiResponse(rawTweetData)
+    tweetData = getApiResponse(rawTweetData,include_txt,include_rtf)
     if tweetData is None:
         return None
     addVnfToLinkCache(twitter_url,tweetData)
@@ -154,8 +158,18 @@ def twitfix(sub_path):
     if match is None:
         abort(404)
     twitter_url = f'https://twitter.com/i/status/{getTweetIdFromUrl(sub_path)}'
+    isApiRequest=request.url.startswith("https://api.vx") or request.url.startswith("http://api.vx")
 
-    tweetData = getTweetData(twitter_url)
+    include_txt="false"
+    include_rtf="false"
+
+    if isApiRequest:
+        if "include_txt" in request.args:
+            include_txt = request.args.get("include_txt")
+        if "include_rtf" in request.args:
+            include_rtf = request.args.get("include_rtf")
+
+    tweetData = getTweetData(twitter_url,include_txt,include_rtf)
     if tweetData is None:
         log.error("Tweet Data Get failed for "+twitter_url)
         return message(msgs.failedToScan)
@@ -175,6 +189,19 @@ def twitfix(sub_path):
         # remove the .mp4 from the end of the URL
         if requestUrlWithoutQuery.endswith(".mp4") or requestUrlWithoutQuery.endswith(".png"):
             sub_path = sub_path[:-4]
+    elif requestUrlWithoutQuery.endswith(".txt"):
+        return Response(tweetData['text'], mimetype='text/plain')
+    elif requestUrlWithoutQuery.endswith(".rtf"):
+        doc = Document()
+        section = Section()
+        doc.Sections.append(section)
+        p = Paragraph()
+        p.append(tweetData['text'])
+        section.append(p)
+        rtf = StringIO()
+        doc.write(rtf)
+        rtf.seek(0)
+        return send_file(BytesIOWrapper(rtf), mimetype='application/rtf', as_attachment=True, download_name=f'{tweetData["user_screen_name"]}_{tweetData["tweetID"]}.rtf')
 
     embedIndex = -1
     # if url ends with /1, /2, /3, or /4, we'll use that as the index
@@ -182,7 +209,7 @@ def twitfix(sub_path):
         embedIndex = int(sub_path[-1])-1
         sub_path = sub_path[:-2]
         
-    if request.url.startswith("https://api.vx") or request.url.startswith("http://api.vx"): # Directly return the API response if the request is from the API
+    if isApiRequest: # Directly return the API response if the request is from the API
         return tweetData
     elif directEmbed: # direct embed
         # direct embeds should always prioritize the main tweet, so don't check for qrt
