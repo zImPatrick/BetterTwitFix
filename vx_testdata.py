@@ -39,3 +39,10 @@ def compareDict(original,compare):
             assert compare[key]==original[key]
         else:
             compareDict(original[key],compare[key])
+
+def videoRedirect(tweetData):
+    for media in tweetData["media_extended"]:
+        media["url"] = media["url"].replace("https://video.twimg.com",f"https://vxtwitter.com/tvid").replace(".mp4","")
+    for media in range(len(tweetData["mediaURLs"])):
+        tweetData["mediaURLs"][media] = tweetData["mediaURLs"][media].replace("https://video.twimg.com",f"https://vxtwitter.com/tvid").replace(".mp4","")
+    return tweetData

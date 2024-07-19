@@ -48,6 +48,11 @@ def isValidUserAgent(user_agent):
         return True
     return False
 
+def fixMedia(mediaInfo):
+    # This is for the iOS Discord app, which has issues when serving URLs ending in .mp4 (https://github.com/dylanpdx/BetterTwitFix/issues/210)
+    mediaInfo['url'] = mediaInfo['url'].replace("https://video.twimg.com",f"{config['config']['url']}/tvid").replace(".mp4","")
+    return mediaInfo
+
 def message(text):
     return render_template(
         'default.html', 
@@ -73,6 +78,8 @@ def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
 def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
     qrt = tweetData['qrt']
     embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
+
+    mediaInfo=fixMedia(mediaInfo)
     return render_template("video.html",
                     tweet=tweetData,
                     media=mediaInfo,
@@ -224,6 +231,7 @@ def twitfix(sub_path):
             if embedIndex == -1: # if the user didn't specify an index, we'll just use the first one
                 embedIndex = 0
             media = tweetData['media_extended'][embedIndex]
+            media=fixMedia(media)
             if media['type'] == "image":
                 return render_template("rawimage.html",media=media)
             elif media['type'] == "video" or media['type'] == "gif":
@@ -257,6 +265,11 @@ def favicon(): # pragma: no cover
 @app.route('/apple-touch-icon.png')
 def apple_touch_icon(): # pragma: no cover
     return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png',mimetype='image/png')
+
+@app.route('/tvid/<path:vid_path>')
+def tvid(vid_path):
+    url = f"https://video.twimg.com/{vid_path}.mp4"
+    return redirect(url, 302)
 
 @app.route("/rendercombined.jpg")
 def rendercombined():

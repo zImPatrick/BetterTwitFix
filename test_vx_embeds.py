@@ -29,7 +29,7 @@ def test_embed_qrtVideoTweet():
     # this is an incredibly lazy test, todo: improve it in the future
     resp = client.get(testQrtVideoTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    qtd_tweet=cache.getVnfFromLinkCache("https://twitter.com/i/status/1674197531301904388")
+    qtd_tweet=videoRedirect(cache.getVnfFromLinkCache("https://twitter.com/i/status/1674197531301904388"))
     vurl = qtd_tweet["mediaURLs"][0]
     assert f"twitter:player:stream\" content=\"{vurl}" in str(resp.data)
 
@@ -65,22 +65,22 @@ def test_embed_Suggestive():
 def test_embed_video_direct():
     resp = client.get(testVideoTweet.replace("https://twitter.com","")+".mp4",headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testVideoTweet_compare["mediaURLs"][0] in str(resp.data)
+    assert videoRedirect(testVideoTweet_compare)["mediaURLs"][0] in str(resp.data)
 
 def test_embed_video_direct_subdomain():
     resp = client.get(testVideoTweet.replace("https://twitter.com","https://d.vxtwitter.com"),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testVideoTweet_compare["mediaURLs"][0] in str(resp.data)
+    assert videoRedirect(testVideoTweet_compare)["mediaURLs"][0] in str(resp.data)
 
 def test_embed_img_direct():
     resp = client.get(testMediaTweet.replace("https://twitter.com","")+".png",headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testMediaTweet_compare["mediaURLs"][0] in str(resp.data)
+    assert videoRedirect(testMediaTweet_compare)["mediaURLs"][0] in str(resp.data)
 
 def test_embed_img_direct_subdomain():
     resp = client.get(testMediaTweet.replace("https://twitter.com","https://d.vxtwitter.com"),headers={"User-Agent":"test"})
     assert resp.status_code==200
-    assert testMediaTweet_compare["mediaURLs"][0] in str(resp.data)
+    assert videoRedirect(testMediaTweet_compare)["mediaURLs"][0] in str(resp.data)
 
 def test_embed_multi_direct():
     # embed first item
@@ -143,7 +143,7 @@ def test_embed_multimedia_single():
     assert img1 not in str(resp.data) and img2 in str(resp.data)
 
 def test_embed_mixedMedia():
-    twt = twitfix.getTweetData(testMixedMediaTweet)
+    twt = videoRedirect(twitfix.getTweetData(testMixedMediaTweet))
     img1 = twt["mediaURLs"][0]
     img2 = twt["mediaURLs"][1]
     resp = client.get(testMixedMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
