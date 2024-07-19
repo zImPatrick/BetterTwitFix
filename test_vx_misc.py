@@ -11,8 +11,8 @@ def test_addToCache():
     twitfix.getTweetData(testMediaTweet)
     twitfix.getTweetData(testMultiMediaTweet)
     #retrieve
-    compareDict(testTextTweet_compare,cache.getVnfFromLinkCache(testTextTweet))
-    compareDict(testVideoTweet_compare,cache.getVnfFromLinkCache(testVideoTweet))
-    compareDict(testMediaTweet_compare,cache.getVnfFromLinkCache(testMediaTweet))
-    compareDict(testMultiMediaTweet_compare,cache.getVnfFromLinkCache(testMultiMediaTweet))
+    compareDict(videoRedirect(testTextTweet_compare),videoRedirect(cache.getVnfFromLinkCache(testTextTweet)))
+    compareDict(videoRedirect(testVideoTweet_compare),videoRedirect(cache.getVnfFromLinkCache(testVideoTweet)))
+    compareDict(videoRedirect(testMediaTweet_compare),videoRedirect(cache.getVnfFromLinkCache(testMediaTweet)))
+    compareDict(videoRedirect(testMultiMediaTweet_compare),videoRedirect(cache.getVnfFromLinkCache(testMultiMediaTweet)))
     cache.clearCache()
