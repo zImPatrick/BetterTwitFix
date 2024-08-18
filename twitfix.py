@@ -19,6 +19,7 @@ from PyRTF.Elements import Document
 from PyRTF.document.section import Section
 from PyRTF.document.paragraph import Paragraph
 from utils import BytesIOWrapper
+from copy import deepcopy
 app = Flask(__name__)
 CORS(app)
 user_agent=""
@@ -50,6 +51,8 @@ def isValidUserAgent(user_agent):
 
 def fixMedia(mediaInfo):
     # This is for the iOS Discord app, which has issues when serving URLs ending in .mp4 (https://github.com/dylanpdx/BetterTwitFix/issues/210)
+    if 'video.twimg.com' not in mediaInfo['url'] or 'convert?url=' in mediaInfo['url']:
+        return mediaInfo
     mediaInfo['url'] = mediaInfo['url'].replace("https://video.twimg.com",f"{config['config']['url']}/tvid").replace(".mp4","")
     return mediaInfo
 
@@ -185,6 +188,7 @@ def twitfix(sub_path):
     if 'qrtURL' in tweetData and tweetData['qrtURL'] is not None:
         qrt = getTweetData(tweetData['qrtURL'])
     tweetData['qrt'] = qrt
+    tweetData = deepcopy(tweetData)
     log.success("Tweet Data Get success")
     if '?' in request.url:
         requestUrlWithoutQuery = request.url.split("?")[0]
@@ -254,6 +258,11 @@ def twitfix(sub_path):
             if media['type'] == "image":
                 return renderImageTweetEmbed(tweetData,media['url'] , appnameSuffix=suffix)
             elif media['type'] == "video" or media['type'] == "gif":
+                if media['type'] == "gif":
+                    if config['config']['gifConvertAPI'] != "" and config['config']['gifConvertAPI'] != "none":
+                        vurl=media['originalUrl'] if 'originalUrl' in media else media['url']
+                        media['url'] = config['config']['gifConvertAPI'] + "/convert?url=" + vurl
+                        suffix += " - GIF"
                 return renderVideoTweetEmbed(tweetData,media,appnameSuffix=suffix)
 
     return message(msgs.failedToScan)
