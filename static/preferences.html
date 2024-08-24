@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preferences</title>
+    <script>
+        function savePreference() {
+            var checkbox = document.getElementById("openLinksCheckbox");
+            localStorage.setItem("openLinksPreference", checkbox.checked);
+        }
+
+        function loadPreference() {
+            var checkbox = document.getElementById("openLinksCheckbox");
+            var preference = localStorage.getItem("openLinksPreference");
+            checkbox.checked = preference === "true";
+        }
+    </script>
+</head>
+<body onload="loadPreference()">
+    <h1>Preferences</h1>
+    <label for="openLinksCheckbox">
+        <input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
+        Open links in app
+    </label>
+</body>
+</html>

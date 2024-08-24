@@ -275,6 +275,14 @@ def favicon(): # pragma: no cover
 def apple_touch_icon(): # pragma: no cover
     return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png',mimetype='image/png')
 
+@app.route('/openInApp.js')
+def openInAppJs(): # pragma: no cover
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'openInApp.js',mimetype='application/javascript')
+
+@app.route('/preferences')
+def preferences(): # pragma: no cover
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'preferences.html', mimetype='text/html')
+
 @app.route('/tvid/<path:vid_path>')
 def tvid(vid_path):
     url = f"https://video.twimg.com/{vid_path}.mp4"

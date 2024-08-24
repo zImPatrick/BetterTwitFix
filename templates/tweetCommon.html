@@ -3,3 +3,5 @@
 <meta property="og:site_name" content="{{ appname }}">
 
 <meta name="twitter:title" content="{{ tweet['user_name'] }} (@{{ tweet['user_screen_name'] }})" />
+<script src="/openInApp.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){openTweet('{{ tweet["tweetID"] }}')})</script>
