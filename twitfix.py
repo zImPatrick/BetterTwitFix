@@ -24,6 +24,15 @@ app = Flask(__name__)
 CORS(app)
 user_agent=""
 
+staticFiles = { # TODO: Use flask static files instead of this
+    "favicon.ico": {"mime": "image/vnd.microsoft.icon","path": "favicon.ico"},
+    "apple-touch-icon.png": {"mime": "image/png","path": "apple-touch-icon.png"},
+    "openInApp.js": {"mime": "text/javascript","path": "openInApp.js"},
+    "preferences": {"mime": "text/html","path": "preferences.html"},
+    "style.css": {"mime": "text/css","path": "style.css"},
+    "Roboto-Regular.ttf": {"mime": "font/ttf","path": "Roboto-Regular.ttf"},
+}
+
 generate_embed_user_agents = [
     "facebookexternalhit/1.1",
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36",
@@ -163,6 +172,10 @@ def determineEmbedTweet(tweetData):
 
 @app.route('/<path:sub_path>') # Default endpoint used by everything
 def twitfix(sub_path):
+    if sub_path in staticFiles:
+        if 'path' not in staticFiles[sub_path] or staticFiles[sub_path]["path"] == None:
+            staticFiles[sub_path]["path"] = sub_path
+        return send_from_directory(os.path.join(app.root_path, 'static'), staticFiles[sub_path]["path"], mimetype=staticFiles[sub_path]["mime"])
     if sub_path.startswith("status/"): # support for /status/1234567890 URLs
         sub_path = "i/" + sub_path
     match = pathregex.search(sub_path)
@@ -267,21 +280,7 @@ def twitfix(sub_path):
 
     return message(msgs.failedToScan)
 
-@app.route('/favicon.ico')
-def favicon(): # pragma: no cover
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
-@app.route('/apple-touch-icon.png')
-def apple_touch_icon(): # pragma: no cover
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'apple-touch-icon.png',mimetype='image/png')
-
-@app.route('/openInApp.js')
-def openInAppJs(): # pragma: no cover
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'openInApp.js',mimetype='application/javascript')
-
-@app.route('/preferences')
-def preferences(): # pragma: no cover
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'preferences.html', mimetype='text/html')
 
 @app.route('/tvid/<path:vid_path>')
 def tvid(vid_path):
