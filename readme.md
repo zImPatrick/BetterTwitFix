@@ -100,3 +100,5 @@ vxTwitter generates a config.json in its root directory the first time you run i
 We check for t.co links in non video tweets, and if one is found, we direct the discord useragent to embed that link directly, this means that twitter links containing youtube / vimeo links will automatically embed those as if you had just directly linked to that content
 
 This project is licensed under the **Do What The Fuck You Want Public License**
+
+The Font "Roboto-Regular" is licensed under the Apache-2.0 license.

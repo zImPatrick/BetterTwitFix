@@ -1,25 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Preferences</title>
-    <script>
-        function savePreference() {
-            var checkbox = document.getElementById("openLinksCheckbox");
-            localStorage.setItem("openLinksPreference", checkbox.checked);
-        }
+	<title>vxTwitter - Preferences</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<script>
+		function savePreference() {
+			var checkbox = document.getElementById("openLinksCheckbox");
+			localStorage.setItem("openLinksPreference", checkbox.checked);
+		}
 
-        function loadPreference() {
-            var checkbox = document.getElementById("openLinksCheckbox");
-            var preference = localStorage.getItem("openLinksPreference");
-            checkbox.checked = preference === "true";
-        }
-    </script>
+		function loadPreference() {
+			var checkbox = document.getElementById("openLinksCheckbox");
+			var preference = localStorage.getItem("openLinksPreference");
+			checkbox.checked = preference === "true";
+		}
+	</script>
+	<link rel="stylesheet" type="text/css" href="/style.css">
 </head>
+
 <body onload="loadPreference()">
-    <h1>Preferences</h1>
-    <label for="openLinksCheckbox">
-        <input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
-        Open links in app
-    </label>
+	<aside>
+		<em> This is not an official X / Twitter website. </em>
+	</aside>
+
+	<header>
+		<a href="https://github.com/dylanpdx/BetterTwitFix" aria-label="Back">
+			<svg viewBox="0 0 24 24" aria-hidden="true" style="color: white"><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"></path></svg>
+		</a>
+		<h1>vxTwitter Preferences</h1>
+	</header>
+
+	<main>
+		<section class="optiongroup" id="redirectionSettings">
+			<h2 labels="redirectionSettings"> Redirection settings </h2>
+			<label for="openLinksCheckbox">
+				<div class="checkboxcontainer">
+					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
+					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
+				</div>
+				<h3> Open links in app </h3>
+				<p> When you open a link on this device, vxTwitter will try to redirect you to the official X (formerly Twitter) app instead of using your browser. </p>
+			</label>
+		</section>
+	</main>
+
+	<aside>
+		<em> This is not an official X / Twitter website. </em>
+	</aside>
 </body>
 </html>
