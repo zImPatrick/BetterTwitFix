@@ -7,21 +7,19 @@
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<script>
 		function loadPref() {
-			var appPref = localStorage.getItem("openLinksPreference");
-			if (appPref != "undefined") {
+			if (localStorage.getItem("openLinksPreference") !== null) {
 				openTweet('{{tweet["TweetID"]}}');
 			}
 		}
 
 		function savePref(value) {
-			var saveToggle = document.getElementById('saveToggle').checked;
-			if (saveToggle === "true") {
+			if (document.getElementById('saveToggle').checked === "true") {
 				localStorage.setItem("openLinksPreference", value);
 			}
 			openTweet('{{tweet["TweetID"]}}');
 		}
 	</script>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 
 <body onload="loadPref()">
