@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>vxTwitter - Open in App</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="/favicon.ico">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<script>
+		function loadPref() {
+			var appPref = localStorage.getItem("openLinksPreference");
+			if (appPref != "undefined") {
+				openTweet('{{tweet["TweetID"]}}');
+			}
+		}
+
+		function savePref(value) {
+			var saveToggle = document.getElementById('saveToggle').checked;
+			if (saveToggle === "true") {
+				localStorage.setItem("openLinksPreference", value);
+			}
+			openTweet('{{tweet["TweetID"]}}');
+		}
+	</script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body onload="loadPref()">
+	<aside class="top">
+		<em> This is not an official X / Twitter website. </em>
+	</aside>
+
+	<main>
+		<section class="popup">
+			<h1> Open this link with the X app? </h1>
+			<div class="buttoncontainer">
+				<button onclick="savePref(true)"> Open in App </button>
+				<button onclick="savePref(false)"> Open in Browser </button>
+			</div>
+			<label for="saveToggle">
+				<h3> Remember on this device </h3>
+				<div class="checkboxcontainer">
+					<input type=checkbox checked id=saveToggle>
+					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
+				</div>
+				<p> You may have to save this preference once per vxTwitter domain. </p>
+			</label>
+		</section>
+	</main>
+
+	<aside class="bottom">
+		<em> This is not an official X / Twitter website. </em>
+	</aside>
+</body>
+</html>
