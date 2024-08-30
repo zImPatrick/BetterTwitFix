@@ -58,7 +58,7 @@ main {
 	flex-direction: column;
 	overflow-y: auto;
 	width: calc(100% - 4ch);
-	max-width: 1500px;
+	max-width: 80ch;
 	padding: 0 2ch;
 	margin: 0 auto;
 }
