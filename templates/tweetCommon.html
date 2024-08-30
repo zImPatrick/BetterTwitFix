@@ -5,3 +5,16 @@
 <meta name="twitter:title" content="{{ tweet['user_name'] }} (@{{ tweet['user_screen_name'] }})" />
 <script src="/openInApp.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){openTweet('{{ tweet["tweetID"] }}')})</script>
+<style>
+	body {
+		background: #fff;
+		color: #000;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			background: #000;
+			color: #fff;
+		}
+	}
+</style>

@@ -7,14 +7,16 @@
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<script>
 		function savePreference() {
-			var checkbox = document.getElementById("openLinksCheckbox");
-			localStorage.setItem("openLinksPreference", checkbox.checked);
+			/* Open Links in App*/
+			var openlinksToggle = document.getElementById("openLinksCheckbox");
+			localStorage.setItem("openLinksPreference", openlinksToggle.checked);
 		}
 
 		function loadPreference() {
-			var checkbox = document.getElementById("openLinksCheckbox");
-			var preference = localStorage.getItem("openLinksPreference");
-			checkbox.checked = preference === "true";
+			/* Open Links in App */
+			var openlinksToggle = document.getElementById("openLinksCheckbox");
+			var openlinksPreference = localStorage.getItem("openLinksPreference");
+			openlinksToggle.checked = openlinksPreference === "true";
 		}
 	</script>
 	<link rel="stylesheet" type="text/css" href="/style.css">
