@@ -63,7 +63,7 @@ main {
 	margin: 0 auto;
 }
 
-label input {
+label :has(input) {
 	grid-area: input;
 }
 
