@@ -23,9 +23,11 @@ function openTweet(tweetId){
         }else if (os === 'ios'){
             window.location.replace(url);
         }
-    
-        setTimeout(() => {
-            window.location = `https://x.com/i/status/${tweetId}`
-        }, 1000)
+    }else{
+        window.location = `https://x.com/i/status/${tweetId}`
     }
+
+    setTimeout(() => {
+        window.location = `https://x.com/i/status/${tweetId}`
+    }, 1000)
 }
