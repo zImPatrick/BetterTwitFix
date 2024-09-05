@@ -77,6 +77,10 @@ def message(text):
 def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
     qrt = tweetData['qrt']
     embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
+
+    if image.startswith("https://pbs.twimg.com") and "?" not in image:
+        image = f"{image}?name=orig"
+    
     return render_template("image.html",
                     tweet=tweetData,
                     pic=[image],
