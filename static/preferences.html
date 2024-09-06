@@ -25,7 +25,7 @@
 			case they want to use their own */
 		}
 	</script>
-	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 
 <body onload="loadPreference()">
@@ -57,23 +57,33 @@
 			<h2 labels="frontendSettings"> Frontend settings <em>(EXPERIMENTAL)</em> </h2>
 			<label for="frontendToggle">
 				<div class="checkboxcontainer">
-					<input type="checkbox" id="frontendToggle" onchange="savePreference(frontendToggle)">
+					<input type="checkbox" id="frontendToggle" onchange="savePreference(frontendToggle, this.checked)">
 					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
 				</div>
 				<h3> Redirect to Nitter </h3>
 				<p> When you open a link on this browser, vxTwitter will redirect you to your chosen Nitter instance instead of X&nbsp;/&nbsp;Twitter </p>
 			</label>
 			<label for="frontendSearch">
-				<input type=button onclick="queryInstances()" value="Search">
+				<button onclick="queryInstances()" id="frontendSearch"> Search </button>
 				<h3> Search for Nitter instances </h3>
 				<p> Use the <a href="https://status.d420.de/about" target="_blank">Nitter health tracker API</a> to query available instances. </p>
 			</label>
-			<label for="frontendSelect">
+			<label id="instancePicker" style="display: none;">
 				<h3> Choose a Nitter Instance </h3>
-				<!-- queryInstances() will check the status.d420.de API and
-				display a list of currently healthy Nitter instances plus a
-				text input field in case the user wants to use their own -->
 				<p> Choose which instance to use for redirection. You can only pick one instance, and Nitter is currently <a href="https://status.d420.de/rip" target="_blank">almost dead</a>, so try picking an instance with good uptime. </p>
+				<table>
+					<thead>
+						<tr>
+							<th scope="col"> Select </th>
+							<th scope="col"> Instance </th>
+							<th scope="col"> Healthy </th>
+							<th scope="col"> Score </th>
+						</tr>
+					</thead>
+					<tbody id="instanceList">
+						<!-- queryInstances() appends instance data here -->
+					</tbody>
+				</table>
 			</label>
 	</main>
 
