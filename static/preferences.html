@@ -6,7 +6,7 @@
 	<link rel="icon" href="/favicon.ico">
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<script>
-		function savePreference() {
+		function savePreference() { /* TODO: rewrite and make reusable for multiple preferences */
 			/* Open Links in App*/
 			var openlinksToggle = document.getElementById("openLinksCheckbox");
 			localStorage.setItem("openLinksPreference", openlinksToggle.checked);
@@ -18,8 +18,14 @@
 			var openlinksPreference = localStorage.getItem("openLinksPreference");
 			openlinksToggle.checked = openlinksPreference === "true";
 		}
+
+		function queryInstances() {
+			/* Query the status.d420.de API and generate a list of healthy
+			instances for the user to pick between plus a text input field in
+			case they want to use their own */
+		}
 	</script>
-	<link rel="stylesheet" type="text/css" href="/style.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body onload="loadPreference()">
@@ -35,8 +41,8 @@
 	</header>
 
 	<main>
-		<section class="optiongroup" id="redirectionSettings">
-			<h2 labels="redirectionSettings"> Redirection settings </h2>
+		<section class="optiongroup" id="appSettings">
+			<h2 labels="appSettings"> App settings </h2>
 			<label for="openLinksCheckbox">
 				<div class="checkboxcontainer">
 					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
@@ -46,6 +52,29 @@
 				<p> When you open a link on this device, vxTwitter will try to redirect you to the official X (formerly Twitter) app instead of using your browser. </p>
 			</label>
 		</section>
+
+		<section class="optiongroup" id="frontendSettings">
+			<h2 labels="frontendSettings"> Frontend settings <em>(EXPERIMENTAL)</em> </h2>
+			<label for="frontendToggle">
+				<div class="checkboxcontainer">
+					<input type="checkbox" id="frontendToggle" onchange="savePreference(frontendToggle)">
+					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
+				</div>
+				<h3> Redirect to Nitter </h3>
+				<p> When you open a link on this browser, vxTwitter will redirect you to your chosen Nitter instance instead of X&nbsp;/&nbsp;Twitter </p>
+			</label>
+			<label for="frontendSearch">
+				<input type=button onclick="queryInstances()" value="Search">
+				<h3> Search for Nitter instances </h3>
+				<p> Use the <a href="https://status.d420.de/about" target="_blank">Nitter health tracker API</a> to query available instances. </p>
+			</label>
+			<label for="frontendSelect">
+				<h3> Choose a Nitter Instance </h3>
+				<!-- queryInstances() will check the status.d420.de API and
+				display a list of currently healthy Nitter instances plus a
+				text input field in case the user wants to use their own -->
+				<p> Choose which instance to use for redirection. You can only pick one instance, and Nitter is currently <a href="https://status.d420.de/rip" target="_blank">almost dead</a>, so try picking an instance with good uptime. </p>
+			</label>
 	</main>
 
 	<aside class="bottom">
