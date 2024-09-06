@@ -6,10 +6,8 @@
 	<link rel="icon" href="/favicon.ico">
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<script>
-		function savePreference() { /* TODO: rewrite and make reusable for multiple preferences */
-			/* Open Links in App*/
-			var openlinksToggle = document.getElementById("openLinksCheckbox");
-			localStorage.setItem("openLinksPreference", openlinksToggle.checked);
+		function savePreference(name, value) {
+			localStorage.setItem(name, value);
 		}
 
 		function loadPreference() {
@@ -45,7 +43,7 @@
 			<h2 labels="appSettings"> App settings </h2>
 			<label for="openLinksCheckbox">
 				<div class="checkboxcontainer">
-					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
+					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference('openLinksPreference', this.checked)">
 					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
 				</div>
 				<h3> Open links in app </h3>
@@ -57,14 +55,14 @@
 			<h2 labels="frontendSettings"> Frontend settings <em>(EXPERIMENTAL)</em> </h2>
 			<label for="frontendToggle">
 				<div class="checkboxcontainer">
-					<input type="checkbox" id="frontendToggle" onchange="savePreference(frontendToggle, this.checked)">
+					<input type="checkbox" id="frontendToggle" onchange="savePreference('frontendToggle', this.checked)">
 					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
 				</div>
 				<h3> Redirect to Nitter </h3>
 				<p> When you open a link on this browser, vxTwitter will redirect you to your chosen Nitter instance instead of X&nbsp;/&nbsp;Twitter </p>
 			</label>
-			<label for="frontendSearch">
-				<button onclick="queryInstances()" id="frontendSearch"> Search </button>
+			<label for="instanceSearch">
+				<button onclick="queryInstances()" id="instanceSearch"> Search </button>
 				<h3> Search for Nitter instances </h3>
 				<p> Use the <a href="https://status.d420.de/about" target="_blank">Nitter health tracker API</a> to query available instances. </p>
 			</label>
