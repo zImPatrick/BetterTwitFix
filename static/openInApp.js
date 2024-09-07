@@ -22,7 +22,7 @@ function openTweet(tweetId){
             window.location.replace(url);
         }
     } else if (localStorage.getItem("frontendToggle") === "true" && localStorage.getItem("frontendUrl") !== null) {
-        window.location = `${frontendUrl}/i/status/${tweetId}`
+        window.location = `${localStorage.getItem("frontendUrl")}/i/status/${tweetId}`
     } else {
         window.location = `https://x.com/i/status/${tweetId}`
     }
