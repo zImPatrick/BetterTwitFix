@@ -15,12 +15,36 @@
 			var openlinksToggle = document.getElementById("openLinksCheckbox");
 			var openlinksPreference = localStorage.getItem("openLinksPreference");
 			openlinksToggle.checked = openlinksPreference === "true";
+			/* Nitter toggle */
+			document.getElementById("frontendToggle").checked = localStorage.getItem("frontendToggle") === "true";
 		}
 
 		function queryInstances() {
-			/* Query the status.d420.de API and generate a list of healthy
-			instances for the user to pick between plus a text input field in
-			case they want to use their own */
+			let instanceList = document.getElementById("instanceList");
+			fetch("https://status.d420.de/api/v1/instances")
+				.then(response => response.json())
+				.then(data => {
+					let i = 0;
+					for (const instance of data.hosts) {
+						if (instance.points > 0) {
+							let labelOpen = `<label for="instance${i}">`;
+							let labelClose = `</label>`;
+							let row = document.createElement("tr");
+							let input = document.createElement("td");
+							input.innerHTML = `${labelOpen} <input type="radio" name="instance" id="instance${i}" value="${instance.url}" onclick="savePreference('frontendUrl', this.value)"> ${labelClose}`;
+							let name = document.createElement("td");
+							name.innerHTML = `${labelOpen} ${instance.domain} ${labelClose}`
+							let health = document.createElement("td");
+							health.innerHTML = `${labelOpen} ${instance.healthy} ${labelClose}`;
+							let score = document.createElement("td");
+							score.innerHTML = `${labelOpen} ${instance.points} ${labelClose}`;
+							row.append(input, name, health, score);
+							instanceList.append(row);
+							i++;
+						}
+					}
+					document.getElementById("instancePicker").style.removeProperty("display");
+				})
 		}
 	</script>
 	<link rel="stylesheet" type="text/css" href="/style.css">
@@ -67,12 +91,12 @@
 				<p> Use the <a href="https://status.d420.de/about" target="_blank">Nitter health tracker API</a> to query available instances. </p>
 			</label>
 			<label id="instancePicker" style="display: none;">
-				<h3> Choose a Nitter Instance </h3>
-				<p> Choose which instance to use for redirection. You can only pick one instance, and Nitter is currently <a href="https://status.d420.de/rip" target="_blank">almost dead</a>, so try picking an instance with good uptime. </p>
+				<h3> Choose a Nitter instance </h3>
+				<p> Choose which instance to use for redirection. You can only pick one instance, and Nitter is currently <a href="https://status.d420.de/rip" target="_blank">almost dead</a>, so the instance with the highest score is probably your best bet. </p>
 				<table>
 					<thead>
 						<tr>
-							<th scope="col"> Select </th>
+							<th scope="col"> Selected </th>
 							<th scope="col"> Instance </th>
 							<th scope="col"> Healthy </th>
 							<th scope="col"> Score </th>
