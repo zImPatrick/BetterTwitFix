@@ -13,17 +13,17 @@ function detectOS() {
 }
 
 function openTweet(tweetId){
-    var preference = localStorage.getItem("openLinksPreference");
-    if (preference === "true"){
+    if (localStorage.getItem("openLinksPreference") === "true") {
         const os = detectOS();
-
         url = `twitter://status?id=${tweetId}`
         if(os === 'android'){
             window.location = url;
         }else if (os === 'ios'){
             window.location.replace(url);
         }
-    }else{
+    } else if (localStorage.getItem("frontendToggle") === "true" && localStorage.getItem("frontendUrl") !== null) {
+        window.location = `${localStorage.getItem("frontendUrl")}/i/status/${tweetId}`
+    } else {
         window.location = `https://x.com/i/status/${tweetId}`
     }
 

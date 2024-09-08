@@ -70,32 +70,56 @@ main {
 	grid-area: main;
 }
 
-label :has(input) {
+em {
+	color: var(--accent);
+}
+
+.optiongroup:not(:first-of-type) {
+	margin: 1em auto;
+	border-top: 1px solid var(--lowcontrast);
+}
+
+label :where(:has(input), input) {
 	grid-area: input;
 }
 
-label h3 {
+h3 {
 	grid-area: title;
 	margin: 0;
 }
 
-label p {
+p {
 	grid-area: text;
 	color: var(--gray);
 	margin: 0;
 }
 
-/* Checkbox settings */
-label:has(input[type=checkbox]) {
+a {
+	color: var(--accent);
+	text-decoration: underline 1px dotted var(--accent);
+	transition: .2s all;
+}
+
+label a:where(:hover, :focus) {
+	color: var(--fg);
+	text-decoration-color: var(--fg);
+}
+
+label {
 	display: grid;
 	grid-template-columns: 1fr auto;
 	grid-template-rows: auto auto;
 	grid-template-areas:
 		"title input"
-		"text text";
+		"text text"
+		"options options";
 }
 
-label:has(input[type=checkbox]):hover {
+label:not(:first-of-type) {
+	margin: 1em auto;
+}
+
+label:not(#instancePicker):hover {
 	cursor: pointer;
 }
 
@@ -103,14 +127,24 @@ label:has(input[type=checkbox]):hover {
 	position: relative;
 }
 
-input[type=checkbox] {
+input[type=checkbox],
+input[type=radio] {
 	appearance: none;
-	width: 20px;
-	height: 20px;
 	border: 2px solid var(--gray);
-	border-radius: 5px;
 	background: var(--bg);
 	transition: .2s all;
+}
+
+input[type=checkbox] {
+	width: 20px;
+	height: 20px;
+	border-radius: 5px;
+}
+
+input[type=radio] {
+	width: 15px;
+	height: 15px;
+	border-radius: 100%;
 }
 
 input[type=checkbox]+svg {
@@ -122,17 +156,70 @@ input[type=checkbox]+svg {
 	inset: 1px 2px;
 }
 
-input[type=checkbox]:hover {
+input[type=checkbox]:hover,
+input[type=radio]:hover {
 	box-shadow: 0 0 0 5px var(--lowcontrast);
 }
 
-input[type=checkbox]:checked {
+input[type=checkbox]:checked,
+input[type=radio]:checked {
 	background: var(--accent);
 	border-color: var(--accent);
 }
 
 input[type=checkbox]:checked+svg {
 	display: block;
+}
+
+button {
+	background: var(--accent);
+	color: var(--fg);
+	padding: 0 1ch;
+	border: none;
+	cursor: pointer;
+	border-radius: 1.5em;
+	font-weight: bold;
+	font-family: 'Roboto', sans-serif;
+	transition: .2s all;
+}
+
+button:where(:hover, :focus) {
+	background: var(--fg);
+	color: var(--bg);
+}
+
+#instancePicker {
+	animation: fadein ease-in .3s 1 forwards;
+}
+
+	@keyframes fadein {
+		from { opacity: 0;}
+		to { opacity: 1;}
+	}
+
+table {
+	grid-area: options;
+	width: fit-content;
+	width: 100%;
+	text-align: center;
+	margin: 1em auto;
+}
+
+th {
+	padding: 0 0.5ch;
+}
+
+tbody {
+	color: var(--gray);
+}
+
+tbody tr:has(input[type=radio]:checked) {
+	color: var(--fg);
+}
+
+td label input {
+	grid-area: options;
+	margin: auto;
 }
 
 /* Popup */
@@ -162,23 +249,11 @@ main:has(.popup) {
 }
 
 .popup button {
-	background: var(--accent);
-	color: var(--fg);
 	width: 60%;
 	height: 3em;
-	border-radius: 1.5em;
 	border: none;
-	cursor: pointer;
 	margin: 1em auto;
 	font-size: larger;
-	font-weight: bold;
-	font-family: 'Roboto', sans-serif;
-	transition: .2s all;
-}
-
-.popup button:where(:hover, :focus) {
-	background: var(--fg);
-	color: var(--bg);
 }
 
 /* "Not a phishing site" warning tape */

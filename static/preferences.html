@@ -6,10 +6,8 @@
 	<link rel="icon" href="/favicon.ico">
 	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 	<script>
-		function savePreference() {
-			/* Open Links in App*/
-			var openlinksToggle = document.getElementById("openLinksCheckbox");
-			localStorage.setItem("openLinksPreference", openlinksToggle.checked);
+		function savePreference(name, value) {
+			localStorage.setItem(name, value);
 		}
 
 		function loadPreference() {
@@ -17,6 +15,36 @@
 			var openlinksToggle = document.getElementById("openLinksCheckbox");
 			var openlinksPreference = localStorage.getItem("openLinksPreference");
 			openlinksToggle.checked = openlinksPreference === "true";
+			/* Nitter toggle */
+			document.getElementById("frontendToggle").checked = localStorage.getItem("frontendToggle") === "true";
+		}
+
+		function queryInstances() {
+			let instanceList = document.getElementById("instanceList");
+			fetch("https://status.d420.de/api/v1/instances")
+				.then(response => response.json())
+				.then(data => {
+					let i = 0;
+					for (const instance of data.hosts) {
+						if (instance.points > 0) {
+							let labelOpen = `<label for="instance${i}">`;
+							let labelClose = `</label>`;
+							let row = document.createElement("tr");
+							let input = document.createElement("td");
+							input.innerHTML = `${labelOpen} <input type="radio" name="instance" id="instance${i}" value="${instance.url}" onclick="savePreference('frontendUrl', this.value)"> ${labelClose}`;
+							let name = document.createElement("td");
+							name.innerHTML = `${labelOpen} ${instance.domain} ${labelClose}`
+							let health = document.createElement("td");
+							health.innerHTML = `${labelOpen} ${instance.healthy} ${labelClose}`;
+							let score = document.createElement("td");
+							score.innerHTML = `${labelOpen} ${instance.points} ${labelClose}`;
+							row.append(input, name, health, score);
+							instanceList.append(row);
+							i++;
+						}
+					}
+					document.getElementById("instancePicker").style.removeProperty("display");
+				})
 		}
 	</script>
 	<link rel="stylesheet" type="text/css" href="/style.css">
@@ -35,17 +63,50 @@
 	</header>
 
 	<main>
-		<section class="optiongroup" id="redirectionSettings">
-			<h2 labels="redirectionSettings"> Redirection settings </h2>
+		<section class="optiongroup" id="appSettings">
+			<h2 labels="appSettings"> App settings </h2>
 			<label for="openLinksCheckbox">
 				<div class="checkboxcontainer">
-					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference()">
+					<input type="checkbox" id="openLinksCheckbox" onchange="savePreference('openLinksPreference', this.checked)">
 					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
 				</div>
 				<h3> Open links in app </h3>
 				<p> When you open a link on this device, vxTwitter will try to redirect you to the official X (formerly Twitter) app instead of using your browser. </p>
 			</label>
 		</section>
+
+		<section class="optiongroup" id="frontendSettings">
+			<h2 labels="frontendSettings"> Frontend settings <em>(EXPERIMENTAL)</em> </h2>
+			<label for="frontendToggle">
+				<div class="checkboxcontainer">
+					<input type="checkbox" id="frontendToggle" onchange="savePreference('frontendToggle', this.checked)">
+					<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9.64 18.952l-5.55-4.861 1.317-1.504 3.951 3.459 8.459-10.948L19.4 6.32 9.64 18.952z"></path></svg>
+				</div>
+				<h3> Redirect to Nitter </h3>
+				<p> When you open a link on this browser, vxTwitter will redirect you to your chosen Nitter instance instead of X&nbsp;/&nbsp;Twitter </p>
+			</label>
+			<label for="instanceSearch">
+				<button onclick="queryInstances()" id="instanceSearch"> Search </button>
+				<h3> Search for Nitter instances </h3>
+				<p> Use the <a href="https://status.d420.de/about" target="_blank">Nitter health tracker API</a> to query available instances. </p>
+			</label>
+			<label id="instancePicker" style="display: none;">
+				<h3> Choose a Nitter instance </h3>
+				<p> Choose which instance to use for redirection. You can only pick one instance, and Nitter is currently <a href="https://status.d420.de/rip" target="_blank">almost dead</a>, so the instance with the highest score is probably your best bet. </p>
+				<table>
+					<thead>
+						<tr>
+							<th scope="col"> Selected </th>
+							<th scope="col"> Instance </th>
+							<th scope="col"> Healthy </th>
+							<th scope="col"> Score </th>
+						</tr>
+					</thead>
+					<tbody id="instanceList">
+						<!-- queryInstances() appends instance data here -->
+					</tbody>
+				</table>
+			</label>
 	</main>
 
 	<aside class="bottom">
