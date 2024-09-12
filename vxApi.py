@@ -13,6 +13,8 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
     media_extended=[]
     hashtags=[]
     communityNote=None
+    oldTweetVersion = False
+    #editedTweet=False
     try:
         if "birdwatch_pivot" in tweet:
             if 'summary' in tweet["birdwatch_pivot"]["note"]:
@@ -21,6 +23,18 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
                 communityNote=tweet["birdwatch_pivot"]["subtitle"]["text"]
     except:
         pass
+    
+    try:
+        if "edit_control" in tweet and "edit_tweet_ids" in tweet["edit_control"]:
+            #if len(tweet["edit_control"]['initial_tweet_id']) > 1:
+            #    editedTweet = True
+            lastEditID = tweet["edit_control"]["edit_tweet_ids"][-1]
+            if lastEditID != tweet["rest_id"]:
+                oldTweetVersion = True
+    except:
+        pass
+
+
     if "extended_entities" in tweetL:
         if "media" in tweetL["extended_entities"]:
             tmedia=tweetL["extended_entities"]["media"]
