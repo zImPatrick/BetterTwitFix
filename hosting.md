@@ -18,7 +18,7 @@ Create a virtual enviornment for all of BetterTwitFix's dependencies to live in 
 
 After that completes, install all the requirements for BetterTwitFix by running `pip3 install -r requirements.txt` and then `pip3 install uwsgi`
 
-Test that everything is correct by running `python3 twitfix.py`. If all worked out well you should see a message that says it's running! You're not done yet though! Press CTRL+C to exit out of that for now.
+Test that everything is correct by running `python3 twitfix.py`. If all worked out well you should see a message that says it's running! You're not done yet though (unless you're running a dev environment)! Press CTRL+C to exit out of that for now.
 
 Edit the twitfix.service file. You can use nano for this by running `nano twitfix.service`
 
