@@ -89,6 +89,7 @@ def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
+                    color=config['config']['color']
                     )
 
 def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
@@ -104,6 +105,7 @@ def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
+                    color=config['config']['color']
                     )
 
 def renderTextTweetEmbed(tweetData,appnameSuffix=""):
@@ -116,6 +118,7 @@ def renderTextTweetEmbed(tweetData,appnameSuffix=""):
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
                     appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
+                    color=config['config']['color']
                     )
 
 @app.route('/robots.txt')

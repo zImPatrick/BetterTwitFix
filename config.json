@@ -1,7 +1,7 @@
 {
     "config": {
         "appname": "vxTwitter",
-        "color": "#43B581",
+        "color": "#1DA1F2",
         "database": "[url to mongo database goes here]",
         "link_cache": "ram",
         "method": "hybrid",

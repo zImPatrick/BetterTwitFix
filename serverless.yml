@@ -21,7 +21,7 @@ provider:
     VXTWITTER_LINK_CACHE: ${env:VXTWITTER_LINK_CACHE, 'json'}
     VXTWITTER_DATABASE: ${env:VXTWITTER_DATABASE, 'none'}
     VXTWITTER_METHOD: ${env:VXTWITTER_METHOD, 'hybrid'}
-    VXTWITTER_COLOR: ${env:VXTWITTER_COLOR, '#43B581'}
+    VXTWITTER_COLOR: ${env:VXTWITTER_COLOR, '#1DA1F2'}
     VXTWITTER_APP_NAME: ${env:VXTWITTER_APP_NAME, 'vxTwitter'}
     VXTWITTER_REPO: ${env:VXTWITTER_REPO, 'https://github.com/dylanpdx/BetterTwitFix'}
     VXTWITTER_URL: ${env:VXTWITTER_URL, 'https://vxtwitter.com'}
