@@ -15,7 +15,10 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
     communityNote=None
     try:
         if "birdwatch_pivot" in tweet:
-            communityNote=tweet["birdwatch_pivot"]["note"]["summary"]["text"]
+            if 'summary' in tweet["birdwatch_pivot"]["note"]:
+                communityNote=tweet["birdwatch_pivot"]["note"]["summary"]["text"]
+            elif 'subtitle' in tweet["birdwatch_pivot"] and 'text' in tweet["birdwatch_pivot"]["subtitle"]:
+                communityNote=tweet["birdwatch_pivot"]["subtitle"]["text"]
     except:
         pass
     if "extended_entities" in tweetL:
