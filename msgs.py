@@ -8,12 +8,13 @@ tweetSuspended="This Tweet is from a suspended account."
 
 videoDescLimit=220
 tweetDescLimit=340
+providerLimit=220
 
 def genLikesDisplay(vnf):
     if vnf['retweets'] > 0:
-        return ("\n\n💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['retweets']))
+        return ("💖 " + numerize.numerize(vnf['likes']) + " 🔁 " + numerize.numerize(vnf['retweets']))
     else:
-        return ("\n\n💖 " + numerize.numerize(vnf['likes']))
+        return ("💖 " + numerize.numerize(vnf['likes']))
 
 def genQrtDisplay(qrt):
     verifiedCheck = "☑️" if ('verified' in qrt and qrt['verified']) else ""
@@ -26,7 +27,18 @@ def genPollDisplay(poll):
         output+=choice["name"]+"\n"+("█"*int(choice["percent"]/pctSplit)) +" "+str(choice["percent"])+"%\n"
     return output
 
-def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
+# formats the top text of the embed
+def formatProvider(base,vnf):
+    finalText = base
+    likes = genLikesDisplay(vnf)
+    finalText += "\n" + likes
+    if ('communityNote' in vnf and vnf['communityNote'] != None):
+        finalText += "\n⚠️ Has community note"
+    if len(finalText) > providerLimit:
+        finalText = base
+    return finalText
+
+def formatEmbedDesc(type,body,qrt,pollData):
     # Trim the embed description to 248 characters, prioritizing poll and likes
 
     qrtType=None
@@ -51,16 +63,16 @@ def formatEmbedDesc(type,body,qrt,pollData,likesDisplay):
         qrt=None
 
     if type=="" or type=="Video":
-        output = body+pollDisplay+likesDisplay
+        output = body+pollDisplay
     elif qrt==None:
-        output= body+pollDisplay+likesDisplay
+        output= body+pollDisplay
     else:
-        output= body + likesDisplay
+        output= body
     if len(output)>limit:
         # find out how many characters we need to remove
         diff = len(output)-limit
         # remove the characters from body, add ellipsis
         body = body[:-(diff+1)]+"…"
-        return formatEmbedDesc(type,body,qrt,pollData,likesDisplay)
+        return formatEmbedDesc(type,body,qrt,pollData)
     else:
         return output

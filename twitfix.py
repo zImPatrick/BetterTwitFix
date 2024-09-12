@@ -76,7 +76,7 @@ def message(text):
 
 def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
     qrt = tweetData['qrt']
-    embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Image",tweetData['text'],qrt,tweetData['pollData'])
 
     if image.startswith("https://pbs.twimg.com") and "?" not in image:
         image = f"{image}?name=orig"
@@ -88,12 +88,12 @@ def renderImageTweetEmbed(tweetData,image,appnameSuffix=""):
                     desc=embedDesc,
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
-                    appname=config['config']['appname']+appnameSuffix,
+                    appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
                     )
 
 def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
     qrt = tweetData['qrt']
-    embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Video",tweetData['text'],qrt,tweetData['pollData'])
 
     mediaInfo=fixMedia(mediaInfo)
     return render_template("video.html",
@@ -103,19 +103,19 @@ def renderVideoTweetEmbed(tweetData,mediaInfo,appnameSuffix=""):
                     desc=embedDesc,
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
-                    appname=config['config']['appname']+appnameSuffix,
+                    appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
                     )
 
 def renderTextTweetEmbed(tweetData,appnameSuffix=""):
     qrt = tweetData['qrt']
-    embedDesc = msgs.formatEmbedDesc("Text",tweetData['text'],qrt,tweetData['pollData'],msgs.genLikesDisplay(tweetData))
+    embedDesc = msgs.formatEmbedDesc("Text",tweetData['text'],qrt,tweetData['pollData'])
     return render_template("text.html",
                     tweet=tweetData,
                     host=config['config']['url'],
                     desc=embedDesc,
                     urlEncodedDesc=urllib.parse.quote(embedDesc),
                     tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
-                    appname=config['config']['appname']+appnameSuffix,
+                    appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
                     )
 
 @app.route('/robots.txt')
