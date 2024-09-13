@@ -81,6 +81,20 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
         if "hashtags" in tweetL["entities"]:
             for i in tweetL["entities"]["hashtags"]:
                 hashtags.append(i["text"])
+    elif "card" in tweet and tweet['card']['name'] == "player":
+        width = None
+        height = None
+        vidUrl = None
+        for i in tweet['card']['binding_values']:
+            if i['key'] == 'player_stream_url':
+                vidUrl = i['value']['string_value']
+            elif i['key'] == 'player_width':
+                width = int(i['value']['string_value'])
+            elif i['key'] == 'player_height':
+                height = int(i['value']['string_value'])
+        if vidUrl != None and width != None and height != None:
+            media.append(vidUrl)
+            media_extended.append({"url":vidUrl,"type":"video","size":{"width":width,"height":height}})
 
     #include_txt = request.args.get("include_txt", "false")
     #include_rtf = request.args.get("include_rtf", "false") # for certain types of archival software (i.e Hydrus)
