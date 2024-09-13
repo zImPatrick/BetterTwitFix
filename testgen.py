@@ -11,6 +11,7 @@ tests = {
     "testNSFWTweet":"https://twitter.com/kuyacoy/status/1581185279376838657",
     "testPollTweet": "https://twitter.com/norm/status/651169346518056960",
     "testMixedMediaTweet":"https://twitter.com/bigbeerfest/status/1760638922084741177",
+    "testVinePlayerTweet":"https://twitter.com/Roblox/status/583302104342638592",
 }
 
 def getVNFFromLink(link):

@@ -160,6 +160,11 @@ def test_embed_mixedMedia():
     assert resp.status_code==200
     assert img1 not in str(resp.data) and img2 in str(resp.data)
 
+def test_embed_vine_player():
+    resp = client.get(testVinePlayerTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+    assert "v.cdn.vine.co" in str(resp.data)
+
 def test_embed_poll():
     resp = client.get(testPollTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     assert resp.status_code==200
