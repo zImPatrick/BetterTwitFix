@@ -14,6 +14,7 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
     hashtags=[]
     communityNote=None
     oldTweetVersion = False
+    tweetArticle=None
     #editedTweet=False
     try:
         if "birdwatch_pivot" in tweet:
@@ -95,6 +96,20 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
         if vidUrl != None and width != None and height != None:
             media.append(vidUrl)
             media_extended.append({"url":vidUrl,"type":"video","size":{"width":width,"height":height}})
+
+    if "article" in tweet:
+        try:
+            result = tweet["article"]["article_results"]["result"]
+            apiArticle = {
+                "title": result["title"],
+                "preview_text": result["preview_text"],
+                "image": None
+            }
+            if "cover_media" in result and "media_info" in result["cover_media"]:
+                apiArticle["image"] = result["cover_media"]["media_info"]["original_img_url"]
+            tweetArticle = apiArticle
+        except:
+            pass
 
     #include_txt = request.args.get("include_txt", "false")
     #include_rtf = request.args.get("include_rtf", "false") # for certain types of archival software (i.e Hydrus)
@@ -199,6 +214,7 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
         "hasMedia": len(media) > 0,
         "combinedMediaUrl": combinedMediaUrl,
         "pollData": pollData,
+        "article": tweetArticle,
     }
     try:
         apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())

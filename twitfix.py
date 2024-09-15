@@ -121,6 +121,20 @@ def renderTextTweetEmbed(tweetData,appnameSuffix=""):
                     color=config['config']['color']
                     )
 
+def renderArticleTweetEmbed(tweetData,appnameSuffix=""):
+    articlePreview=tweetData['article']["title"]+"\n\n"+tweetData['article']["preview_text"]+"…"
+    embedDesc = msgs.formatEmbedDesc("Image",articlePreview,None,None)
+    return render_template("image.html",
+                    tweet=tweetData,
+                    pic=[tweetData['article']["image"]],
+                    host=config['config']['url'],
+                    desc=embedDesc,
+                    urlEncodedDesc=urllib.parse.quote(embedDesc),
+                    tweetLink=f'https://twitter.com/{tweetData["user_screen_name"]}/status/{tweetData["tweetID"]}',
+                    appname=msgs.formatProvider(config['config']['appname']+appnameSuffix,tweetData),
+                    color=config['config']['color']
+                    )
+
 @app.route('/robots.txt')
 def robots():
     return "User-agent: *\nDisallow: /"
@@ -262,7 +276,9 @@ def twitfix(sub_path):
                 return render_template("rawvideo.html",media=media)
     else: # full embed
         embedTweetData = determineEmbedTweet(tweetData)
-        if not embedTweetData['hasMedia']:
+        if "article" in embedTweetData and embedTweetData["article"] is not None:
+            return renderArticleTweetEmbed(tweetData," - See original tweet for full article")
+        elif not embedTweetData['hasMedia']:
             return renderTextTweetEmbed(tweetData)
         elif embedTweetData['allSameType'] and embedTweetData['media_extended'][0]['type'] == "image" and embedIndex == -1 and embedTweetData['combinedMediaUrl'] != None:
             return renderImageTweetEmbed(tweetData,embedTweetData['combinedMediaUrl'],appnameSuffix=" - See original tweet for full quality")
