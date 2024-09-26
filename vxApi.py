@@ -15,6 +15,7 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
     communityNote=None
     oldTweetVersion = False
     tweetArticle=None
+    lang=None
     #editedTweet=False
     try:
         if "birdwatch_pivot" in tweet:
@@ -191,6 +192,9 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
         for i in pollData["options"]:
             i["percent"] = round((i["votes"]/totalVotes)*100,2)
         
+    if 'lang' in tweetL:
+        lang = tweetL['lang']
+
 
     apiObject = {
         "text": twText,
@@ -215,6 +219,7 @@ def getApiResponse(tweet,include_txt=False,include_rtf=False):
         "combinedMediaUrl": combinedMediaUrl,
         "pollData": pollData,
         "article": tweetArticle,
+        "lang": lang
     }
     try:
         apiObject["date_epoch"] = int(datetime.strptime(tweetL["created_at"], "%a %b %d %H:%M:%S %z %Y").timestamp())
