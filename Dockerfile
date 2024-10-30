@@ -1,7 +1,7 @@
 FROM python:3.10-alpine AS build
 RUN apk add build-base python3-dev linux-headers pcre-dev jpeg-dev zlib-dev
 RUN pip install --upgrade pip
-RUN pip install yt-dlp pillow uwsgi
+RUN pip install pillow uwsgi
 
 FROM python:3.10-alpine AS deps
 WORKDIR /twitfix
