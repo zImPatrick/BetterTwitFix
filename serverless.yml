@@ -59,7 +59,6 @@ custom:
     layer: true
     dockerizePip: false
 
-	
 resources:
   Resources:
     vxTwitterDynamoTable:
