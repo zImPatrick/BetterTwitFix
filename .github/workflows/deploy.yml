@@ -41,10 +41,10 @@ jobs:
       - name: Install serverless-plugin-include-dependencies
         run: serverless plugin install -n serverless-plugin-include-dependencies
 
-      - name: Set up Python 3.8
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
