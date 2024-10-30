@@ -27,7 +27,7 @@ jobs:
           cache: 'npm'
 
       - name: Install packages
-        run: npm install -g serverless@3.25.1
+        run: npm install -g serverless
 
       - name: Install serverless-wsgi
         run: serverless plugin install -n serverless-wsgi
