@@ -58,7 +58,7 @@ custom:
     app: twitfix.app
   pythonRequirements:
     layer: true
-    dockerizePip: false
+    dockerizePip: true
 
 resources:
   Resources:
