@@ -10,7 +10,6 @@ import msgs
 import twExtract as twExtract
 from configHandler import config
 from cache import addVnfToLinkCache,getVnfFromLinkCache
-from yt_dlp.utils import ExtractorError
 import vxlogging as log
 from utils import getTweetIdFromUrl, pathregex
 from vxApi import getApiResponse
