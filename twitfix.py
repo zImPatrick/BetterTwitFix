@@ -229,7 +229,7 @@ def twitfix(sub_path):
             # get first subpath
             username=sub_path.split("/")[0]
             extra = sub_path.split("/")[1]
-        if extra in [None,"with_replies","media","likes","highlights","superfollows","media"] and username != "" and username != None:
+        if extra in [None,"with_replies","media","likes","highlights","superfollows","media",''] and username != "" and username != None:
             userData = getUserData(f"https://twitter.com/{username}")
             if isApiRequest:
                 if userData is None:
