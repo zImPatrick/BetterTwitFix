@@ -40,6 +40,11 @@ def test_embed_FromScratch():
     client.get(testMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
     client.get(testMultiMediaTweet.replace("https://twitter.com",""),headers={"User-Agent":"test"})
 
+def test_embed_User():
+    cache.clearCache()
+    resp = client.get(testUser.replace("https://twitter.com",""),headers={"User-Agent":"test"})
+    assert resp.status_code==200
+
 def test_embed_FromCache():
     cache.clearCache()
     twitfix.getTweetData(testTextTweet)
