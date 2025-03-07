@@ -177,7 +177,12 @@ def getTweetData(twitter_url,include_txt="false",include_rtf="false"):
         rawTweetData = None
     if rawTweetData is None:
         try:
-            rawTweetData = twExtract.extractStatus(twitter_url,workaroundTokens=config['config']['workaroundTokens'].split(','))
+            if config['config']['workaroundTokens'] is not None:
+                workaroundTokens = config['config']['workaroundTokens'].split(",")
+            else:
+                workaroundTokens = None
+            
+            rawTweetData = twExtract.extractStatus(twitter_url,workaroundTokens=workaroundTokens)
         except:
             rawTweetData = None
     if rawTweetData == None or 'error' in rawTweetData:
