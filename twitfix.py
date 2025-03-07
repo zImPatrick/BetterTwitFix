@@ -172,7 +172,7 @@ def getTweetData(twitter_url,include_txt="false",include_rtf="false"):
         return cachedVNF
 
     try:
-        rawTweetData = twExtract.extractStatusV2Anon(twitter_url)
+        rawTweetData = twExtract.extractStatusV2Anon(twitter_url, None)
     except:
         rawTweetData = None
     if rawTweetData is None:
