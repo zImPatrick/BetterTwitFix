@@ -5,6 +5,7 @@ import re
 import os
 import random
 import urllib.parse
+import time
 from oauthlib import oauth1
 import sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -18,6 +19,7 @@ bearerTokens=[tweetdeckBearer,bearer,v2bearer,androidBearer]
 
 guestToken=None
 guestTokenUses=0
+guestTokenExpiry=0
 pathregex = r"\w{1,15}\/(status|statuses)\/(\d{2,20})"
 userregex = r"^https?:\/\/(?:www\.)?twitter\.com\/(?:#!\/)?@?([^/?#]*)(?:[?#/].*)?$"
 userIDregex = r"\/i\/user\/(\d+)"
@@ -113,7 +115,10 @@ def getAuthHeaders(btoken,authToken=None,guestToken=None):
 def getGuestToken():
     global guestToken
     global guestTokenUses
-    if guestToken is None:
+    global guestTokenExpiry
+
+    # get a new guest token if we a) dont have one or b) our token expired/expires in 30s
+    if guestToken is None or time.time() > (guestTokenExpiry - 30):
         r = requests.get(f"https://{twitterUrl}",headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0","Cookie":"night_mode=2"},allow_redirects=False)
         m = re.search(gt_pattern, r.text)
         if m is None:
@@ -121,6 +126,9 @@ def getGuestToken():
             guestToken = json.loads(r.text)["guest_token"]
         else:
             guestToken = m.group(1)
+        # document.cookie="gt=1898840488410530097; Max-Age=9000; Domain=.x.com; Path=/; Secure";
+        # todo: adjust this to use the actual max-age instead of hardcoding 9000 
+        guestTokenExpiry = time.time() + 9000
         guestTokenUses = 0
     else:
         guestTokenUses+=1
